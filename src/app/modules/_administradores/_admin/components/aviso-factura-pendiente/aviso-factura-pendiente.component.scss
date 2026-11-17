@@ -1,0 +1,18 @@
+:host {
+  display: contents;
+}
+
+.aviso-factura-pendiente {
+  display: grid;
+  gap: 1rem;
+
+  &__mensaje {
+    margin: 0;
+    padding: 0.85rem 1rem;
+    color: var(--app-warning);
+    background: var(--app-warning-soft);
+    border: 1px solid var(--app-warning-border);
+    border-radius: 0.8rem;
+    line-height: 1.55;
+  }
+}

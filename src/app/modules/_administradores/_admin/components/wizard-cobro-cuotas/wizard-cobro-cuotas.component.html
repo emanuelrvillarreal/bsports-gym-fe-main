@@ -1,0 +1,285 @@
+<section class="wizard-cobro" aria-label="Nuevo cobro de cuotas">
+  <app-titulo-hero
+    titulo="Nuevo cobro"
+    subtitulo="Elegí quién paga, qué cuotas paga y cómo paga."
+    icono="tesoreria"
+  />
+
+  @if (pasoActual() === 'listo') {
+    @if (resultado(); as cobro) {
+      <section class="wizard-cobro__listo" role="status" aria-live="polite">
+        <ng-icon name="heroCheckCircle" aria-hidden="true" />
+        <h3>Cobro registrado</h3>
+        <p class="wizard-cobro__listo-monto">{{ formatearMonto(cobro.monto) }}</p>
+        <p>
+          {{ cobro.pagador || 'El socio' }} pagó {{ cobro.cantidad }}
+          {{ cobro.cantidad === 1 ? 'cuota' : 'cuotas'
+          }}{{ cobro.medio ? ' con ' + cobro.medio.toLowerCase() : '' }}.
+        </p>
+        <p class="wizard-cobro__ayuda">Ya figura como pagado en la tabla de cuotas.</p>
+      </section>
+    }
+  } @else {
+    <app-wizard-pasos
+      [pasos]="pasos"
+      [pasoActual]="pasoActual()"
+      etiquetaProgreso="Progreso del cobro"
+    >
+      @if (error()) {
+        <p class="wizard-cobro__mensaje wizard-cobro__mensaje--error" role="alert">{{ error() }}</p>
+      }
+
+      @if (pasoActual() === 'socio') {
+        <section class="wizard-cobro__paso" aria-labelledby="cobro-socio-titulo">
+          <h3 id="cobro-socio-titulo">¿Quién paga?</h3>
+          <p class="wizard-cobro__ayuda">
+            Buscá al socio y tocá <strong>Elegir</strong>. Los que tienen deuda aparecen primero.
+          </p>
+          <div class="wizard-cobro__buscador">
+            <label for="busqueda-socio-cobro">Nombre, apellido, DNI o número de socio</label>
+            <div>
+              <input
+                id="busqueda-socio-cobro"
+                type="search"
+                [value]="busquedaSocio()"
+                (input)="cambiarBusquedaSocio($event)"
+                (keydown.enter)="buscarSocios()"
+              />
+              <app-boton [deshabilitado]="cargandoSocios()" (accion)="buscarSocios()"
+                >Buscar</app-boton
+              >
+            </div>
+          </div>
+          <app-tabla-responsive
+            [columnas]="columnasSocios"
+            [filas]="socios()"
+            [acciones]="accionesSocios"
+            [cargando]="cargandoSocios()"
+            [tbody_rows]="5"
+            idFila="memberUuid"
+            mensajeVacio="No hay socios para mostrar."
+            (accionFila)="manejarSocio($event)"
+          />
+          <app-paginacion
+            [paginaActual]="paginaSocios()"
+            [totalPaginas]="totalPaginasSocios()"
+            [deshabilitado]="cargandoSocios()"
+            (paginaCambiada)="cambiarPaginaSocios($event)"
+          />
+        </section>
+      } @else if (pasoActual() === 'deuda') {
+        <section class="wizard-cobro__paso" aria-labelledby="cobro-deuda-titulo">
+          <header class="wizard-cobro__encabezado-paso">
+            <div class="wizard-cobro__identidad-deuda">
+              <h3 id="cobro-deuda-titulo">¿Qué paga {{ pagador() || 'el socio' }}?</h3>
+              <p class="wizard-cobro__ayuda">
+                Marcamos toda la deuda. Destildá las cuotas que hoy no paga.
+              </p>
+            </div>
+            <app-boton
+              apariencia="texto"
+              [deshabilitado]="cargandoCuotas() || !totalElementosCuotas()"
+              [cargando]="cargandoSeleccionTotal()"
+              (accion)="alternarSeleccionTotal()"
+            >
+              {{ todaDeudaSeleccionada() ? 'Destildar todo' : 'Marcar toda la deuda' }}
+            </app-boton>
+          </header>
+
+          <div class="wizard-cobro__total wizard-cobro__total--fijo" aria-live="polite">
+            <span>
+              {{ cuotasSeleccionadas().length }} de {{ totalElementosCuotas() }}
+              {{ totalElementosCuotas() === 1 ? 'cuota' : 'cuotas' }} · Total a cobrar
+            </span>
+            <strong>{{ formatearMonto(totalSeleccionado()) }}</strong>
+          </div>
+
+          @if (cargandoCuotas() && !cuotasPagina().length) {
+            <p class="wizard-cobro__ayuda" role="status">Buscando la deuda…</p>
+          } @else if (!cuotasPagina().length) {
+            <p class="wizard-cobro__vacio">
+              {{ pagador() || 'Este socio' }} no tiene cuotas pendientes ni vencidas. Está al día.
+            </p>
+          } @else {
+            <ul class="wizard-cobro__cuotas" role="list">
+              @for (cuota of cuotasPagina(); track cuota.cuotaUuid) {
+                <li>
+                  <label
+                    class="wizard-cobro__cuota"
+                    [class.wizard-cobro__cuota--elegida]="estaSeleccionada(cuota.cuotaUuid)"
+                  >
+                    <input
+                      type="checkbox"
+                      [checked]="estaSeleccionada(cuota.cuotaUuid)"
+                      [disabled]="procesando() || cargandoSeleccionTotal()"
+                      (change)="alternarCuota(cuota, $event)"
+                    />
+                    <span class="wizard-cobro__cuota-texto">
+                      <strong>{{ cuota.concepto }}</strong>
+                      <span>
+                        {{ cuota.personaNombre }} {{ cuota.personaApellido }} ·
+                        <span
+                          [class.wizard-cobro__cuota-vencida]="cuota.estado === 'VENCIDA'"
+                          >{{ etiquetaEstado(cuota) }}</span
+                        >
+                      </span>
+                    </span>
+                    <span class="wizard-cobro__importe-cuota">
+                      @if (montoFinalDifiere(cuota)) {
+                        <del>{{ formatearMonto(cuota.monto) }}</del>
+                      }
+                      <strong>{{ formatearMonto(montoACobrar(cuota)) }}</strong>
+                    </span>
+                  </label>
+                </li>
+              }
+            </ul>
+            @if (totalPaginasCuotas() > 1) {
+              <app-paginacion
+                [paginaActual]="paginaCuotas()"
+                [totalPaginas]="totalPaginasCuotas()"
+                [deshabilitado]="cargandoCuotas() || cargandoSeleccionTotal()"
+                (paginaCambiada)="cambiarPaginaCuotas($event)"
+              />
+            }
+          }
+        </section>
+      } @else {
+        <section class="wizard-cobro__paso" aria-labelledby="cobro-confirmacion-titulo">
+          <h3 id="cobro-confirmacion-titulo">¿Cómo paga {{ pagador() || 'el socio' }}?</h3>
+
+          <div class="wizard-cobro__resumen">
+            @for (persona of resumenPersonas(); track persona.personaMemberUuid) {
+              <article>
+                <header>
+                  <h4>{{ persona.nombreCompleto }}</h4>
+                  <strong>{{ formatearMonto(persona.subtotal) }}</strong>
+                </header>
+                <ul role="list">
+                  @for (cuota of persona.cuotas; track cuota.cuotaUuid) {
+                    <li>
+                      <span>
+                        {{ cuota.concepto }}
+                        @if (errorCuota(cuota.cuotaUuid); as mensajeError) {
+                          <small role="alert">{{ mensajeError }}</small>
+                        }
+                      </span>
+                      <span class="wizard-cobro__importe-cuota">
+                        @if (montoFinalDifiere(cuota)) {
+                          <del>{{ formatearMonto(cuota.monto) }}</del>
+                        }
+                        <b>{{ formatearMonto(montoACobrar(cuota)) }}</b>
+                      </span>
+                    </li>
+                  }
+                </ul>
+              </article>
+            }
+          </div>
+
+          @if (modoMedios() === 'total') {
+            <div class="wizard-cobro__medios" role="radiogroup" aria-label="Medio de pago">
+              @for (opcion of opcionesMedio; track opcion.valor) {
+                <button
+                  type="button"
+                  role="radio"
+                  class="wizard-cobro__medio"
+                  [class.wizard-cobro__medio--elegido]="medioGlobal() === opcion.valor"
+                  [attr.aria-checked]="medioGlobal() === opcion.valor"
+                  [disabled]="procesando()"
+                  (click)="elegirMedio(opcion.valor)"
+                >
+                  <ng-icon [name]="opcion.icono" aria-hidden="true" />
+                  <strong>{{ opcion.etiqueta }}</strong>
+                  <span>{{ opcion.descripcion }}</span>
+                </button>
+              }
+            </div>
+            @if (medioGlobal() === 'OTRO') {
+              <fieldset class="wizard-cobro__otros">
+                <legend>¿Con qué pagó?</legend>
+                @for (o of opcionesOtro; track o.valor) {
+                  <label class="wizard-cobro__otro" [class.wizard-cobro__otro--elegido]="medioOtro() === o.valor">
+                    <input
+                      type="radio"
+                      name="medio-otro"
+                      [checked]="medioOtro() === o.valor"
+                      [disabled]="procesando()"
+                      (change)="medioOtro.set(o.valor)"
+                    />
+                    {{ o.etiqueta }}
+                  </label>
+                }
+              </fieldset>
+            }
+            @if (cuotasSeleccionadas().length > 1) {
+              <app-boton
+                class="wizard-cobro__modo-alternativo"
+                apariencia="texto"
+                [deshabilitado]="procesando()"
+                (accion)="seleccionarModo('por-cuota')"
+              >
+                Pagó cada cuota con un medio distinto
+              </app-boton>
+            }
+          } @else {
+            <p class="wizard-cobro__ayuda">Elegí con qué se pagó cada cuota.</p>
+            <div class="wizard-cobro__medios-cuota">
+              @for (cuota of cuotasSeleccionadas(); track cuota.cuotaUuid) {
+                <article>
+                  <div>
+                    <strong>{{ cuota.personaNombre }} {{ cuota.personaApellido }}</strong>
+                    <span class="wizard-cobro__detalle-cuota">
+                      {{ cuota.concepto }}
+                      <span class="wizard-cobro__importe-cuota">
+                        @if (montoFinalDifiere(cuota)) {
+                          <del>{{ formatearMonto(cuota.monto) }}</del>
+                        }
+                        <b>{{ formatearMonto(montoACobrar(cuota)) }}</b>
+                      </span>
+                    </span>
+                  </div>
+                  <app-select
+                    etiqueta="Medio de pago"
+                    [opciones]="opcionesMedioPagoManual"
+                    [value]="medioCuota(cuota.cuotaUuid)"
+                    (valueChange)="actualizarMedioCuota(cuota.cuotaUuid, $event)"
+                  />
+                </article>
+              }
+            </div>
+            <app-boton
+              class="wizard-cobro__modo-alternativo"
+              apariencia="texto"
+              [deshabilitado]="procesando()"
+              (accion)="seleccionarModo('total')"
+            >
+              Usar un solo medio para todo
+            </app-boton>
+          }
+
+          <div class="wizard-cobro__total wizard-cobro__total--final">
+            <span>Total a cobrar</span>
+            <strong>{{ formatearMonto(totalSeleccionado()) }}</strong>
+          </div>
+        </section>
+      }
+    </app-wizard-pasos>
+  }
+</section>
+
+@if (checkout(); as datosCheckout) {
+  <app-checkout-mercado-pago
+    [abierto]="true"
+    [enlace]="datosCheckout.enlace"
+    [qr]="datosCheckout.qr"
+    [resumen]="cuotasSeleccionadas().length + ' cuota(s) seleccionada(s)'"
+    [monto]="formatearMonto(totalSeleccionado())"
+    [mensaje]="mensajeCheckout()"
+    [mensajeError]="errorCheckout()"
+    [copiando]="copiandoCheckout()"
+    (abrirCheckout)="abrirCheckout()"
+    (copiarEnlace)="copiarEnlaceCheckout()"
+    (cerrar)="cerrarCheckout()"
+  />
+}

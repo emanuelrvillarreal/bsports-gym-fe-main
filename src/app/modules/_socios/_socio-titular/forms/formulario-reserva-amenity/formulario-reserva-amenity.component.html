@@ -1,0 +1,43 @@
+<form id="formulario-reserva-amenity" class="formulario-reserva-amenity" appValidacionFormulario (submit)="$event.preventDefault(); enviar()" novalidate>
+  <small class="formulario-reserva-amenity__error" [class.formulario-reserva-amenity__error--visible]="!!mensajeError()" role="alert">{{ mensajeError() }}</small>
+
+  <app-input-fecha
+    id="reserva-amenity-fecha"
+    etiqueta="Fecha *"
+    [valorInicial]="fecha()"
+    [minimo]="minimo"
+    [diasPermitidos]="diasPermitidos()"
+    [requerido]="true"
+    (valorCambiado)="actualizarFecha($event)"
+  />
+
+  <div class="formulario-reserva-amenity__horas">
+  <app-input-hora
+    inputId="reserva-amenity-desde"
+    etiqueta="Desde *"
+    [valor]="horaDesde()"
+    [minimo]="amenity().horaInicio.slice(0, 5)"
+    [maximo]="amenity().horaFin.slice(0, 5)"
+    [requerido]="true"
+    [invalido]="!!horaHasta() && horaDesde() >= horaHasta()"
+    (valorCambiado)="actualizarHoraDesde($event)"
+  />
+  <app-input-hora
+    inputId="reserva-amenity-hasta"
+    etiqueta="Hasta *"
+    [valor]="horaHasta()"
+    [minimo]="amenity().horaInicio.slice(0, 5)"
+    [maximo]="amenity().horaFin.slice(0, 5)"
+    [requerido]="true"
+    [invalido]="!!horaDesde() && horaHasta() <= horaDesde()"
+    (valorCambiado)="actualizarHoraHasta($event)"
+  />
+  </div>
+
+  @if (!esGratuito()) {
+    <app-select etiqueta="Forma de pago" [opciones]="pagos" [value]="tipoPago()" (valueChange)="seleccionarTipoPago($event)" />
+  } @else {
+    <p class="formulario-reserva-amenity__ayuda">La reserva se procesará mediante Mercado Pago.</p>
+  }
+  <p class="formulario-reserva-amenity__ayuda">Disponible de {{ amenity().horaInicio.slice(0, 5) }} a {{ amenity().horaFin.slice(0, 5) }} h.</p>
+</form>

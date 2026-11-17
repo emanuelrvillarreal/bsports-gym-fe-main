@@ -1,0 +1,19 @@
+<app-card titulo="Histórico de balances" descripcion="Meses cerrados, sin incluir el mes actual.">
+  @if (error()) { <p role="alert">{{ error() }}</p> }
+  <app-tabla-responsive [columnas]="columnas" [filas]="filas()" [cargando]="cargando()" [acciones]="acciones" [maxFilasVisibles]="5" (accionFila)="manejarAccion($event)" />
+  <app-paginacion [paginaActual]="pagina()" [totalPaginas]="totalPaginas()" [deshabilitado]="cargando()" (paginaCambiada)="cambiarPagina($event)" />
+</app-card>
+
+<app-popup [abierto]="!!balanceSeleccionado()" [titulo]="balanceSeleccionado() ? 'Balance ' + balanceSeleccionado()!.periodoTexto : 'Balance'" [mostrarEncabezado]="false" ancho="grande" textoCancelar="Aceptar" aparienciaCancelar="solido" (cancelar)="cerrarBalance()">
+  @if (balanceSeleccionado(); as balance) {
+    <app-titulo-hero icono="tesoreria" [titulo]="'Balance ' + balance.periodoTexto" subtitulo="Resumen financiero del período seleccionado." />
+    <app-grafico-barras [barras]="barrasBalance()" />
+  }
+</app-popup>
+
+<app-popup [abierto]="!!comparacionSeleccionada()" titulo="Comparativa de balances" [mostrarEncabezado]="false" ancho="extraGrande" textoCancelar="Aceptar" aparienciaCancelar="solido" (cancelar)="cerrarComparacion()">
+  @if (comparacionSeleccionada(); as comparacion) {
+    <app-titulo-hero icono="tesoreria" [titulo]="'Balance ' + comparacion.seleccionado.periodoTexto + ' vs ' + comparacion.anterior.periodoTexto" subtitulo="Comparativa con el mismo período del año anterior." />
+    <app-grafico-barras class="balance-comparacion__grafico" [barras]="barrasComparacion()" estilo="vs" />
+  }
+</app-popup>

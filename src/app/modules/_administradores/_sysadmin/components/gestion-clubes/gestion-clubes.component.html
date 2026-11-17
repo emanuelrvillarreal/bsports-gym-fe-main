@@ -1,0 +1,176 @@
+<section class="gestion-clubes" aria-label="Gestion global de gimnasios">
+  <app-card
+    titulo="Gimnasios"
+    descripcion="Edita los datos completos de una empresa o administra sus usuarios."
+  >
+    <form class="gestion-clubes__busqueda" (submit)="$event.preventDefault(); buscarClubes()">
+      <label for="busqueda-clubes">Buscar gimnasio</label>
+      <input
+        id="busqueda-clubes"
+        name="busqueda-clubes"
+        type="search"
+        [ngModel]="busqueda()"
+        (ngModelChange)="busqueda.set($event)"
+        placeholder="Nombre, razon social o CUIT"
+      />
+      <app-boton tipo="submit" [cargando]="cargando()" [deshabilitado]="cargando()"
+        >Buscar</app-boton
+      >
+    </form>
+
+    @if (errorListado()) {
+      <p class="gestion-clubes__error" role="alert">{{ errorListado() }}</p>
+    }
+
+    <app-tabla-responsive
+      [columnas]="columnas"
+      [filas]="filas()"
+      idFila="uuid"
+      [acciones]="acciones"
+      [cargando]="cargando()"
+      [tbody_rows]="filasVisibles"
+      mensajeVacio="No hay gimnasios para mostrar."
+      (accionFila)="manejarAccionFila($event)"
+    />
+
+    <app-paginacion
+      [paginaActual]="pagina()"
+      [totalPaginas]="totalPaginas()"
+      [deshabilitado]="cargando()"
+      (paginaCambiada)="cambiarPagina($event)"
+    />
+  </app-card>
+
+  <app-popup
+    [abierto]="popupEmpresaAbierto()"
+    titulo="Datos de la empresa"
+    [mostrarEncabezado]="false"
+    ancho="grande"
+    [cancelarDeshabilitado]="procesando()"
+    (cancelar)="cerrarPopupEmpresa()"
+  >
+    <app-titulo-hero
+      class="gestion-clubes__popup-titulo"
+      icono="cambiarEmpresa"
+      titulo="Datos de la empresa"
+      [subtitulo]="nombreClubSeleccionado()"
+    />
+
+    @if (cargandoPerfil()) {
+      <app-load-spinner-blue />
+    } @else if (errorPerfil()) {
+      <p class="gestion-clubes__error" role="alert">{{ errorPerfil() }}</p>
+      <app-boton apariencia="texto" (accion)="cargarPerfil()">Reintentar perfil</app-boton>
+    } @else if (perfil()) {
+      <app-formulario-perfil-club [perfil]="perfil()" (enviado)="guardarPerfil($event)" />
+    }
+
+    <app-boton
+      popupAcciones
+      tipo="submit"
+      form="formulario-perfil-club"
+      [cargando]="guardandoPerfil()"
+      [deshabilitado]="guardandoPerfil() || cargandoPerfil() || !perfil()"
+      ariaLabelCarga="Guardando perfil"
+    >
+      Guardar empresa
+    </app-boton>
+  </app-popup>
+
+  <app-popup
+    [abierto]="popupAdministradoresAbierto()"
+    [titulo]="'Administradores: ' + nombreClubSeleccionado()"
+    descripcion="Consulta, agrega y edita los administradores del gimnasio"
+    ancho="grande"
+    [cancelarDeshabilitado]="procesando()"
+    (cancelar)="cerrarPopupAdministradores()"
+  >
+    @if (formularioAdministradorVisible()) {
+      <section class="gestion-clubes__panel" aria-label="Formulario de administrador">
+        <div class="gestion-clubes__volver">
+          <app-boton
+            apariencia="texto"
+            [deshabilitado]="guardandoAdministrador()"
+            (accion)="volverAlListadoAdministradores()"
+          >
+            Volver al listado
+          </app-boton>
+        </div>
+        <h3>{{ tituloAdministrador() }}</h3>
+        @if (errorOperacion()) {
+          <p class="gestion-clubes__error" role="alert">{{ errorOperacion() }}</p>
+        }
+        <app-formulario-administrador-club
+          [modo]="modoAdministrador()"
+          [administrador]="administradorEditando()"
+          (enviado)="guardarAdministrador($event)"
+        />
+      </section>
+    } @else {
+      <section class="gestion-clubes__panel" aria-label="Administradores del gimnasio">
+        <div class="gestion-clubes__panel-encabezado">
+          <div>
+            <h3>Administradores</h3>
+            <p>Gestiona los usuarios con rol ADMIN de este gimnasio.</p>
+          </div>
+          <app-boton (accion)="abrirNuevoAdministrador()">Sumar administrador</app-boton>
+        </div>
+
+        <form
+          class="gestion-clubes__busqueda gestion-clubes__busqueda--administradores"
+          (submit)="$event.preventDefault(); buscarAdministradores()"
+        >
+          <label for="busqueda-administradores">Buscar administrador</label>
+          <input
+            id="busqueda-administradores"
+            name="busqueda-administradores"
+            type="search"
+            [ngModel]="busquedaAdministradores()"
+            (ngModelChange)="busquedaAdministradores.set($event)"
+            placeholder="Nombre, apellido o email"
+          />
+          <app-boton
+            tipo="submit"
+            [cargando]="cargandoAdministradores()"
+            [deshabilitado]="cargandoAdministradores()"
+            >Buscar</app-boton
+          >
+        </form>
+
+        @if (errorAdministradores()) {
+          <p class="gestion-clubes__error" role="alert">{{ errorAdministradores() }}</p>
+        }
+
+        <app-tabla-responsive
+          [columnas]="columnasAdministradores"
+          [filas]="filasAdministradores()"
+          idFila="userUuid"
+          [acciones]="accionesAdministradores"
+          [cargando]="cargandoAdministradores()"
+          [tbody_rows]="filasVisibles"
+          mensajeVacio="No hay administradores para mostrar."
+          (accionFila)="manejarAccionAdministrador($event)"
+        />
+        <app-paginacion
+          [paginaActual]="paginaAdministradores()"
+          [totalPaginas]="totalPaginasAdministradores()"
+          [deshabilitado]="cargandoAdministradores()"
+          (paginaCambiada)="cambiarPaginaAdministradores($event)"
+        />
+      </section>
+    }
+
+    @if (formularioAdministradorVisible()) {
+      <app-boton
+        popupAcciones
+        tipo="submit"
+        form="formulario-administrador-club"
+        [cargando]="guardandoAdministrador()"
+        [deshabilitado]="guardandoAdministrador()"
+        ariaLabelCarga="Guardando administrador"
+      >
+        Guardar administrador
+      </app-boton>
+    }
+  </app-popup>
+</section>

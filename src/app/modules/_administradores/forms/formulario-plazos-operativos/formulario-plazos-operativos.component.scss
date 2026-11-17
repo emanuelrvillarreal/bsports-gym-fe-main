@@ -1,0 +1,100 @@
+.formulario-plazos-operativos {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.formulario-plazos-operativos__error {
+  min-height: 1.25rem;
+  color: var(--semantic-danger);
+  visibility: hidden;
+}
+
+.formulario-plazos-operativos__error--visible {
+  visibility: visible;
+}
+
+.formulario-plazos-operativos__campos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: 1rem;
+}
+
+.formulario-plazos-operativos__campos label {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.formulario-plazos-operativos__campos label > span {
+  color: var(--app-text-soft);
+  font-size: 0.85rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-transform: none;
+}
+
+.formulario-plazos-operativos__campos input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 2.75rem;
+  padding: 0.65rem 0.8rem;
+  font: inherit;
+  color: var(--app-text);
+  background: color-mix(in srgb, var(--app-surface) 86%, transparent);
+  border: 1px solid color-mix(in srgb, var(--app-surface-border) 78%, transparent);
+  border-radius: 8px;
+}
+
+.formulario-plazos-operativos__campos input:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--app-accent) 35%, white);
+  outline-offset: 2px;
+}
+
+:host-context(.theme-mode-dark) .formulario-plazos-operativos__campos input,
+:host-context(.dark-mode-on) .formulario-plazos-operativos__campos input {
+  background: #000;
+}
+
+:host-context(.theme-mode-dark) ::ng-deep .formulario-plazos-operativos__campos app-select .app-select__control,
+:host-context(.dark-mode-on) ::ng-deep .formulario-plazos-operativos__campos app-select .app-select__control {
+  --app-boton-fondo-texto: #000;
+  --app-boton-fondo-texto-interaccion: #000;
+}
+
+.formulario-plazos-operativos__acciones {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.formulario-plazos-operativos__recargo {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.formulario-plazos-operativos__recargo legend {
+  padding: 0;
+  margin-bottom: 0.5rem;
+  color: var(--app-text-soft);
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.formulario-plazos-operativos__ayuda {
+  margin: 0;
+  color: var(--app-text-soft);
+  font-size: 0.85rem;
+}
+
+.formulario-plazos-operativos .formulario-plazos-operativos__check {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.formulario-plazos-operativos .formulario-plazos-operativos__check input {
+  width: 1.1rem;
+  height: 1.1rem;
+}

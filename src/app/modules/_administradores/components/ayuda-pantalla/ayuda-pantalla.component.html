@@ -1,0 +1,22 @@
+@if (ayuda(); as a) {
+  @if (oculta()) {
+    <div class="ayuda ayuda--oculta">
+      <button type="button" class="ayuda__link ayuda__abrir" (click)="mostrar()" aria-expanded="false">¿Cómo se usa esta pantalla?</button>
+    </div>
+  } @else {
+    <aside class="ayuda" aria-label="Ayuda de esta pantalla">
+      <div class="ayuda__contenido">
+        <p class="ayuda__titulo">¿Para qué sirve esta pantalla?</p>
+        <p>{{ a.texto }}</p>
+        @if (a.pasos.length) {
+          <ol>
+            @for (paso of a.pasos; track $index) {
+              <li>{{ paso }}</li>
+            }
+          </ol>
+        }
+      </div>
+      <button type="button" class="ayuda__link" (click)="ocultar()" aria-expanded="true">Cerrar ayuda</button>
+    </aside>
+  }
+}

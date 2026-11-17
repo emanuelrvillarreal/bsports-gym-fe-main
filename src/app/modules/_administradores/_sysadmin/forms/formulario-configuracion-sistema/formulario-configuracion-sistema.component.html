@@ -1,0 +1,44 @@
+<form
+  id="formulario-configuracion"
+  class="formulario-configuracion-sistema"
+  appValidacionFormulario
+  (submit)="$event.preventDefault(); enviar()"
+>
+  <small
+    class="formulario-configuracion-sistema__error"
+    [class.formulario-configuracion-sistema__error--visible]="errorVisible()"
+    role="alert"
+    >{{ mensajeError() }}</small
+  >
+
+  <label for="configuracion-sistema-nombre">
+    <span>Clave</span>
+    <input
+      id="configuracion-sistema-nombre"
+      type="text"
+      required
+      maxlength="160"
+      placeholder="clave.ejemplo"
+      [attr.data-app-invalido]="!nombre().trim() ? 'true' : null"
+      [value]="nombre()"
+      (input)="actualizarNombre($event)"
+    />
+  </label>
+
+  <label for="configuracion-sistema-valor">
+    <span>Valor</span>
+    <textarea
+      id="configuracion-sistema-valor"
+      required
+      rows="3"
+      [attr.data-app-invalido]="!valor().trim() ? 'true' : null"
+      [value]="valor()"
+      (input)="actualizarValor($event)"
+    ></textarea>
+  </label>
+
+  <label class="formulario-configuracion-sistema__checkbox">
+    <input type="checkbox" [checked]="global()" (change)="actualizarGlobal($event)" />
+    <span>Configuración global</span>
+  </label>
+</form>

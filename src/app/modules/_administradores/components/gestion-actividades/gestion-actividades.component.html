@@ -1,0 +1,562 @@
+<section class="gestion-actividades">
+  <app-card>
+    <div class="gestion-actividades__busqueda">
+      <label class="gestion-actividades__campo-busqueda">
+        <span>Buscar</span>
+        <input
+          type="search"
+          placeholder="Busca por nombre de actividad o ubicación"
+          [value]="busqueda()"
+          (input)="actualizarBusqueda($event)"
+          (keydown.enter)="buscar()"
+        />
+      </label>
+      <app-select
+        class="gestion-actividades__disponibilidad"
+        etiqueta="Disponibilidad"
+        [opciones]="opcionesCompleta"
+        [value]="filtroCompleta()"
+        (valueChange)="cambiarFiltroCompleta($event)"
+      />
+      <app-boton
+        class="gestion-actividades__boton-buscar"
+        tipo="button"
+        (accion)="buscar()"
+        [cargando]="cargando()"
+        ariaLabelCarga="Buscando actividades"
+        >Buscar</app-boton
+      >
+    </div>
+
+    <div class="gestion-actividades__acciones-listado">
+      @if (puedeAdministrar()) {
+        <div class="gestion-actividades__nueva-actividad">
+          <span>Nueva actividad</span>
+          <app-boton
+            class="gestion-actividades__boton-agregar"
+            tipo="button"
+            [soloIcono]="true"
+            aria-label="Nueva actividad"
+            aria-haspopup="dialog"
+            (accion)="abrirAlta()"
+          >
+            <ng-icon name="heroPlus" aria-hidden="true" />
+          </app-boton>
+        </div>
+      }
+    </div>
+
+    @if (error() && !formularioVisible() && !actividadInscripcionUuid()) {
+      <p class="gestion-actividades__error" role="alert">{{ error() }}</p>
+    }
+    @if (errorCatalogos()) {
+      <p class="gestion-actividades__error" role="alert">{{ errorCatalogos() }}</p>
+    }
+
+    <app-popup
+      [abierto]="formularioVisible() && puedeAdministrar()"
+      [titulo]="editandoUuid() ? 'Editar actividad' : 'Nueva actividad'"
+      [descripcion]="
+        editandoUuid()
+          ? 'Actualizá los datos generales de la actividad.'
+          : 'Completá los datos para registrar una nueva actividad.'
+      "
+      [mostrarEncabezado]="false"
+      ancho="grande"
+      [cancelarDeshabilitado]="guardando()"
+      (cancelar)="cancelarFormulario()"
+    >
+      <app-titulo-hero
+        [titulo]="editandoUuid() ? 'Editar actividad' : 'Nueva actividad'"
+        [subtitulo]="
+          editandoUuid()
+            ? 'Actualizá los datos generales y los profesores asignados.'
+            : 'Completá los datos y seleccioná los profesores de la actividad.'
+        "
+        icono="actividades"
+      />
+      @if (error()) {
+        <p class="gestion-actividades__error" role="alert">{{ error() }}</p>
+      }
+      @if (formularioVisible()) {
+        <app-formulario-actividad
+          [actividad]="actividadFormulario()"
+          [categorias]="categoriasDisponibles()"
+          (enviado)="guardar($event)"
+        />
+        <section class="gestion-actividades__seleccion-profesores">
+          <div class="gestion-actividades__seleccion-profesores-encabezado">
+            <div class="gestion-actividades__seleccion-profesores-titulo">
+              <span class="gestion-actividades__numero-seccion" aria-hidden="true">5</span>
+              <div>
+                <h3>¿Quién la da? <span class="gestion-actividades__opcional">(opcional)</span></h3>
+                <p>Marcá los profesores a cargo de la actividad.</p>
+              </div>
+            </div>
+            <label class="gestion-actividades__busqueda-profesores">
+              <span class="sr-only">Buscar profesor por nombre o apellido</span>
+              <input
+                type="search"
+                placeholder="Buscar por nombre o apellido"
+                [value]="busquedaProfesores()"
+                (input)="actualizarBusquedaProfesores($event)"
+              />
+            </label>
+          </div>
+          <ng-template #seleccionarProfesor let-profesor>
+            <label class="gestion-actividades__checkbox-seleccion">
+              <input
+                class="gestion-actividades__checkbox-circular"
+                type="checkbox"
+                [checked]="profesoresSeleccionados().includes(profesor.profesorUuid)"
+                [attr.aria-label]="'Seleccionar a ' + profesor.nombre + ' ' + profesor.apellido"
+                (change)="alternarProfesor(profesor.profesorUuid, $any($event.target).checked)"
+              />
+            </label>
+          </ng-template>
+          <app-tabla-responsive
+            class="gestion-actividades__tabla-profesores"
+            [columnas]="columnasProfesores"
+            [filas]="filasProfesores()"
+            idFila="profesorUuid"
+            [plantillaAcciones]="seleccionarProfesor"
+            tituloAcciones="Seleccionar"
+            [cargando]="cargandoProfesores()"
+            [tbody_rows]="4"
+            mensajeVacio="No hay profesores activos para asignar."
+          />
+          @if (totalProfesores() > 50) {
+            <app-paginacion
+              [cantidadBotonesVisibles]="3"
+              [paginaActual]="paginaProfesores()"
+              [totalPaginas]="totalPaginasProfesores()"
+              [deshabilitado]="cargandoProfesores()"
+              (paginaCambiada)="cambiarPaginaProfesores($event)"
+            />
+          }
+        </section>
+      }
+
+      <app-boton
+        popupAcciones
+        tipo="submit"
+        form="formulario-actividad"
+        [cargando]="guardando()"
+        ariaLabelCarga="Guardando actividad"
+        >Guardar</app-boton
+      >
+    </app-popup>
+
+    <app-popup
+      [abierto]="actividadInscripcionUuid() !== null"
+      titulo="Inscribir socio"
+      descripcion="Seleccioná el socio que querés inscribir en la actividad."
+      [mostrarEncabezado]="false"
+      ancho="mediano"
+      textoCancelar="Cerrar"
+      aparienciaCancelar="solido"
+      [cancelarDeshabilitado]="inscribiendoMemberUuid() !== null"
+      (cancelar)="cancelarInscripcion()"
+    >
+      <app-titulo-hero
+        titulo="Inscribir socio"
+        [subtitulo]="
+          socioInscripcionSeleccionado()
+            ? modoInscripcion() === 'DESCUENTO'
+              ? 'Elegí el descuento que querés aplicar a la inscripción.'
+              : 'Elegí cómo querés completar la inscripción.'
+            : 'Seleccioná el socio que querés inscribir en la actividad.'
+        "
+        icono="socios"
+      />
+      @if (actividadInscripcionUuid()) {
+        @if (socioInscripcionSeleccionado(); as socio) {
+          <p class="gestion-actividades__nota">
+            Vas a inscribir a <strong>{{ socio.nombreCompleto }}</strong>.
+          </p>
+          <app-selector-horarios-actividad
+            class="gestion-actividades__selector-horarios"
+            titulo="Horarios a los que va a asistir"
+            [horarios]="horariosActividadInscripcion()"
+            [seleccionados]="horariosInscripcionSeleccionados()"
+            [deshabilitado]="inscribiendoMemberUuid() !== null"
+            (seleccionCambiada)="horariosInscripcionSeleccionados.set($event)"
+          />
+          @if (!horariosInscripcionSeleccionados().length) {
+            <p class="gestion-actividades__nota" role="status">
+              Elegí al menos un horario para continuar.
+            </p>
+          }
+          @if (modoInscripcion() === 'DESCUENTO' && formularioAsignacionVisible()) {
+            <app-selector-descuentos
+              [descuentos]="catalogoDescuentos()"
+              [seleccionados]="descuentosInscripcionSeleccionados()"
+              [cargando]="cargandoCatalogoDescuentos()"
+              titulo="Descuentos para la inscripción (opcional)"
+              descripcion="Se aplican a esta inscripción. Podés agregar más de uno."
+              (descuentoAgregado)="agregarDescuentoInscripcion($event)"
+              (descuentoQuitado)="quitarDescuentoInscripcion($event)"
+            />
+          }
+          @if (modoInscripcion() === null) {
+            <section class="gestion-actividades__modalidades-inscripcion" aria-label="Modalidad de inscripción">
+              <app-boton
+                class="gestion-actividades__opcion-inscripcion"
+                tipo="button"
+                [contenidoVertical]="true"
+                [cargando]="inscribiendoMemberUuid() !== null"
+                [deshabilitado]="!horariosInscripcionSeleccionados().length"
+                (accion)="inscribirSinDescuento()"
+              >
+                <ng-icon name="heroUserPlus" size="2.5rem" aria-hidden="true" />
+                <span class="gestion-actividades__opcion-texto">
+                  <strong>Inscripción</strong>
+                  <span>normal</span>
+                </span>
+              </app-boton>
+              <app-boton
+                class="gestion-actividades__opcion-inscripcion gestion-actividades__opcion-inscripcion--descuento"
+                tipo="button"
+                [contenidoVertical]="true"
+                colorFondo="linear-gradient(115deg, #8b5a00 0%, #f4c542 23%, #fff2a6 40%, #d89b13 56%, #fff2a6 72%, #8b5a00 100%)"
+                colorInteraccion="linear-gradient(115deg, #8b5a00 0%, #f4c542 23%, #fff2a6 40%, #d89b13 56%, #fff2a6 72%, #8b5a00 100%)"
+                [deshabilitado]="!horariosInscripcionSeleccionados().length"
+                (accion)="abrirInscripcionConDescuento()"
+              >
+                <ng-icon name="heroCurrencyDollar" size="2.5rem" aria-hidden="true" />
+                <span class="gestion-actividades__opcion-texto">
+                  <strong>Inscripción</strong>
+                  <span>con descuento</span>
+                </span>
+              </app-boton>
+            </section>
+          }
+        } @else {
+          <label class="gestion-actividades__busqueda-socios" for="busqueda-socios-inscripcion">
+            <span>Buscar socio</span>
+            <input
+              id="busqueda-socios-inscripcion"
+              type="search"
+              placeholder="Buscar por nombre, apellido o DNI"
+              [value]="busquedaSociosInscripcion()"
+              (input)="actualizarBusquedaSociosInscripcion($event)"
+            />
+          </label>
+          <app-tabla-responsive
+            class="gestion-actividades__tabla-socios-inscripcion"
+            [columnas]="columnasSociosInscripcion"
+            [filas]="filasSociosInscripcion()"
+            idFila="memberUuid"
+            [acciones]="accionesSociosInscripcion"
+            [cargando]="cargandoSociosInscripcion()"
+            [tbody_rows]="4"
+            mensajeVacio="No hay socios activos para inscribir."
+            (accionFila)="manejarAccionSocioInscripcion($event)"
+          />
+          @if (totalSociosInscripcion() > 100) {
+            <app-paginacion
+              [mostrarResumen]="true"
+              [cantidadBotonesVisibles]="3"
+              [paginaActual]="paginaSociosInscripcion()"
+              [totalPaginas]="totalPaginasSociosInscripcion()"
+              [deshabilitado]="cargandoSociosInscripcion() || inscribiendoMemberUuid() !== null"
+              (paginaCambiada)="cambiarPaginaSociosInscripcion($event)"
+            />
+          }
+        }
+      }
+
+      <app-boton
+        popupAcciones
+        apariencia="texto"
+        [style.display]="socioInscripcionSeleccionado() ? null : 'none'"
+        [deshabilitado]="inscribiendoMemberUuid() !== null"
+        (accion)="
+          modoInscripcion() === 'DESCUENTO'
+            ? volverAModalidadesInscripcion()
+            : volverASeleccionSocio()
+        "
+        >{{ modoInscripcion() === 'DESCUENTO' ? 'Volver a modalidades' : 'Volver' }}</app-boton
+      >
+      <app-boton
+        popupAcciones
+        [style.display]="
+          modoInscripcion() === 'DESCUENTO' && descuentosInscripcionSeleccionados().length > 0
+            ? null
+            : 'none'
+        "
+        [cargando]="inscribiendoMemberUuid() !== null"
+        (accion)="confirmarInscripcionConDescuentos()"
+        >Confirmar inscripción</app-boton
+      >
+
+    </app-popup>
+
+    <app-popup
+      [abierto]="actividadDetalleUuid() !== null"
+      [titulo]="actividadDetalle()?.nombre ?? 'Detalle de actividad'"
+      descripcion="Información completa de la actividad, profesores e inscriptos."
+      [mostrarEncabezado]="false"
+      [mostrarCancelar]="false"
+      [altoCompleto]="true"
+      ancho="grande"
+      (cancelar)="cerrarDetalle()"
+    >
+      @if (actividadDetalle(); as actividad) {
+        <div class="gestion-actividades__detalle">
+          <app-titulo-hero
+            [titulo]="actividad.nombre"
+            icono="actividades"
+          />
+
+          <dl class="gestion-actividades__resumen">
+            <div>
+              <dt>Categor&#xED;as y edades</dt>
+              <dd>
+                @if (categoriasDeActividad(actividad).length) {
+                  <details class="gestion-actividades__detalle-categorias">
+                    <summary>
+                      <span>
+                        {{ categoriasDeActividad(actividad)[0].nombre }}
+                        ({{
+                          formatearRangoEdad(
+                            categoriasDeActividad(actividad)[0].edadMinima,
+                            categoriasDeActividad(actividad)[0].edadMaxima
+                          )
+                        }})
+                      </span>
+                      @if (categoriasDeActividad(actividad).length > 1) {
+                        <span aria-hidden="true">+</span>
+                        <span
+                          class="gestion-actividades__categoria-contador"
+                          [style.color]="colorTextoContadorCategorias()"
+                        >{{ categoriasDeActividad(actividad).length }}</span>
+                      }
+                    </summary>
+                    @if (categoriasDeActividad(actividad).length > 1) {
+                      <div class="gestion-actividades__categorias-restantes">
+                        @for (
+                          categoria of categoriasDeActividad(actividad).slice(1);
+                          track categoria.categoriaUuid
+                        ) {
+                          <p>
+                            <strong>{{ categoria.nombre }}</strong>
+                            ({{ formatearRangoEdad(categoria.edadMinima, categoria.edadMaxima) }})
+                          </p>
+                        }
+                      </div>
+                    }
+                  </details>
+                } @else {
+                  Sin categor&#xED;as asignadas
+                }
+              </dd>
+            </div>
+            <div>
+              <dt>Ubicación</dt>
+              <dd>{{ actividad.ubicacion }}</dd>
+            </div>
+            @if (!horariosDetalle().length) {
+              <div>
+                <dt>Horario</dt>
+                <dd class="gestion-actividades__horario">
+                  <ng-icon name="heroClock" aria-hidden="true" />
+                  {{ formatearHorario(actividad.horaInicio) }} a
+                  {{ formatearHorario(actividad.horaFin) }}
+                </dd>
+              </div>
+            }
+          </dl>
+
+          @if (horariosDetalle().length) {
+            <section class="gestion-actividades__seccion" aria-labelledby="horarios-actividad">
+              <h3 id="horarios-actividad">Horarios</h3>
+              <div class="gestion-actividades__horarios-detalle">
+                @for (grupo of horariosDetalle(); track grupo.dia) {
+                  <div class="gestion-actividades__horarios-dia">
+                    <h4>{{ grupo.dia }}</h4>
+                    <ul role="list">
+                      @for (horario of grupo.franjas; track horario.uuid) {
+                        <li [class.gestion-actividades__horario-lleno]="horario.lleno">
+                          <ng-icon name="heroClock" aria-hidden="true" />
+                          <strong>{{ horario.franja }}</strong>
+                          <span>{{ horario.ocupacion }}{{ horario.lleno ? ' · Lleno' : '' }}</span>
+                        </li>
+                      }
+                    </ul>
+                  </div>
+                }
+              </div>
+            </section>
+          } @else {
+          <section class="gestion-actividades__seccion" aria-labelledby="dias-actividad">
+            <h3 id="dias-actividad">Días de la actividad</h3>
+            @if (todosLosDias()) {
+              <p class="gestion-actividades__todos-dias">Todos los días</p>
+            } @else if (diasDetalle().length) {
+              <ul class="gestion-actividades__dias" role="list">
+                @for (dia of diasDetalle(); track dia) {
+                  <li>{{ dia }}</li>
+                }
+              </ul>
+            } @else {
+              <p class="gestion-actividades__vacio">No hay días configurados.</p>
+            }
+          </section>
+          }
+
+          <section class="gestion-actividades__seccion" aria-labelledby="profesores-actividad">
+            <h3 id="profesores-actividad">Profesores</h3>
+            @if (actividad.profesores.length) {
+              <ul
+                class="gestion-actividades__profesores"
+                role="list"
+                tabindex="0"
+                aria-label="Profesores asignados. Desplazate para ver el resto."
+              >
+                @for (profesor of actividad.profesores; track profesor.profesorUuid) {
+                  <li>
+                    <span class="gestion-actividades__profesor-resumen">
+                      @if (profesor.imageUrl) {
+                        <img
+                          [src]="profesor.imageUrl"
+                          [alt]="profesor.nombre + ' ' + profesor.apellido"
+                        />
+                      } @else {
+                        <span class="gestion-actividades__profesor-avatar" aria-hidden="true">
+                          {{ inicialesProfesor(profesor) }}
+                        </span>
+                      }
+                      <strong>{{ profesor.nombre }} {{ profesor.apellido }}</strong>
+                    </span>
+                    <app-boton
+                      tipo="button"
+                      apariencia="texto"
+                      [soloIcono]="true"
+                      [aria-label]="
+                        'Ver todos los datos de ' + profesor.nombre + ' ' + profesor.apellido
+                      "
+                      aria-haspopup="dialog"
+                      (accion)="abrirDetalleProfesor(profesor)"
+                    >
+                      <ng-icon name="heroEye" aria-hidden="true" />
+                    </app-boton>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <p class="gestion-actividades__vacio">No hay profesores asignados.</p>
+            }
+          </section>
+
+          <section class="gestion-actividades__seccion" aria-labelledby="inscriptos-actividad">
+            <div class="gestion-actividades__seccion-encabezado">
+              <h3 id="inscriptos-actividad">Inscriptos</h3>
+              <span>{{ inscriptos().length }} en total</span>
+            </div>
+            <app-tabla-responsive
+              class="gestion-actividades__tabla-inscriptos-detalle"
+              [columnas]="columnasInscriptosDetalle"
+              [filas]="inscriptosPagina()"
+              idFila="dni"
+              [acciones]="accionesInscriptosDetalle"
+              [tbody_rows]="4"
+              mensajeVacio="No hay socios inscriptos en esta actividad."
+              (accionFila)="manejarAccionInscripto($event)"
+            />
+            @if (inscriptos().length > 50) {
+              <app-paginacion
+                [cantidadBotonesVisibles]="3"
+                [paginaActual]="paginaInscriptosDetalle()"
+                [totalPaginas]="totalPaginasInscriptosDetalle()"
+                (paginaCambiada)="cambiarPaginaInscriptosDetalle($event)"
+              />
+            }
+          </section>
+        </div>
+      }
+      <app-boton popupAcciones tipo="button" (accion)="cerrarDetalle()">Cerrar</app-boton>
+    </app-popup>
+
+    <app-popup
+      [abierto]="profesorDetalle() !== null"
+      [titulo]="tituloProfesorDetalle()"
+      descripcion="Datos completos del profesor asignado a la actividad."
+      [mostrarEncabezado]="false"
+      [mostrarCancelar]="false"
+      ancho="mediano"
+      (cancelar)="cerrarDetalleProfesor()"
+      >
+        @if (profesorDetalle(); as profesor) {
+          <div class="gestion-actividades__encabezado-profesor">
+            @if (profesor.imageUrl) {
+              <img
+                [src]="profesor.imageUrl"
+                [alt]="'Foto de ' + profesor.nombre + ' ' + profesor.apellido"
+              />
+            } @else {
+              <span class="gestion-actividades__profesor-avatar" aria-hidden="true">
+                {{ inicialesProfesor(profesor) }}
+              </span>
+            }
+            <app-titulo-hero
+              [titulo]="profesor.nombre + ' ' + profesor.apellido"
+              subtitulo="Profesor asignado a la actividad"
+              icono="profesores"
+            />
+          </div>
+        <dl class="gestion-actividades__profesor-detalle">
+          <div class="gestion-actividades__profesor-nombre">
+            <dt>Nombre y apellido</dt>
+            <dd>{{ profesor.nombre }} {{ profesor.apellido }}</dd>
+          </div>
+          <div>
+            <dt>DNI</dt>
+            <dd>{{ formatearDniProfesor(profesor.dni) }}</dd>
+          </div>
+          <div>
+            <dt>Teléfono</dt>
+            <dd>{{ formatearTelefonoProfesor(profesor.telefono) }}</dd>
+          </div>
+          <div>
+            <dt>Email</dt>
+            <dd>{{ valorOGuion(profesor.email) }}</dd>
+          </div>
+        </dl>
+      }
+      <app-boton popupAcciones tipo="button" (accion)="cerrarDetalleProfesor()">Cerrar</app-boton>
+    </app-popup>
+
+    <ng-template #categoriaCelda let-fila>
+      <span class="gestion-actividades__categoria-celda">
+        <span>{{ fila.categoriaPrimera }}</span>
+        @if (fila.cantidadCategorias > 1) {
+          <span class="gestion-actividades__categoria-mas" aria-hidden="true">+</span>
+          <span
+            class="gestion-actividades__categoria-contador"
+            [style.color]="colorTextoContadorCategorias()"
+            aria-hidden="true"
+          >{{ fila.cantidadCategorias }}</span>
+        }
+      </span>
+    </ng-template>
+
+    <app-tabla-responsive
+      [columnas]="columnas"
+      [filas]="filas()"
+      [plantillasCeldas]="{ categoria: categoriaCelda }"
+      idFila="actividadUuid"
+      [acciones]="acciones"
+      [cargando]="cargando()"
+      [tbody_rows]="6"
+      mensajeVacio="No hay actividades para mostrar."
+      (accionFila)="manejarAccion($event)"
+    />
+    <app-paginacion
+      [paginaActual]="paginaActual()"
+      [totalPaginas]="totalPaginas()"
+      [deshabilitado]="cargando()"
+      (paginaCambiada)="cambiarPagina($event)"
+    />
+  </app-card>
+</section>

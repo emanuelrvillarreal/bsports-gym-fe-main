@@ -1,0 +1,176 @@
+<form
+  class="formulario-evento-acceso fs-form"
+  [id]="formId()"
+  appValidacionFormulario
+  (submit)="$event.preventDefault(); enviar()"
+  novalidate
+>
+  <small
+    class="formulario-evento-acceso__resumen-error"
+    [class.formulario-evento-acceso__resumen-error--visible]="
+      intentoEnvio() && formularioInvalido()
+    "
+    role="alert"
+  >
+    Revisá los campos obligatorios y los importes ingresados.
+  </small>
+
+  <!-- 1. Datos del evento -->
+  <section class="fs-seccion" aria-labelledby="fea-titulo-datos">
+    <header class="fs-seccion__cabecera">
+      <span class="fs-seccion__numero" aria-hidden="true">1</span>
+      <div>
+        <h3 id="fea-titulo-datos">¿Qué evento es?</h3>
+        <p>Un título claro, la fecha y una breve descripción para quienes lo vean.</p>
+      </div>
+    </header>
+    <div class="fs-seccion__cuerpo fs-grid">
+      <label for="evento-acceso-titulo">
+        <span>Título *</span>
+        <input
+          id="evento-acceso-titulo"
+          type="text"
+          required
+          maxlength="120"
+          autocomplete="off"
+          placeholder="Ej: Torneo de verano, Fiesta de aniversario"
+          [value]="titulo()"
+          [attr.data-app-invalido]="intentoEnvio() && !tituloValido() ? 'true' : null"
+          aria-describedby="evento-acceso-titulo-ayuda"
+          (input)="titulo.set($any($event.target).value)"
+        />
+        <small id="evento-acceso-titulo-ayuda" class="formulario-evento-acceso__ayuda fs-nota">
+          Obligatorio, hasta 120 caracteres.
+        </small>
+      </label>
+
+      <app-input-fecha
+        id="evento-acceso-fecha"
+        etiqueta="Fecha del evento *"
+        modo="fecha"
+        [minimo]="fechaMinima"
+        [requerido]="true"
+        [attr.data-app-invalido]="intentoEnvio() && !fechaValida() ? 'true' : null"
+        [valorInicial]="fecha()"
+        (valorCambiado)="fecha.set($event)"
+      />
+
+      <label class="fs-grid__completo" for="evento-acceso-descripcion">
+        <span>Descripción *</span>
+        <textarea
+          id="evento-acceso-descripcion"
+          required
+          maxlength="500"
+          rows="5"
+          placeholder="Contá de qué se trata el evento, horarios, qué incluye la entrada, etc."
+          [value]="descripcion()"
+          [attr.data-app-invalido]="intentoEnvio() && !descripcionValida() ? 'true' : null"
+          aria-describedby="evento-acceso-descripcion-ayuda"
+          (input)="descripcion.set($any($event.target).value)"
+        ></textarea>
+        <small id="evento-acceso-descripcion-ayuda" class="formulario-evento-acceso__ayuda fs-contador">
+          Obligatoria, hasta 500 caracteres. {{ descripcion().length }}/500
+        </small>
+      </label>
+    </div>
+  </section>
+
+  <!-- 2. Entradas -->
+  <section class="fs-seccion formulario-evento-acceso__precios" aria-labelledby="fea-titulo-entradas">
+    <header class="fs-seccion__cabecera">
+      <span class="fs-seccion__numero" aria-hidden="true">2</span>
+      <div>
+        <h3 id="fea-titulo-entradas">¿Quién puede entrar y cuánto paga?</h3>
+        <p>
+          Los socios al día siempre pueden entrar. Activá a los morosos y a los invitados solo si querés
+          dejarlos pasar, y definí cuánto paga cada uno. Dejá el precio vacío o en 0 si es gratis.
+        </p>
+      </div>
+    </header>
+
+    <div class="fs-seccion__cuerpo fea-entradas">
+      <div class="fea-entrada">
+        <div class="fea-entrada__titulo">
+          <strong>Socio al día</strong>
+          <small>Siempre puede entrar</small>
+        </div>
+        <label for="evento-acceso-monto">
+          <span>Precio de entrada</span>
+          <input
+            id="evento-acceso-monto"
+            type="text"
+            autocomplete="off"
+            inputmode="decimal"
+            placeholder="$ 0"
+            [attr.data-app-invalido]="intentoEnvio() && !montoValido(monto(), true) ? 'true' : null"
+            [value]="formatearMonto(monto())"
+            (input)="actualizarMonto('monto', $event)"
+            (blur)="formatearInputMonto($event)"
+          />
+        </label>
+      </div>
+
+      <div class="fea-entrada" [class.fea-entrada--apagada]="!permiteMorosos()">
+        <label class="fs-interruptor formulario-evento-acceso__permiso" for="evento-acceso-permite-morosos">
+          <input
+            id="evento-acceso-permite-morosos"
+            type="checkbox"
+            role="switch"
+            [checked]="permiteMorosos()"
+            (change)="permiteMorosos.set($any($event.target).checked)"
+          />
+          <span class="fs-interruptor__control" aria-hidden="true"></span>
+          <span class="fs-interruptor__texto">Permitir socios morosos</span>
+        </label>
+        <label for="evento-acceso-monto-morosos">
+          <span>Precio para morosos</span>
+          <input
+            id="evento-acceso-monto-morosos"
+            type="text"
+            autocomplete="off"
+            inputmode="decimal"
+            placeholder="$ 0"
+            [disabled]="!permiteMorosos()"
+            [attr.data-app-invalido]="
+              intentoEnvio() && permiteMorosos() && !montoValido(montoMorosos()) ? 'true' : null
+            "
+            [value]="formatearMonto(montoMorosos())"
+            (input)="actualizarMonto('montoMorosos', $event)"
+            (blur)="formatearInputMonto($event)"
+          />
+        </label>
+      </div>
+
+      <div class="fea-entrada" [class.fea-entrada--apagada]="!permiteInvitados()">
+        <label class="fs-interruptor formulario-evento-acceso__permiso" for="evento-acceso-permite-invitados">
+          <input
+            id="evento-acceso-permite-invitados"
+            type="checkbox"
+            role="switch"
+            [checked]="permiteInvitados()"
+            (change)="permiteInvitados.set($any($event.target).checked)"
+          />
+          <span class="fs-interruptor__control" aria-hidden="true"></span>
+          <span class="fs-interruptor__texto">Permitir invitados</span>
+        </label>
+        <label for="evento-acceso-monto-invitados">
+          <span>Precio para invitados</span>
+          <input
+            id="evento-acceso-monto-invitados"
+            type="text"
+            autocomplete="off"
+            inputmode="decimal"
+            placeholder="$ 0"
+            [disabled]="!permiteInvitados()"
+            [attr.data-app-invalido]="
+              intentoEnvio() && permiteInvitados() && !montoValido(montoInvitados()) ? 'true' : null
+            "
+            [value]="formatearMonto(montoInvitados())"
+            (input)="actualizarMonto('montoInvitados', $event)"
+            (blur)="formatearInputMonto($event)"
+          />
+        </label>
+      </div>
+    </div>
+  </section>
+</form>

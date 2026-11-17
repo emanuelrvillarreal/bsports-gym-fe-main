@@ -1,0 +1,128 @@
+<aside
+  class="nav-bar"
+  [class.nav-bar--derecha]="ladoMenu() === 'derecha'"
+  [class.nav-bar--cerrada]="!menuAbierto()"
+  [class.nav-bar--sin-transicion]="!transicionesEfectivas()"
+  [class.nav-bar--alto-rendimiento]="altoRendimiento()"
+  (pointerdown)="iniciarArrastre($event)"
+  aria-label="Menu principal"
+>
+  <div class="nav-bar__marca">
+    @if (menuAbierto()) {
+      <div class="nav-bar__marca-info">
+        <span class="nav-bar__logo" aria-hidden="true">
+          @if (!logoCargado() && !logoConError()) {
+            <span class="nav-bar__logo-spinner">
+              <app-load-spinner tipo="imagen" [altoRendimiento]="altoRendimiento()" />
+            </span>
+          }
+          <img
+            [ngSrc]="logoUrl()"
+            alt=""
+            width="96"
+            height="96"
+            [class.nav-bar__logo-image--oculta]="!logoCargado() || logoConError()"
+            (load)="manejarLogoCargado()"
+            (error)="manejarLogoError()"
+          />
+        </span>
+        <div class="nav-bar__titulos">
+          <strong [attr.title]="nombreMarca()">{{ nombreMarca() }}</strong>
+        </div>
+      </div>
+    }
+    <button
+      class="nav-bar__colapsar"
+      type="button"
+      (click)="alternarEstadoMenu()"
+      [attr.aria-label]="menuAbierto() ? 'Cerrar menu' : 'Abrir menu'"
+    >
+      <ng-icon
+        [name]="
+          iconos.obtenerNombre(
+            menuAbierto()
+              ? ladoMenu() === 'izquierda'
+                ? 'colapsarIzquierda'
+                : 'colapsarDerecha'
+              : ladoMenu() === 'izquierda'
+                ? 'colapsarDerecha'
+                : 'colapsarIzquierda'
+          )
+        "
+      />
+    </button>
+  </div>
+
+  <nav class="nav-bar__navegacion" aria-label="Secciones principales">
+    <div class="nav-bar__navegacion-contenido">
+      @for (opcion of opcionesNavegacion(); track opcion.ruta ?? opcion.href ?? opcion.etiqueta) {
+      @if (opcion.ruta) {
+        <a
+          class="nav-bar__item"
+          [routerLink]="opcion.ruta"
+          [queryParams]="opcion.queryParams"
+          [routerLinkActive]="opcion.activaEn ? '' : 'nav-bar__item--activa'"
+          [class.nav-bar__item--activa]="activaPorGrupo(opcion)"
+          [attr.title]="!menuAbierto() ? opcion.etiqueta : null"
+          (click)="manejarSeleccionItem()"
+        >
+          <ng-icon [name]="iconos.obtenerNombre(opcion.icono)" aria-hidden="true" />
+          @if (menuAbierto()) {
+            <span>{{ opcion.etiqueta }}</span>
+          }
+        </a>
+      } @else if (opcion.href) {
+        <a
+          class="nav-bar__item"
+          [href]="opcion.href"
+          [attr.target]="opcion.externa ? '_blank' : null"
+          rel="noreferrer"
+          [attr.title]="!menuAbierto() ? opcion.etiqueta : null"
+          (click)="manejarSeleccionItem()"
+        >
+          <ng-icon [name]="iconos.obtenerNombre(opcion.icono)" aria-hidden="true" />
+          @if (menuAbierto()) {
+            <span>{{ opcion.etiqueta }}</span>
+          }
+        </a>
+      }
+      }
+    </div>
+  </nav>
+
+  <button
+    class="nav-bar__item nav-bar__item--cerrar-sesion"
+    type="button"
+    (click)="cerrarSesion()"
+    [attr.title]="!menuAbierto() ? 'Cerrar sesion' : null"
+  >
+    <ng-icon [name]="iconos.obtenerNombre('cerrarSesion')" aria-hidden="true" />
+    @if (menuAbierto()) {
+      <span>Cerrar sesion</span>
+    }
+  </button>
+
+  <button
+    class="nav-bar__alternador"
+    type="button"
+    (click)="alternarLadoMenu(); manejarSeleccionItem()"
+    [attr.aria-label]="
+      ladoMenu() === 'izquierda' ? 'Mover menu al lado derecho' : 'Mover menu al lado izquierdo'
+    "
+    [attr.title]="
+      !menuAbierto()
+        ? ladoMenu() === 'izquierda'
+          ? 'Mover a la derecha'
+          : 'Mover a la izquierda'
+        : null
+    "
+  >
+    <ng-icon
+      [name]="iconos.obtenerNombre(ladoMenu() === 'izquierda' ? 'moverDerecha' : 'moverIzquierda')"
+      aria-hidden="true"
+    />
+    @if (menuAbierto()) {
+      <span>{{ ladoMenu() === 'izquierda' ? 'Mover a la derecha' : 'Mover a la izquierda' }}</span>
+    }
+  </button>
+</aside>

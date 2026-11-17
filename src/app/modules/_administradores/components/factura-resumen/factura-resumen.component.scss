@@ -1,0 +1,135 @@
+:host {
+  display: block;
+}
+
+.factura-resumen {
+  color: var(--app-text);
+
+  &__encabezado,
+  &__datos {
+    display: grid;
+    gap: 1rem;
+  }
+
+  &__encabezado {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    padding: 1rem;
+    background: var(--app-surface-strong);
+    border: 1px solid var(--app-surface-border);
+    border-radius: 0.9rem;
+
+    div {
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    span {
+      color: var(--app-text-soft);
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: none;
+    }
+  }
+
+  &__importe {
+    text-align: right;
+
+    strong {
+      font-size: 1.35rem;
+
+      small {
+        color: var(--app-text-soft);
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+    }
+  }
+
+  &__estado {
+    width: fit-content;
+    padding: 0.3rem 0.65rem;
+    border: 1px solid var(--app-surface-border);
+    border-radius: 999px;
+
+    &--pagada {
+      color: var(--app-success);
+      background: var(--app-success-soft);
+      border-color: var(--app-success-border);
+    }
+
+    &--pendiente {
+      color: var(--app-warning);
+      background: var(--app-warning-soft);
+      border-color: var(--app-warning-border);
+    }
+
+    &--vencida {
+      color: var(--app-danger);
+      background: var(--app-danger-soft);
+      border-color: var(--app-danger-border);
+    }
+  }
+
+  &__datos {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 1rem 0 0;
+
+    div {
+      min-width: 0;
+      padding: 0.8rem;
+      border-bottom: 1px solid var(--app-surface-border);
+    }
+
+    dt {
+      color: var(--app-text-soft);
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    dd {
+      margin: 0.3rem 0 0;
+      overflow-wrap: anywhere;
+      font-weight: 700;
+    }
+  }
+
+  &__productos {
+    margin-top: 1rem;
+
+    h3 {
+      margin: 0 0 0.55rem;
+      font-size: 0.95rem;
+    }
+
+    ul {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    li {
+      padding: 0.35rem 0.65rem;
+      background: var(--app-surface-strong);
+      border: 1px solid var(--app-surface-border);
+      border-radius: 999px;
+      overflow-wrap: anywhere;
+    }
+  }
+}
+
+@media (max-width: 40rem) {
+  .factura-resumen {
+    &__encabezado,
+    &__datos {
+      grid-template-columns: 1fr;
+    }
+
+    &__importe {
+      text-align: left;
+    }
+  }
+}

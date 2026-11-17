@@ -1,0 +1,209 @@
+<form
+  id="formulario-perfil-club"
+  class="formulario-perfil-club"
+  appValidacionFormulario
+  (submit)="$event.preventDefault(); enviar()"
+  novalidate
+>
+  <small
+    class="formulario-perfil-club__error"
+    [class.formulario-perfil-club__error--visible]="errorVisible()"
+    role="alert"
+    >{{ mensajeError() }}</small
+  >
+
+  <fieldset>
+    <legend>Identidad del gimnasio</legend>
+    <label for="perfil-club-path">
+      <span>Path *</span>
+      <input
+        id="perfil-club-path"
+        required
+        [value]="path()"
+        (input)="actualizarTexto('path', $event)"
+      />
+    </label>
+    <label for="perfil-club-nombre-comercial">
+      <span>Nombre comercial *</span>
+      <input
+        id="perfil-club-nombre-comercial"
+        required
+        [value]="nombreComercial()"
+        (input)="actualizarTexto('nombreComercial', $event)"
+      />
+    </label>
+    <label for="perfil-club-razon-social">
+      <span>Razon social *</span>
+      <input
+        id="perfil-club-razon-social"
+        required
+        [value]="razonSocial()"
+        (input)="actualizarTexto('razonSocial', $event)"
+      />
+    </label>
+    <label for="perfil-club-cuit">
+      <span>CUIT *</span>
+      <input
+        id="perfil-club-cuit"
+        required
+        inputmode="numeric"
+        maxlength="14"
+        pattern="[0-9]{2}-[0-9]{2}\.[0-9]{3}\.[0-9]{3}-[0-9]"
+        [value]="cuit()"
+        (input)="actualizarTexto('cuit', $event)"
+      />
+    </label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Contacto</legend>
+    <label for="perfil-club-telefono">
+      <span>Telefono *</span>
+      <input
+        id="perfil-club-telefono"
+        type="tel"
+        inputmode="tel"
+        required
+        [value]="telefono()"
+        (input)="actualizarTexto('telefono', $event)"
+      />
+    </label>
+    <label for="perfil-club-email-institucional">
+      <span>Email institucional *</span>
+      <input
+        id="perfil-club-email-institucional"
+        type="email"
+        required
+        [value]="emailInstitucional()"
+        (input)="actualizarTexto('emailInstitucional', $event)"
+      />
+    </label>
+    <label for="perfil-club-email-factura">
+      <span>Email de facturacion *</span>
+      <input
+        id="perfil-club-email-factura"
+        type="email"
+        required
+        [value]="emailFacturaElectronica()"
+        (input)="actualizarTexto('emailFacturaElectronica', $event)"
+      />
+    </label>
+  </fieldset>
+
+  <fieldset class="formulario-perfil-club__ancho-completo">
+    <legend>Domicilios</legend>
+    <div class="formulario-perfil-club__domicilios">
+      <section>
+        <h3>Domicilio principal</h3>
+        <label for="perfil-club-domicilio-direccion"
+          ><span>Direccion *</span
+          ><input
+            id="perfil-club-domicilio-direccion"
+            required
+            [value]="domicilioDireccion()"
+            (input)="actualizarDireccion('domicilio', 'direccion', $event)"
+        /></label>
+        <label for="perfil-club-domicilio-codigo"
+          ><span>Codigo postal *</span
+          ><input
+            id="perfil-club-domicilio-codigo"
+            required
+            maxlength="6"
+            [value]="domicilioCodigoPostal()"
+            (input)="actualizarDireccion('domicilio', 'codigoPostal', $event)"
+        /></label>
+        <label for="perfil-club-domicilio-localidad"
+          ><span>Localidad *</span
+          ><input
+            id="perfil-club-domicilio-localidad"
+            required
+            [value]="domicilioLocalidad()"
+            (input)="actualizarDireccion('domicilio', 'localidad', $event)"
+        /></label>
+      </section>
+      <section>
+        <h3>Domicilio de facturacion</h3>
+        <label for="perfil-club-facturacion-direccion"
+          ><span>Direccion *</span
+          ><input
+            id="perfil-club-facturacion-direccion"
+            required
+            [value]="facturacionDireccion()"
+            (input)="actualizarDireccion('domicilioFacturacion', 'direccion', $event)"
+        /></label>
+        <label for="perfil-club-facturacion-codigo"
+          ><span>Codigo postal *</span
+          ><input
+            id="perfil-club-facturacion-codigo"
+            required
+            maxlength="6"
+            [value]="facturacionCodigoPostal()"
+            (input)="actualizarDireccion('domicilioFacturacion', 'codigoPostal', $event)"
+        /></label>
+        <label for="perfil-club-facturacion-localidad"
+          ><span>Localidad *</span
+          ><input
+            id="perfil-club-facturacion-localidad"
+            required
+            [value]="facturacionLocalidad()"
+            (input)="actualizarDireccion('domicilioFacturacion', 'localidad', $event)"
+        /></label>
+      </section>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Branding y cuotas</legend>
+    <label for="perfil-club-color-primario"
+      ><span>Color primario *</span
+      ><input
+        id="perfil-club-color-primario"
+        type="color"
+        required
+        [value]="colorPrimario()"
+        (input)="actualizarTexto('colorPrimario', $event)"
+    /></label>
+    <label for="perfil-club-color-secundario"
+      ><span>Color secundario *</span
+      ><input
+        id="perfil-club-color-secundario"
+        type="color"
+        required
+        [value]="colorSecundario()"
+        (input)="actualizarTexto('colorSecundario', $event)"
+    /></label>
+    <app-select
+      etiqueta="Periodicidad de cuota social"
+      placeholder="Seleccionar periodicidad"
+      [opciones]="opcionesPeriodicidadCuota"
+      [value]="periodicidadCuotaSocial()"
+      (valueChange)="actualizarPeriodicidadCuota($event)"
+    />
+    <label for="perfil-club-dias-vencimiento"
+      ><span>Dias para morosidad</span
+      ><input
+        id="perfil-club-dias-vencimiento"
+        type="number"
+        min="0"
+        [value]="diasVencimientoMoroso() ?? ''"
+        (input)="actualizarNumero('diasVencimientoMoroso', $event)"
+    /></label>
+    <label for="perfil-club-dias-inhabilitacion"
+      ><span>Dias para inhabilitacion</span
+      ><input
+        id="perfil-club-dias-inhabilitacion"
+        type="number"
+        min="0"
+        [value]="diasInhabilitacion() ?? ''"
+        (input)="actualizarNumero('diasInhabilitacion', $event)"
+    /></label>
+    <label class="formulario-perfil-club__checkbox" for="perfil-club-cuota-social"
+      ><input
+        id="perfil-club-cuota-social"
+        type="checkbox"
+        [checked]="cuotaSocialHabilitada()"
+        (change)="actualizarCuota($event)"
+      /><span>Habilitar cuota social</span></label
+    >
+  </fieldset>
+</form>

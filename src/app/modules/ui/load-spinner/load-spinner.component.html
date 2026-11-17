@@ -1,0 +1,11 @@
+<span
+  class="load-spinner"
+  [ngClass]="{
+    'load-spinner--default': tipo() === 'default',
+    'load-spinner--imagen': tipo() === 'imagen',
+    'load-spinner--alto-rendimiento': altoRendimiento(),
+  }"
+  [style.--spinner-color-primario]="colorPrimario() || null"
+  [style.--spinner-color-secundario]="colorSecundario() || null"
+  aria-hidden="true"
+></span>

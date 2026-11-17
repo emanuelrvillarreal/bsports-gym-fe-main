@@ -1,0 +1,46 @@
+<article class="app-card">
+  @if (titulo() || descripcion()) {
+    <header class="app-card__header">
+      <div class="app-card__header-main">
+        @if (titulo()) {
+          <h3 class="app-card__titulo">
+            @if (icono()) {
+              <ng-icon [name]="icono()" aria-hidden="true" />
+            }
+            <span>{{ titulo() }}</span>
+          </h3>
+        }
+        @if (descripcion()) {
+          <p class="app-card__descripcion">{{ descripcion() }}</p>
+        }
+      </div>
+
+      <div class="app-card__header-side">
+        <ng-content select="[cardHeaderActions]" />
+
+        @if (colapsar()) {
+          <app-boton
+            class="app-card__toggle"
+            tipo="button"
+            apariencia="texto"
+            [aria-expanded]="!colapsada()"
+            [aria-label]="colapsada() ? 'Expandir card' : 'Colapsar card'"
+            (accion)="alternarColapsado()"
+          >
+            <ng-icon
+              [name]="colapsada() ? 'heroChevronDown' : 'heroChevronUp'"
+              aria-hidden="true"
+            />
+          </app-boton>
+        }
+      </div>
+    </header>
+  }
+  <div class="app-card__contenido-shell">
+    <div class="app-card__contenido">
+      <div class="app-card__contenido-inner">
+        <ng-content />
+      </div>
+    </div>
+  </div>
+</article>

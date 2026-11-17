@@ -1,0 +1,369 @@
+<form
+  class="sysadmin-registro__form"
+  [formGroup]="registroForm"
+  appValidacionFormulario
+  (ngSubmit)="registrarEmpresa()"
+  [attr.aria-busy]="cargando()"
+  novalidate
+>
+  <small
+    class="sysadmin-registro__error-formulario"
+    [class.sysadmin-registro__error-formulario--visible]="!!mensajeErrorVisible()"
+    role="alert"
+  >
+    {{ mensajeErrorVisible() || ' ' }}
+  </small>
+
+  <section class="sysadmin-registro__panel">
+    <div class="sysadmin-registro__panel-head">
+      <div class="sysadmin-registro__panel-copy">
+        <h2>Datos institucionales</h2>
+        <p>Informacion de la empresa que se registrara en el sistema.</p>
+      </div>
+    </div>
+
+    <div class="sysadmin-registro__grid">
+      <label
+        class="sysadmin-registro__field"
+        [class.sysadmin-registro__field--error]="campoInvalido('nombreComercial')"
+      >
+        <span>Nombre comercial</span>
+        <input type="text" formControlName="nombreComercial" autocomplete="organization" />
+        <small class="sysadmin-registro__field-error">{{
+          obtenerErrorCampo('nombreComercial')
+        }}</small>
+      </label>
+
+      <label
+        class="sysadmin-registro__field"
+        [class.sysadmin-registro__field--error]="campoInvalido('razonSocial')"
+      >
+        <span>Razon social</span>
+        <input type="text" formControlName="razonSocial" />
+        <small class="sysadmin-registro__field-error">{{ obtenerErrorCampo('razonSocial') }}</small>
+      </label>
+
+      <label
+        class="sysadmin-registro__field"
+        [class.sysadmin-registro__field--error]="campoInvalido('cuit')"
+      >
+        <span>CUIT</span>
+        <input
+          type="text"
+          [attr.data-app-invalido]="campoInvalido('cuit') ? 'true' : null"
+          [value]="valorFormateadoCuit()"
+          inputmode="numeric"
+          maxlength="15"
+          placeholder="20-00000000-1"
+          (input)="filtrarCuit($event)"
+        />
+        <small class="sysadmin-registro__field-error">{{ obtenerErrorCampo('cuit') }}</small>
+      </label>
+
+      <label
+        class="sysadmin-registro__field"
+        [class.sysadmin-registro__field--error]="campoInvalido('emailInstitucional')"
+      >
+        <span>Email institucional</span>
+        <input type="email" formControlName="emailInstitucional" autocomplete="email" />
+        <small class="sysadmin-registro__field-error">{{
+          obtenerErrorCampo('emailInstitucional')
+        }}</small>
+      </label>
+
+      <label
+        class="sysadmin-registro__field"
+        [class.sysadmin-registro__field--error]="campoInvalido('telefono')"
+      >
+        <span>Telefono</span>
+        <input
+          type="tel"
+          [attr.data-app-invalido]="campoInvalido('telefono') ? 'true' : null"
+          [value]="valorFormateadoTelefono('telefono')"
+          inputmode="numeric"
+          autocomplete="tel"
+          maxlength="23"
+          (input)="filtrarTelefono($event, 'telefono')"
+        />
+        <small class="sysadmin-registro__field-error">{{ obtenerErrorCampo('telefono') }}</small>
+      </label>
+
+      <label
+        class="sysadmin-registro__field"
+        [class.sysadmin-registro__field--error]="campoInvalido('colorPrimario')"
+      >
+        <span>Color primario</span>
+        <input type="color" formControlName="colorPrimario" />
+        <small class="sysadmin-registro__field-error">{{
+          obtenerErrorCampo('colorPrimario')
+        }}</small>
+      </label>
+
+      <label
+        class="sysadmin-registro__field"
+        [class.sysadmin-registro__field--error]="campoInvalido('colorSecundario')"
+      >
+        <span>Color secundario</span>
+        <input type="color" formControlName="colorSecundario" />
+        <small class="sysadmin-registro__field-error">{{
+          obtenerErrorCampo('colorSecundario')
+        }}</small>
+      </label>
+    </div>
+  </section>
+
+  <section class="sysadmin-registro__panel">
+    <div class="sysadmin-registro__panel-head">
+      <div class="sysadmin-registro__panel-copy">
+        <h2>Suscripción CRM</h2>
+        <p>Datos fiscales necesarios para dejar preparado el gimnasio en el CRM.</p>
+      </div>
+    </div>
+
+    <div class="sysadmin-registro__grid">
+      <div
+        class="sysadmin-registro__field"
+        [class.sysadmin-registro__field--error]="campoInvalido('codigoCondicionImpositiva')"
+      >
+        <app-select
+          etiqueta="Condición impositiva"
+          placeholder="Seleccionar condición"
+          formControlName="codigoCondicionImpositiva"
+          [opciones]="opcionesCondicionesImpositivasCrm()"
+          [attr.data-app-invalido]="campoInvalido('codigoCondicionImpositiva') ? 'true' : null"
+        />
+        <small class="sysadmin-registro__field-error">{{
+          obtenerErrorCampo('codigoCondicionImpositiva')
+        }}</small>
+      </div>
+
+      <div
+        class="sysadmin-registro__field"
+        [class.sysadmin-registro__field--error]="campoInvalido('codigoProvincia')"
+      >
+        <app-select
+          etiqueta="Provincia"
+          placeholder="Seleccionar provincia"
+          formControlName="codigoProvincia"
+          [opciones]="opcionesProvinciasCrm()"
+          [attr.data-app-invalido]="campoInvalido('codigoProvincia') ? 'true' : null"
+        />
+        <small class="sysadmin-registro__field-error">{{
+          obtenerErrorCampo('codigoProvincia')
+        }}</small>
+      </div>
+    </div>
+
+    <p class="sysadmin-registro__leyenda-crm" role="note">
+      Recuerde que el plan va a quedar sin suscripción. Cuando termine la operación, ingrese en CRM
+      Manager para asignar el plan.
+    </p>
+  </section>
+
+  @for (domicilio of domicilios; track domicilio.grupo) {
+    <section class="sysadmin-registro__panel" [formGroupName]="domicilio.grupo">
+      <div class="sysadmin-registro__panel-head">
+        <div class="sysadmin-registro__panel-copy">
+          <h2>{{ domicilio.titulo }}</h2>
+          <p>{{ domicilio.descripcion }}</p>
+        </div>
+      </div>
+
+      <div class="sysadmin-registro__grid">
+        <label
+          class="sysadmin-registro__field"
+          [class.sysadmin-registro__field--error]="campoInvalido(domicilio.grupo + '.direccion')"
+        >
+          <span>Direccion</span>
+          <input type="text" formControlName="direccion" autocomplete="street-address" />
+          <small class="sysadmin-registro__field-error">{{
+            obtenerErrorCampo(domicilio.grupo + '.direccion')
+          }}</small>
+        </label>
+
+        <label
+          class="sysadmin-registro__field"
+          [class.sysadmin-registro__field--error]="campoInvalido(domicilio.grupo + '.codigoPostal')"
+        >
+          <span>Codigo postal</span>
+          <input
+            type="text"
+            formControlName="codigoPostal"
+            autocomplete="postal-code"
+            maxlength="6"
+          />
+          <small class="sysadmin-registro__field-error">{{
+            obtenerErrorCampo(domicilio.grupo + '.codigoPostal')
+          }}</small>
+        </label>
+
+        <label
+          class="sysadmin-registro__field sysadmin-registro__field--full"
+          [class.sysadmin-registro__field--error]="campoInvalido(domicilio.grupo + '.localidad')"
+        >
+          <span>Localidad</span>
+          <input type="text" formControlName="localidad" autocomplete="address-level2" />
+          <small class="sysadmin-registro__field-error">{{
+            obtenerErrorCampo(domicilio.grupo + '.localidad')
+          }}</small>
+        </label>
+      </div>
+    </section>
+  }
+
+  <section class="sysadmin-registro__panel">
+    <div class="sysadmin-registro__grid">
+      <label
+        class="sysadmin-registro__field"
+        [class.sysadmin-registro__field--error]="campoInvalido('emailFacturaElectronica')"
+      >
+        <span>Email para factura electr?nica</span>
+        <input type="email" formControlName="emailFacturaElectronica" />
+        <small class="sysadmin-registro__field-error">{{
+          obtenerErrorCampo('emailFacturaElectronica')
+        }}</small>
+      </label>
+    </div>
+  </section>
+
+  <section class="sysadmin-registro__panel">
+    <div class="sysadmin-registro__panel-head">
+      <div class="sysadmin-registro__panel-copy">
+        <h2>Cuota social</h2>
+        <p>Configuracion inicial de generacion, mora e inhabilitacion.</p>
+      </div>
+    </div>
+
+    <label class="sysadmin-registro__toggle">
+      <input type="checkbox" formControlName="cuotaSocialHabilitada" />
+      <span>Habilitar cuota social</span>
+    </label>
+
+    <div class="sysadmin-registro__grid">
+      <div
+        class="sysadmin-registro__field"
+        [class.sysadmin-registro__field--error]="campoInvalido('periodicidadCuotaSocial')"
+      >
+        <app-select
+          etiqueta="Periodicidad de cuota social"
+          placeholder="Seleccionar periodicidad"
+          formControlName="periodicidadCuotaSocial"
+          [opciones]="opcionesPeriodicidadCuota"
+          [attr.data-app-invalido]="campoInvalido('periodicidadCuotaSocial') ? 'true' : null"
+        />
+        <small class="sysadmin-registro__field-error">{{
+          obtenerErrorCampo('periodicidadCuotaSocial')
+        }}</small>
+      </div>
+
+      <label
+        class="sysadmin-registro__field"
+        [class.sysadmin-registro__field--error]="campoInvalido('diasVencimientoMoroso')"
+      >
+        <span>Dias para considerar moroso (opcional)</span>
+        <input type="number" formControlName="diasVencimientoMoroso" min="0" />
+        <small class="sysadmin-registro__field-error">{{
+          obtenerErrorCampo('diasVencimientoMoroso')
+        }}</small>
+      </label>
+
+      <label
+        class="sysadmin-registro__field"
+        [class.sysadmin-registro__field--error]="campoInvalido('diasInhabilitacion')"
+      >
+        <span>Dias para inhabilitacion (opcional)</span>
+        <input type="number" formControlName="diasInhabilitacion" min="0" />
+        <small class="sysadmin-registro__field-error">{{
+          obtenerErrorCampo('diasInhabilitacion')
+        }}</small>
+      </label>
+    </div>
+  </section>
+
+  <section class="sysadmin-registro__panel" formGroupName="admin">
+    <div class="sysadmin-registro__panel-head">
+      <div class="sysadmin-registro__panel-copy">
+        <h2>Administrador inicial</h2>
+        <p>Usuario administrador que se crea junto con el gimnasio.</p>
+      </div>
+    </div>
+
+    <div class="sysadmin-registro__grid">
+      <label
+        class="sysadmin-registro__field"
+        [class.sysadmin-registro__field--error]="campoInvalido('admin.nombre')"
+      >
+        <span>Nombre</span>
+        <input type="text" formControlName="nombre" autocomplete="given-name" />
+        <small class="sysadmin-registro__field-error">{{
+          obtenerErrorCampo('admin.nombre')
+        }}</small>
+      </label>
+
+      <label
+        class="sysadmin-registro__field"
+        [class.sysadmin-registro__field--error]="campoInvalido('admin.apellido')"
+      >
+        <span>Apellido</span>
+        <input type="text" formControlName="apellido" autocomplete="family-name" />
+        <small class="sysadmin-registro__field-error">{{
+          obtenerErrorCampo('admin.apellido')
+        }}</small>
+      </label>
+
+      <label
+        class="sysadmin-registro__field"
+        [class.sysadmin-registro__field--error]="campoInvalido('admin.email')"
+      >
+        <span>Email</span>
+        <input type="email" formControlName="email" autocomplete="email" />
+        <small class="sysadmin-registro__field-error">{{ obtenerErrorCampo('admin.email') }}</small>
+      </label>
+
+      <div
+        class="sysadmin-registro__field"
+        [class.sysadmin-registro__field--error]="campoInvalido('admin.password')"
+      >
+        <app-input-password
+          etiqueta="Contraseña"
+          autocomplete="new-password"
+          [requerido]="true"
+          [attr.data-app-invalido]="campoInvalido('admin.password') ? 'true' : null"
+          formControlName="password"
+        />
+        <small class="sysadmin-registro__field-error">{{
+          obtenerErrorCampo('admin.password')
+        }}</small>
+      </div>
+
+      <div
+        class="sysadmin-registro__field"
+        [class.sysadmin-registro__field--error]="confirmacionContrasenaInvalida()"
+      >
+        <app-input-password
+          etiqueta="Confirmar contraseña"
+          autocomplete="new-password"
+          [requerido]="true"
+          [attr.data-app-invalido]="confirmacionContrasenaInvalida() ? 'true' : null"
+          formControlName="confirmarPassword"
+        />
+        <small class="sysadmin-registro__field-error">{{
+          obtenerErrorConfirmacionContrasena()
+        }}</small>
+      </div>
+    </div>
+  </section>
+
+  @if (mostrarAcciones()) {
+    <div class="sysadmin-registro__acciones">
+      <app-boton
+        tipo="submit"
+        [class.sysadmin-registro__submit--error]="submitInvalido()"
+        [cargando]="cargando()"
+        ariaLabelCarga="Guardando gimnasio"
+      >
+        {{ textoBoton() }}
+      </app-boton>
+    </div>
+  }
+</form>

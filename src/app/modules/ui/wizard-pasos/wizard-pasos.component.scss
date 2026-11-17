@@ -1,0 +1,111 @@
+:host {
+  --wizard-color: var(--app-accent);
+  --wizard-superficie: var(--app-surface);
+  --wizard-borde: var(--app-surface-border);
+  display: block;
+}
+
+.wizard-pasos {
+  display: grid;
+  gap: 1.5rem;
+
+  &__progreso {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+    width: min(100%, 38rem);
+    margin: 0 auto;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__paso {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 0.4rem;
+    color: var(--app-text-soft);
+    text-align: center;
+
+    &:not(:last-child)::after {
+      position: absolute;
+      top: 1.2rem;
+      left: calc(50% + 1.55rem);
+      z-index: 0;
+      width: calc(100% - 3.1rem);
+      height: 2px;
+      background: var(--wizard-borde);
+      content: '';
+    }
+  }
+
+  &__numero {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    background: var(--wizard-superficie);
+    border: 2px solid currentColor;
+    border-radius: 50%;
+    font-weight: 800;
+    transition: color 0.2s ease, background 0.2s ease;
+  }
+
+  &__etiqueta {
+    max-width: 8rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
+  &__paso--activo,
+  &__paso--completo {
+    color: var(--wizard-color);
+
+    .wizard-pasos__numero {
+      color: var(--app-surface);
+      background: var(--wizard-color);
+      border-color: var(--wizard-color);
+    }
+  }
+
+  &__paso--completo::after {
+    background: var(--wizard-color);
+  }
+
+  &__paso--activo .wizard-pasos__numero {
+    box-shadow: 0 0 0 0.35rem color-mix(in srgb, var(--wizard-color) 18%, transparent);
+  }
+
+  &__anuncio {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  &__contenido {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 40rem) {
+  .wizard-pasos {
+    gap: 1rem;
+
+    &__etiqueta {
+      max-width: 5.5rem;
+      font-size: 0.85rem;
+    }
+
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wizard-pasos__numero {
+    transition: none;
+  }
+}

@@ -1,0 +1,82 @@
+<section class="cuotas-portal" aria-label="Cuotas del grupo familiar">
+  <app-card>
+    <div class="cuotas-portal__barra">
+      <label class="cuotas-portal__filtro">
+        <input
+          type="checkbox"
+          [checked]="incluirFamiliares()"
+          (change)="actualizarIncluirFamiliares($event)"
+        />
+        <span>Ver familiares</span>
+      </label>
+
+      <span class="cuotas-portal__mercado-pago" role="img" aria-label="Mercado Pago"></span>
+    </div>
+
+    <section class="cuotas-portal__periodo" aria-labelledby="cuotas-periodo-titulo">
+      <div class="cuotas-portal__periodo-encabezado">
+        <span id="cuotas-periodo-titulo">{{ tituloPeriodo() }}</span>
+      </div>
+      <input
+        class="cuotas-portal__rango"
+        type="range"
+        min="1"
+        max="12"
+        step="1"
+        [value]="cantidadMeses()"
+        [style.--cuotas-rango-progreso]="progresoRango() + '%'"
+        [attr.aria-valuetext]="tituloPeriodo()"
+        aria-label="Cantidad de meses a visualizar"
+        (input)="actualizarCantidadMeses($event)"
+      />
+      <div class="cuotas-portal__rango-etiquetas" aria-hidden="true">
+        <span>1 mes</span>
+        <span>6 meses</span>
+        <span>12 meses</span>
+      </div>
+    </section>
+
+    @if (error()) {
+      <p class="cuotas-portal__error" role="alert">{{ error() }}</p>
+    }
+
+    <ng-template #montoCuota let-cuota>
+      <span class="cuotas-portal__importe">
+        @if (montoFinalDifiere(cuota)) {
+          <del>{{ formatearMonto(cuota.monto) }}</del>
+          <strong>{{ formatearMonto(cuota.montoFinal!) }}</strong>
+        } @else {
+          {{ formatearMonto(cuota.monto) }}
+        }
+      </span>
+    </ng-template>
+
+    <app-tabla-responsive
+      [columnas]="columnas"
+      [filas]="filas()"
+      [plantillasCeldas]="{ monto: montoCuota }"
+      idFila="cuotaUuid"
+      [tbody_rows]="6"
+      [acciones]="acciones"
+      mensajeVacio="No hay cuotas para el período seleccionado."
+      [cargando]="cargando()"
+      (accionFila)="manejarAccion($event)"
+    />
+  </app-card>
+</section>
+
+@if (checkout(); as datosCheckout) {
+  <app-checkout-mercado-pago
+    [abierto]="true"
+    [enlace]="datosCheckout.enlace"
+    [qr]="datosCheckout.qr"
+    [resumen]="datosCheckout.resumen"
+    [monto]="datosCheckout.monto"
+    [mensaje]="mensajeCheckout()"
+    [mensajeError]="errorCheckout()"
+    [copiando]="copiandoCheckout()"
+    (abrirCheckout)="abrirCheckout()"
+    (copiarEnlace)="copiarEnlaceCheckout()"
+    (cerrar)="cerrarCheckout()"
+  />
+}

@@ -1,0 +1,18 @@
+:host {
+  display: block;
+}
+
+.formulario-finalizacion-descuento {
+  display: grid;
+  gap: 0.8rem;
+  margin: 0;
+
+  &__error {
+    min-height: 1.1rem;
+    color: var(--semantic-danger, #ef4444);
+    visibility: hidden;
+  }
+  &__error--visible {
+    visibility: visible;
+  }
+}

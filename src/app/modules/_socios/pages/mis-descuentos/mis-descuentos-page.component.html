@@ -1,0 +1,46 @@
+<main class="mis-descuentos">
+  <app-titulo-hero icono="tesoreria" titulo="Mis descuentos" subtitulo="Las rebajas que tenés en tus cuotas y hasta cuándo." />
+
+  @if (cargando() && !personas().length) {
+    <p class="mis-descuentos__vacio">Cargando…</p>
+  } @else if (error()) {
+    <p class="mis-descuentos__error" role="alert">
+      No se pudieron cargar tus descuentos.
+      <button type="button" class="mis-descuentos__link" (click)="cargar()">Reintentar</button>
+    </p>
+  } @else if (!algunoTiene()) {
+    <p class="mis-descuentos__vacio">Por ahora no tenés descuentos. Si te corresponde alguno, consultalo en el gimnasio.</p>
+  } @else {
+    @for (p of personas(); track p.memberUuid) {
+      @if (tieneDescuentos(p)) {
+        <section class="mis-descuentos__persona" [attr.aria-label]="'Descuentos de ' + p.nombre">
+          @if (personas().length > 1) {
+            <h3>{{ p.nombre }}</h3>
+          }
+          <ul>
+            @for (d of p.cuotaSocial; track d.asignacionUuid) {
+              <li class="mis-descuentos__item">
+                <div>
+                  <strong>{{ d.titulo }}</strong>
+                  <span>En la cuota social · {{ vigencia(d) }}</span>
+                </div>
+                <span class="mis-descuentos__valor">{{ valor(d) }}</span>
+              </li>
+            }
+            @for (a of p.actividades; track a.actividadUuid) {
+              @for (d of a.descuentos; track d.asignacionUuid) {
+                <li class="mis-descuentos__item">
+                  <div>
+                    <strong>{{ d.titulo }}</strong>
+                    <span>En {{ a.actividadNombre }} · {{ vigencia(d) }}</span>
+                  </div>
+                  <span class="mis-descuentos__valor">{{ valor(d) }}</span>
+                </li>
+              }
+            }
+          </ul>
+        </section>
+      }
+    }
+  }
+</main>

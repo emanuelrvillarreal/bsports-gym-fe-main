@@ -1,0 +1,23 @@
+<section class="wizard-pasos">
+  <ol class="wizard-pasos__progreso" [attr.aria-label]="etiquetaProgreso()">
+    @for (paso of pasos(); track paso.id; let indice = $index) {
+      <li
+        class="wizard-pasos__paso"
+        [class.wizard-pasos__paso--activo]="indice === indiceActual()"
+        [class.wizard-pasos__paso--completo]="indice < indiceActual()"
+        [attr.aria-current]="indice === indiceActual() ? 'step' : null"
+      >
+        <span class="wizard-pasos__numero" aria-hidden="true">{{ indice + 1 }}</span>
+        <span class="wizard-pasos__etiqueta">{{ paso.etiqueta }}</span>
+      </li>
+    }
+  </ol>
+
+  <p class="wizard-pasos__anuncio" aria-live="polite">
+    Paso {{ indiceActual() + 1 }} de {{ pasos().length }}: {{ etiquetaActual() }}
+  </p>
+
+  <div class="wizard-pasos__contenido">
+    <ng-content />
+  </div>
+</section>

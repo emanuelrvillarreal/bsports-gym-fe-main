@@ -1,0 +1,92 @@
+:host { display: block; }
+
+.tarjeta {
+  --tono: var(--app-text-soft);
+
+  display: grid;
+  gap: .75rem;
+  padding: 1rem;
+  border: 1px solid var(--app-surface-border);
+  border-left: 4px solid var(--tono);
+  border-radius: .85rem;
+  background: var(--app-surface);
+
+  &--ok { --tono: var(--semantic-success); }
+  &--alerta { --tono: var(--app-warning); }
+  &--peligro { --tono: var(--semantic-danger); }
+  &--apagado { opacity: .85; }
+
+  &__cabecera {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .5rem;
+
+    h4 { margin: 0; font-size: 1rem; }
+  }
+
+  &__resumen { margin: .2rem 0 0; color: var(--app-text-soft); font-size: .82rem; }
+
+  &__estado {
+    padding: .2rem .6rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--tono) 18%, transparent);
+    color: var(--tono);
+    font-size: 0.85rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  &__datos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 11rem), 1fr));
+    gap: .6rem;
+    margin: 0;
+
+    div { display: grid; align-content: start; gap: .1rem; }
+    dt { color: var(--app-text-soft); font-size: 0.85rem; }
+    dd { margin: 0; font-weight: 700; overflow-wrap: anywhere; }
+    small { color: var(--app-text-soft); font-size: 0.85rem; }
+  }
+
+  &__ancho { grid-column: 1 / -1; }
+
+  &__barra {
+    display: block;
+    height: .4rem;
+    margin-top: .2rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--app-surface-border) 60%, transparent);
+    overflow: hidden;
+
+    span { display: block; height: 100%; background: var(--tono); }
+  }
+
+  &__seccion {
+    display: grid;
+    gap: .35rem;
+
+    h5 { margin: 0; font-size: .82rem; }
+
+    ul { display: grid; gap: .3rem; margin: 0; padding: 0; list-style: none; }
+
+    li {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: .1rem .6rem;
+      padding: .35rem .55rem;
+      border-radius: .4rem;
+      background: color-mix(in srgb, var(--app-surface-border) 22%, transparent);
+      font-size: .82rem;
+    }
+
+    small { color: var(--app-text-soft); font-size: 0.85rem; }
+  }
+
+  &__rechazo small { color: var(--semantic-danger); }
+
+  &__acciones { display: flex; flex-wrap: wrap; gap: .25rem; }
+}

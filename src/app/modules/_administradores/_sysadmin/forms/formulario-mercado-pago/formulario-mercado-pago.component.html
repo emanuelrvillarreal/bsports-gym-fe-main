@@ -1,0 +1,22 @@
+<form id="formulario-mercado-pago" class="formulario-mercado-pago" appValidacionFormulario (submit)="$event.preventDefault(); enviar()" autocomplete="off">
+  <p class="formulario-mercado-pago__error" [class.formulario-mercado-pago__error--visible]="!!error()" role="alert">{{ error() }}</p>
+  <p class="formulario-mercado-pago__aviso">Las credenciales solo se envían al guardar. No se muestran ni se almacenan en el navegador.</p>
+
+  <label class="formulario-mercado-pago__campo" for="mp-access-token">
+    <span>Access token</span>
+    @if (configuracion()?.accessTokenHint; as hint) { <small>Actual: {{ hint }}</small> }
+    <input id="mp-access-token" name="accessToken" type="password" autocomplete="off" maxlength="512" [required]="requiereCargaCompleta()" [value]="accessToken()" (input)="actualizarCampo('accessToken', $event)" />
+  </label>
+
+  <label class="formulario-mercado-pago__campo" for="mp-public-key">
+    <span>Public key</span>
+    @if (configuracion()?.publicKeyHint; as hint) { <small>Actual: {{ hint }}</small> }
+    <input id="mp-public-key" name="publicKey" type="password" autocomplete="off" maxlength="512" [required]="requiereCargaCompleta()" [value]="publicKey()" (input)="actualizarCampo('publicKey', $event)" />
+  </label>
+
+  <label class="formulario-mercado-pago__campo" for="mp-webhook-secret">
+    <span>Webhook secret</span>
+    @if (configuracion()?.webhookSecretHint; as hint) { <small>Actual: {{ hint }}</small> }
+    <input id="mp-webhook-secret" name="webhookSecret" type="password" autocomplete="off" maxlength="512" [required]="requiereCargaCompleta()" [value]="webhookSecret()" (input)="actualizarCampo('webhookSecret', $event)" />
+  </label>
+</form>

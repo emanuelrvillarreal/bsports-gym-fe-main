@@ -1,0 +1,34 @@
+:host {
+  display: block;
+}
+
+.mis-actividades-portal {
+  &__selector-socio {
+    display: grid;
+    grid-template-columns: minmax(12rem, 18rem);
+    align-items: end;
+  }
+
+  &__error-grupo {
+    margin: 0 0 1rem;
+    color: var(--semantic-danger);
+  }
+
+  &__estado {
+    display: grid;
+    justify-items: center;
+    gap: 1rem;
+    padding: 2rem 1rem;
+
+    p {
+      margin: 0;
+      color: var(--semantic-danger);
+    }
+  }
+}
+
+@media (max-width: 42rem) {
+  .mis-actividades-portal__selector-socio {
+    grid-template-columns: 1fr;
+  }
+}

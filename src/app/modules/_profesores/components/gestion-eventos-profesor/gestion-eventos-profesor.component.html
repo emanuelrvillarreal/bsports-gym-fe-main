@@ -1,0 +1,259 @@
+<section class="eventos-profesor" aria-label="Gestión de eventos del profesor">
+  <app-card>
+    <div class="eventos-profesor__encabezado-tabla">
+      <div>
+        <span class="eventos-profesor__eyebrow">Eventos</span>
+        <h2>Eventos asignados</h2>
+      </div>
+    </div>
+    <div class="eventos-profesor__filtros">
+      <label class="eventos-profesor__busqueda">
+        <span>Buscar evento</span>
+        <input
+          type="search"
+          placeholder="Nombre o ubicación"
+          [value]="busqueda()"
+          (input)="actualizarBusqueda($event)"
+          (keydown.enter)="buscar()"
+        />
+      </label>
+      <app-boton tipo="button" (accion)="buscar()" [cargando]="cargando()">Buscar</app-boton>
+      <app-select
+        etiqueta="Actividad asignada"
+        [opciones]="opcionesActividades()"
+        [value]="actividadUuid()"
+        [maximoOpcionesVisibles]="5"
+        (valueChange)="cambiarActividad($event)"
+      />
+    </div>
+    <div class="eventos-profesor__acciones">
+      <div class="eventos-profesor__nuevo-evento">
+        <span>Nuevo evento</span>
+        <app-boton
+          class="eventos-profesor__boton-nuevo"
+          tipo="button"
+          [soloIcono]="true"
+          aria-label="Nuevo evento"
+          aria-haspopup="dialog"
+          (accion)="abrirAlta()"
+        >
+          <ng-icon name="heroPlus" aria-hidden="true" />
+        </app-boton>
+      </div>
+    </div>
+    @if (error() && !popupFormularioAbierto()) {
+      <p class="eventos-profesor__error" role="alert">{{ error() }}</p>
+    }
+    <app-tabla-responsive
+      [columnas]="columnasEventos"
+      [filas]="eventos()"
+      idFila="uuid"
+      [acciones]="accionesEventos"
+      [cargando]="cargando()"
+      [tbody_rows]="6"
+      [vacio_reservar_filas]="false"
+      mensajeVacio="No hay eventos asignados para mostrar."
+      (accionFila)="manejarAccionEvento($event)"
+    />
+    <app-paginacion
+      [paginaActual]="paginaActual()"
+      [totalPaginas]="totalPaginas()"
+      [deshabilitado]="cargando()"
+      (paginaCambiada)="cambiarPagina($event)"
+    />
+  </app-card>
+
+  <app-popup
+    [abierto]="popupFormularioAbierto()"
+    [titulo]="eventoEditando() ? 'Editar evento' : 'Crear evento'"
+    [mostrarEncabezado]="false"
+    ancho="grande"
+    [cancelarDeshabilitado]="guardando()"
+    (cancelar)="cerrarFormulario()"
+  >
+    <app-titulo-hero
+      icono="eventos"
+      [titulo]="eventoEditando() ? 'Editar evento' : 'Crear evento'"
+      [subtitulo]="
+        eventoEditando()
+          ? 'Actualizá los datos del evento seleccionado.'
+          : 'Completá los datos y elegí una de tus actividades asignadas.'
+      "
+    />
+    @if (error()) {
+      <p class="eventos-profesor__error" role="alert">{{ error() }}</p>
+    }
+    <app-formulario-evento-actividad
+      formId="formulario-evento-profesor"
+      [opcionesActividades]="opcionesFormulario()"
+      [actividadUuidInicial]="actividadUuid()"
+      [valorInicial]="eventoEditando()"
+      [actividadBloqueada]="!!eventoEditando()"
+      [reinicioVersion]="formularioVersion()"
+      (enviado)="guardar($event)"
+    />
+    <app-boton
+      popupAcciones
+      tipo="submit"
+      form="formulario-evento-profesor"
+      [cargando]="guardando()"
+      >Guardar evento</app-boton
+    >
+  </app-popup>
+
+  <app-popup
+    class="eventos-profesor__popup-detalle"
+    [abierto]="popupDetalleAbierto()"
+    titulo="Detalle"
+    [mostrarEncabezado]="false"
+    ancho="extraGrande"
+    textoCancelar="Cerrar"
+    aparienciaCancelar="solido"
+    (cancelar)="cerrarDetalle()"
+  >
+    <div class="detalle-actividad" aria-live="polite">
+      @if (errorDetalle()) {
+        <p class="eventos-profesor__error" role="alert">{{ errorDetalle() }}</p>
+      }
+      @if (tipoDetalle() === 'evento') {
+        @if (eventoDetalle(); as evento) {
+          <app-titulo-hero
+            icono="eventos"
+            [titulo]="evento.titulo"
+            [subtitulo]="'Actividad: ' + evento.actividadNombre"
+          >
+            <span tituloHeroAcciones [class]="'detalle-actividad__chip ' + claseEstadoEvento()">{{
+              textoEstadoEvento()
+            }}</span>
+          </app-titulo-hero>
+          <section class="detalle-actividad__seccion" aria-labelledby="titulo-datos-evento">
+            <div class="detalle-actividad__titulo-seccion">
+              <span class="detalle-actividad__eyebrow">Evento</span>
+              <h2 id="titulo-datos-evento">Datos del evento</h2>
+            </div>
+            <dl class="detalle-actividad__datos">
+              <div>
+                <dt>Ubicación</dt>
+                <dd>{{ evento.ubicacion }}</dd>
+              </div>
+              <div>
+                <dt>Inicio</dt>
+                <dd class="detalle-actividad__valor-con-icono">
+                  <span>{{ evento.inicio }}</span
+                  ><ng-icon name="heroCalendarDays" aria-hidden="true" />
+                </dd>
+              </div>
+              <div>
+                <dt>Fin</dt>
+                <dd class="detalle-actividad__valor-con-icono">
+                  <span>{{ evento.fin }}</span
+                  ><ng-icon name="heroCalendarDays" aria-hidden="true" />
+                </dd>
+              </div>
+              @if (evento.descripcion) {
+                <div class="detalle-actividad__dato--ancho-completo">
+                  <dt>Descripción</dt>
+                  <dd>{{ evento.descripcion }}</dd>
+                </div>
+              }
+            </dl>
+          </section>
+          <section
+            class="detalle-actividad__planilla"
+            aria-labelledby="titulo-participantes-evento"
+          >
+            <div class="detalle-actividad__titulo-planilla">
+              <div>
+                <span class="detalle-actividad__eyebrow">Evento</span>
+                <h2 id="titulo-participantes-evento">Alumnos del evento</h2>
+              </div>
+              <span>{{ participantesEvento().length }} alumnos</span>
+            </div>
+            @if (errorParticipantesEvento()) {
+              <p class="eventos-profesor__error" role="alert">{{ errorParticipantesEvento() }}</p>
+            }
+            <app-tabla-responsive
+              [columnas]="columnasInscriptos"
+              [filas]="participantesEvento()"
+              idFila="inscriptoUuid"
+              [mostrarAcciones]="false"
+              [tbody_rows]="5"
+              [vacio_reservar_filas]="false"
+              mensajeVacio="No hay alumnos inscriptos en la actividad asociada."
+            />
+          </section>
+        }
+      }
+      @if (tipoDetalle() === 'actividad') {
+        @if (actividadDetalle(); as actividad) {
+          <app-titulo-hero
+            icono="actividades"
+            [titulo]="actividad.nombre"
+            subtitulo="Datos habituales de la actividad"
+          />
+          <section class="detalle-actividad__seccion" aria-labelledby="titulo-datos-actividad">
+            <div class="detalle-actividad__titulo-seccion">
+              <span class="detalle-actividad__eyebrow">Actividad</span>
+              <h2 id="titulo-datos-actividad">Datos habituales de la actividad</h2>
+            </div>
+            <dl class="detalle-actividad__datos">
+              <div class="detalle-actividad__dato--ancho-completo">
+                <dt>Días habituales</dt>
+                <dd>
+                  @if (diasHabituales().length) {
+                    <ul class="detalle-actividad__chips" role="list">
+                      @for (dia of diasHabituales(); track dia) {
+                        <li class="detalle-actividad__chip">{{ dia }}</li>
+                      }
+                    </ul>
+                  } @else {
+                    <span>-</span>
+                  }
+                </dd>
+              </div>
+              <div>
+                <dt>Horario habitual</dt>
+                <dd class="detalle-actividad__valor-con-icono">
+                  <span>{{ actividad.horaInicio }}–{{ actividad.horaFin }}</span
+                  ><ng-icon name="heroClock" aria-hidden="true" />
+                </dd>
+              </div>
+              <div>
+                <dt>Cupo</dt>
+                <dd>
+                  <span
+                    class="detalle-actividad__chip"
+                    [class.detalle-actividad__chip--exito]="!cupoCompleto()"
+                    [class.detalle-actividad__chip--peligro]="cupoCompleto()"
+                    >{{ actividad.inscriptos.length }}/{{ actividad.cupoMaximo }}</span
+                  >
+                </dd>
+              </div>
+            </dl>
+          </section>
+          <section
+            class="detalle-actividad__planilla"
+            aria-labelledby="titulo-inscriptos-actividad"
+          >
+            <div class="detalle-actividad__titulo-planilla">
+              <div>
+                <span class="detalle-actividad__eyebrow">Actividad</span>
+                <h2 id="titulo-inscriptos-actividad">Alumnos de la actividad</h2>
+              </div>
+              <span>{{ filasInscriptosActividad().length }} alumnos</span>
+            </div>
+            <app-tabla-responsive
+              [columnas]="columnasInscriptos"
+              [filas]="filasInscriptosActividad()"
+              idFila="inscriptoUuid"
+              [mostrarAcciones]="false"
+              [tbody_rows]="5"
+              [vacio_reservar_filas]="false"
+              mensajeVacio="No hay alumnos inscriptos en esta actividad."
+            />
+          </section>
+        }
+      }
+    </div>
+  </app-popup>
+</section>

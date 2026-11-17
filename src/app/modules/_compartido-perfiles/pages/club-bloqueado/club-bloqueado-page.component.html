@@ -1,0 +1,52 @@
+<main class="club-bloqueado">
+  <app-titulo-hero
+    titulo="Lo lamentamos"
+    subtitulo="El gimnasio se encuentra fuera de actividad online por el momento."
+    icono="configuracion"
+  />
+
+  <app-card
+    [titulo]="esAdmin ? 'Regularizá la cuenta para recuperar el acceso' : 'El gimnasio no se encuentra disponible'"
+    [descripcion]="
+      esAdmin
+        ? 'La navegación permanecerá bloqueada hasta que el CRM confirme la regularización.'
+        : 'Lamentamos los inconvenientes. Por el momento, el gimnasio no tiene actividad online.'
+    "
+  >
+    @if (esAdmin) {
+      @if (cargando()) {
+        <div class="club-bloqueado__carga">
+          <app-load-spinner-blue ariaLabel="Consultando factura vencida" />
+        </div>
+      } @else if (factura(); as facturaVencida) {
+        <app-factura-resumen [factura]="facturaVencida" />
+        <app-boton (accion)="pagar(facturaVencida)">Pagar factura</app-boton>
+      } @else {
+        <p>
+          No se encontró una factura vencida para mostrar. El bloqueo también puede deberse a que
+          la suscripción del CRM no está vigente. Contactá a soporte para regularizarla.
+        </p>
+      }
+    } @else {
+      <p>
+        Comunicate con el gimnasio si necesitás más información sobre la reanudación de sus servicios
+        online.
+      </p>
+    }
+
+    @if (error()) {
+      <p class="club-bloqueado__error" role="alert">{{ error() }}</p>
+    }
+
+    <div class="club-bloqueado__acciones">
+      <app-boton [cargando]="verificando()" (accion)="reintentar()">
+        Verificar nuevamente
+      </app-boton>
+      <app-boton apariencia="texto" [deshabilitado]="verificando()" (accion)="cerrarSesion()">
+        Cerrar sesión
+      </app-boton>
+    </div>
+  </app-card>
+
+  <app-checkout-factura [factura]="facturaParaPagar()" (cerrar)="cerrarCheckout()" />
+</main>

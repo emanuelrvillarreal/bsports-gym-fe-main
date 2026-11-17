@@ -1,0 +1,98 @@
+<header class="header">
+  @if (saludoUsuario()) {
+    <div class="header__saludo" aria-label="Saludo de usuario">
+      <div class="header__perfil">
+        <button
+          type="button"
+          class="header__avatar-button"
+          data-driver-onboarding="header-avatar-button"
+          aria-label="Cambiar foto de perfil"
+          aria-haspopup="dialog"
+          [attr.aria-expanded]="fotoPopupAbierto()"
+          (click)="abrirFotoPerfil()"
+        >
+          @if (imagenUsuarioDisponible()) {
+            @if (fotoCargando()) {
+              <span class="header__avatar-spinner" aria-hidden="true">
+                <app-load-spinner tipo="imagen" />
+              </span>
+            }
+            <img
+              class="header__avatar-image"
+              [ngSrc]="imagenUsuario()"
+              alt="Foto del usuario autenticado"
+              width="40"
+              height="40"
+              loading="eager"
+              [class.header__avatar-image--cargando]="fotoCargando()"
+              (load)="manejarFotoCargada()"
+              (error)="manejarFotoError()"
+            />
+          } @else if (inicialesUsuario()) {
+            <span class="header__avatar-fallback">{{ inicialesUsuario() }}</span>
+          } @else {
+            <ng-icon name="heroUserCircle" aria-hidden="true" />
+          }
+        </button>
+        <!-- Siempre visible: indica que el avatar es donde se carga la foto. -->
+        <span class="header__avatar-badge" aria-hidden="true">
+          <ng-icon name="heroCamera" />
+        </span>
+      </div>
+
+      <span class="header__saludo-texto">
+        <strong>{{ saludoUsuario() }}</strong>
+        <button
+          type="button"
+          class="header__foto-link"
+          [class.header__foto-link--destacado]="!imagenUsuarioDisponible()"
+          aria-haspopup="dialog"
+          (click)="abrirFotoPerfil()"
+        >
+          {{ imagenUsuarioDisponible() ? 'Cambiar foto' : 'Agregá tu foto de perfil' }}
+        </button>
+      </span>
+    </div>
+  }
+
+  <div class="header__acciones" data-driver-onboarding="header-actions">
+    @if (mostrarContador()) {
+      <app-contador />
+    }
+    <app-letra-grande />
+    <app-dark-mode />
+  </div>
+</header>
+
+<app-popup
+  [abierto]="fotoPopupAbierto()"
+  titulo="Foto de perfil"
+  [mostrarEncabezado]="false"
+  [mostrarCancelar]="false"
+>
+  @if (fotoPopupAbierto()) {
+    <app-titulo-hero titulo="Foto de perfil" subtitulo="Subí una imagen para identificar tu cuenta." icono="perfil" />
+    <app-formulario-registro-foto
+      modo="foto-perfil"
+      [fotoInicial]="imagenUsuario() || null"
+      [cargando]="procesandoFoto()"
+      [mensajeErrorExterno]="mensajeErrorFoto()"
+      textoBotonConfirmar="Guardar foto"
+      textoBotonRestablecer="Restablecer selección"
+      [mostrarBotonRestablecer]="false"
+      [mostrarBotonEliminar]="!!imagenUsuario()"
+      (submitted)="guardarFotoPerfil($event)"
+      (eliminar)="eliminarFotoPerfil()"
+    />
+  }
+  <app-boton
+    popupAcciones
+    tipo="button"
+    colorPaleta="primario"
+    [deshabilitado]="procesandoFoto()"
+    (accion)="cerrarFotoPerfil()"
+  >
+    Cerrar
+  </app-boton>
+</app-popup>
+

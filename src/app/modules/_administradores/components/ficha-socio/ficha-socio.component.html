@@ -1,0 +1,165 @@
+<div class="ficha">
+  <section class="ficha__datos" aria-label="Datos del socio">
+    @let s = socio();
+    <div class="ficha__perfil">
+      <div class="ficha__foto" [class.ficha__foto--cargando]="guardandoFoto()">
+        @if (fotoUrl(); as url) {
+          <img [src]="url" [alt]="'Foto de ' + s.nombre + ' ' + s.apellido" />
+        } @else {
+          <span aria-hidden="true">{{ iniciales() }}</span>
+        }
+      </div>
+      <div class="ficha__perfil-texto">
+        <p class="ficha__nombre">{{ s.nombre }} {{ s.apellido }}</p>
+        <div class="ficha__foto-acciones">
+          <label class="ficha__boton-foto" [class.ficha__boton-foto--deshabilitado]="guardandoFoto()">
+            <input
+              type="file"
+              accept="image/*"
+              class="ficha__input-foto"
+              [disabled]="guardandoFoto()"
+              (change)="elegirFoto($event)"
+            />
+            {{ guardandoFoto() ? 'Guardando…' : fotoUrl() ? 'Cambiar foto' : 'Agregar foto' }}
+          </label>
+          @if (fotoUrl() && !guardandoFoto()) {
+            <button type="button" class="ficha__link" (click)="quitarFoto()">Quitar foto</button>
+          }
+        </div>
+      </div>
+    </div>
+    <dl>
+      <div><dt>N.º de socio</dt><dd>{{ s.numeroSocio || '-' }}</dd></div>
+      <div><dt>DNI</dt><dd>{{ s.dni || '-' }}</dd></div>
+      <div><dt>Email</dt><dd>{{ s.email || '-' }}</dd></div>
+      <div><dt>Teléfono</dt><dd>{{ s.telefono || '-' }}</dd></div>
+      <div><dt>Nacimiento</dt><dd>{{ fecha(s.fechaNacimiento) }}</dd></div>
+      <div><dt>Sexo</dt><dd>{{ sexo(s.sexo) }}</dd></div>
+      <div><dt>Alta</dt><dd>{{ fecha(s.fechaAlta) }}</dd></div>
+      <div><dt>Grupo</dt><dd>{{ s.titular !== false && !s.titularMemberUuid ? 'Titular' : 'Familiar' }}</dd></div>
+      <div><dt>Estado</dt><dd>{{ estadoSocio(s.estado) }}</dd></div>
+    </dl>
+  </section>
+
+  @if (cargando() && !ficha()) {
+    <p class="ficha__vacio">Cargando ficha…</p>
+  } @else if (error()) {
+    <p class="ficha__error" role="alert">
+      No se pudo cargar la ficha.
+      <button type="button" class="ficha__link" (click)="cargar()">Reintentar</button>
+    </p>
+  } @else if (ficha(); as f) {
+    <section class="ficha__cuenta" [class.ficha__cuenta--deuda]="!f.cuenta.alDia" aria-label="Estado de cuenta">
+      <div class="ficha__cuenta-estado">
+        <span class="ficha__chip" [attr.data-tono]="f.cuenta.alDia ? 'ok' : 'peligro'">
+          {{ f.cuenta.alDia ? 'Al día' : 'Con deuda vencida' }}
+        </span>
+        @if (!f.cuenta.alDia) {
+          <strong>{{ moneda(f.cuenta.deudaVencida) }}</strong>
+          <span>en {{ f.cuenta.cuotasVencidas }} {{ f.cuenta.cuotasVencidas === 1 ? 'cuota vencida' : 'cuotas vencidas' }}</span>
+        }
+      </div>
+      @if (f.cuenta.proximoVencimiento; as p) {
+        <p>
+          Próximo vencimiento: <strong>{{ fecha(p.vencimiento) }}</strong> · {{ p.concepto }} · {{ moneda(p.monto) }}
+          @if (f.cuenta.cuotasPorVencer > 1) {
+            <span class="ficha__suave">({{ f.cuenta.cuotasPorVencer }} cuotas por vencer, {{ moneda(f.cuenta.porVencer) }})</span>
+          }
+        </p>
+      } @else if (f.cuenta.alDia) {
+        <p class="ficha__suave">No tiene cuotas pendientes.</p>
+      }
+    </section>
+
+    <section class="ficha__bloque" aria-label="Membresías">
+      <h3>Pases del socio</h3>
+      @for (m of membresiasActuales(); track m.uuid) {
+        <article class="ficha__item">
+          <div class="ficha__item-cabecera">
+            <strong>{{ m.pase.nombre }}</strong>
+            <span class="ficha__chip" [attr.data-tono]="tonoMembresia(m)">{{ situacion(m) }}</span>
+          </div>
+          <p>Del {{ fecha(m.fechaInicio) }} al <strong>{{ fecha(m.fechaFin) }}</strong>{{ cobro(m) ? ' · ' + cobro(m) : '' }}</p>
+        </article>
+      } @empty {
+        <p class="ficha__vacio">No tiene pases vigentes.</p>
+      }
+      @if (membresiasHistorial().length) {
+        <details class="ficha__historial">
+          <summary>Historial de pases ({{ membresiasHistorial().length }})</summary>
+          @for (m of membresiasHistorial(); track m.uuid) {
+            <p>{{ m.pase.nombre }} · {{ fecha(m.fechaInicio) }} al {{ fecha(m.fechaFin) }} · {{ situacion(m) }}</p>
+          }
+        </details>
+      }
+    </section>
+
+    <section class="ficha__bloque" aria-label="Actividades">
+      <h3>Actividades</h3>
+      @for (a of actividadesActivas(); track a.inscripcionUuid) {
+        <article class="ficha__item">
+          <div class="ficha__item-cabecera">
+            <strong>{{ a.actividad }}</strong>
+            @if (a.cubiertaPorPase) {
+              <span class="ficha__chip" data-tono="ok">Cubierta por el pase</span>
+            } @else if (a.ultimaCuota; as c) {
+              <span class="ficha__chip" [attr.data-tono]="tonoCuota(c)">{{ estadoCuota(c) }}</span>
+            }
+          </div>
+          <p>
+            Inscripto desde el {{ fecha(a.fechaInscripcion) }}
+            @if (a.ultimaCuota; as c) {
+              · Última cuota: {{ c.concepto }} ({{ moneda(c.monto) }}),
+              {{ c.estado === 'PAGADA' ? pago(c) : 'vence el ' + fecha(c.vencimiento) }}
+            }
+            @if (a.proximaCuota && !a.cubiertaPorPase) {
+              · Próxima cuota: {{ fecha(a.proximaCuota) }}
+            }
+          </p>
+        </article>
+      } @empty {
+        <p class="ficha__vacio">No está inscripto en ninguna actividad.</p>
+      }
+      @if (actividadesHistorial().length) {
+        <details class="ficha__historial">
+          <summary>Historial de actividades ({{ actividadesHistorial().length }})</summary>
+          @for (a of actividadesHistorial(); track a.inscripcionUuid) {
+            <p>
+              {{ a.actividad }} · del {{ fecha(a.fechaInscripcion) }} al {{ fecha(a.fechaBaja) }}
+              @if (a.motivoBaja) { <span class="ficha__suave">({{ a.motivoBaja }})</span> }
+            </p>
+          }
+        </details>
+      }
+    </section>
+
+    <section class="ficha__bloque" aria-label="Últimas cuotas">
+      <h3>Últimas cuotas</h3>
+      @if (f.cuotas.length) {
+        <div class="ficha__tabla">
+          <table>
+            <thead>
+              <tr><th>Concepto</th><th>Tipo</th><th>Vence</th><th>Monto</th><th>Estado</th></tr>
+            </thead>
+            <tbody>
+              @for (c of f.cuotas; track c.uuid) {
+                <tr>
+                  <td>{{ c.concepto }}</td>
+                  <td>{{ tipo(c) }}</td>
+                  <td>{{ fecha(c.vencimiento) }}</td>
+                  <td>{{ moneda(c.monto) }}</td>
+                  <td>
+                    <span class="ficha__chip" [attr.data-tono]="tonoCuota(c)">{{ estadoCuota(c) }}</span>
+                    @if (pago(c)) { <small class="ficha__suave">{{ pago(c) }}</small> }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <p class="ficha__vacio">No tiene cuotas.</p>
+      }
+    </section>
+  }
+</div>

@@ -1,0 +1,162 @@
+:host {
+  --app-boton-color-fondo: var(--app-accent);
+  --app-boton-color-interaccion: color-mix(in srgb, var(--app-accent) 82%, var(--app-text));
+  --app-boton-color-texto: var(--app-bg);
+  --app-boton-color-texto-interaccion: var(--app-bg);
+  --app-boton-fondo-decorado: var(--app-boton-color-fondo);
+  --app-boton-fondo-decorado-interaccion: var(--app-boton-color-interaccion);
+  --app-boton-fondo-texto-interaccion: var(--app-accent-soft);
+  --app-boton-fondo-texto: transparent;
+  --app-boton-color-texto-texto: var(--app-text);
+  --app-boton-borde: 0;
+  --app-boton-sombra: none;
+  --app-boton-padding: 0.65rem 1rem;
+  --app-boton-min-height: 2.75rem;
+  --app-boton-font-size: inherit;
+  --app-boton-font-weight: 600;
+  --app-boton-text-transform: none;
+  --app-boton-background-size: auto;
+  --app-boton-background-position: 0% 50%;
+  --app-boton-background-position-interaccion: 100% 50%;
+  --app-boton-animacion: none;
+  --app-boton-radio: 0.5rem;
+  // Fallback para navegadores sin soporte de color-mix().
+  --app-boton-focus: 3px solid var(--app-accent);
+  --app-boton-focus: 3px solid color-mix(in srgb, var(--app-accent) 50%, white);
+  display: inline-block;
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+}
+
+.app-boton {
+  position: relative;
+  display: inline-flex;
+  width: 100%;
+  min-height: var(--app-boton-min-height);
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: var(--app-boton-padding);
+  color: var(--app-boton-color-texto);
+  font: inherit;
+  font-size: var(--app-boton-font-size);
+  font-weight: var(--app-boton-font-weight);
+  line-height: 1.2;
+  white-space: nowrap;
+  background: var(--app-boton-fondo-decorado);
+  background-size: var(--app-boton-background-size);
+  background-position: var(--app-boton-background-position);
+  border: var(--app-boton-borde);
+  border-radius: var(--app-boton-radio);
+  box-shadow: var(--app-boton-sombra);
+  text-transform: var(--app-boton-text-transform);
+  animation: var(--app-boton-animacion);
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    background-position 280ms ease,
+    color 150ms ease,
+    opacity 150ms ease,
+    transform 100ms ease;
+
+  &:not(:disabled):hover,
+  &:not(:disabled):active {
+    color: var(--app-boton-color-texto-interaccion);
+    background: var(--app-boton-fondo-decorado-interaccion);
+    background-position: var(--app-boton-background-position-interaccion);
+  }
+
+  &:not(:disabled):active {
+    transform: translateY(1px);
+  }
+
+  &:focus-visible {
+    outline: var(--app-boton-focus);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.58;
+  }
+
+  &--cargando:disabled {
+    cursor: wait;
+    opacity: 1;
+  }
+
+  &__contenido {
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: center;
+    gap: inherit;
+
+    &--oculto {
+      visibility: hidden;
+    }
+  }
+
+  &__spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: block;
+    width: 1.5em;
+    transform: translate(-50%, -50%);
+    color: inherit;
+    pointer-events: none;
+
+    app-load-spinner-blue {
+      display: block;
+      width: 100%;
+    }
+  }
+}
+
+:host(.app-boton-host--texto) {
+  .app-boton {
+    color: var(--app-boton-color-texto-texto);
+    background: var(--app-boton-fondo-texto);
+    background-size: var(--app-boton-background-size);
+    background-position: var(--app-boton-background-position);
+
+    &:not(:disabled):hover,
+    &:not(:disabled):active {
+      color: var(--app-boton-color-texto-texto);
+      background: var(--app-boton-fondo-texto-interaccion);
+      background-size: var(--app-boton-background-size);
+      background-position: var(--app-boton-background-position-interaccion);
+    }
+  }
+}
+
+:host(.app-boton-host--solo-icono) {
+  .app-boton {
+    width: 2.75rem;
+    min-width: 2.75rem;
+    padding: 0.5rem;
+  }
+}
+
+:host(.app-boton-host--contenido-vertical) {
+  .app-boton__contenido {
+    width: 100%;
+    align-self: stretch;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-boton {
+    transition: none;
+
+    &:not(:disabled):active {
+      transform: none;
+    }
+  }
+}

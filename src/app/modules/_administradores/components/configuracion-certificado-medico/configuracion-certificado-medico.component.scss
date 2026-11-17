@@ -1,0 +1,37 @@
+@use '../../../ui/formulario-secciones/formulario-secciones' as fs;
+
+:host {
+  display: block;
+}
+
+@include fs.estilos;
+
+.config-cert {
+  &__tarjetas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    gap: 0.75rem;
+  }
+
+  &__ejemplo {
+    color: var(--app-text);
+    font-weight: 600;
+  }
+
+  &__error {
+    margin: 0;
+    color: var(--semantic-danger, #dc2626);
+    font-weight: 600;
+  }
+
+  &__ok {
+    margin: 0;
+    color: var(--semantic-success, #15803d);
+    font-weight: 600;
+  }
+
+  &__acciones {
+    display: flex;
+    justify-content: flex-end;
+  }
+}

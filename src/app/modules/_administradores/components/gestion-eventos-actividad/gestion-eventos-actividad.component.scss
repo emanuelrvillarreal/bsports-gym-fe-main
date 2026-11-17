@@ -1,0 +1,63 @@
+:host {
+  display: block;
+}
+.gestion-eventos {
+  margin-top: 1rem;
+}
+.gestion-eventos__busqueda {
+  display: grid;
+  gap: 0.8rem;
+  align-items: end;
+}
+.gestion-eventos__busqueda {
+  grid-template-columns: minmax(0, 1fr) auto minmax(12rem, 18rem);
+  margin-bottom: 1rem;
+}
+.gestion-eventos__campo-busqueda > span {
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: none;
+}
+.gestion-eventos__campo-busqueda > span {
+  display: block;
+  margin-bottom: 0.4rem;
+}
+.gestion-eventos__busqueda input {
+  width: 100%;
+  min-height: 2.75rem;
+  box-sizing: border-box;
+  padding: 0.55rem 0.7rem;
+  color: var(--app-text);
+  background: var(--app-surface);
+  border: 1px solid var(--app-surface-border);
+  border-radius: 0.55rem;
+}
+.gestion-eventos__acciones-listado {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+.gestion-eventos__nuevo {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-weight: 600;
+}
+.gestion-eventos__boton-nuevo {
+  --app-boton-radio: 999px;
+}
+.gestion-eventos__error {
+  color: var(--semantic-danger);
+}
+
+:host-context(.theme-mode-dark) {
+  .gestion-eventos__busqueda input { background: #000; }
+  ::ng-deep .gestion-eventos__busqueda app-select .app-select__control .app-boton { background: #000; }
+
+}
+
+@media (max-width: 680px) {
+  .gestion-eventos__busqueda {
+    grid-template-columns: 1fr;
+  }
+}

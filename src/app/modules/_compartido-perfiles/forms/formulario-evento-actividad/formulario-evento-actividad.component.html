@@ -1,0 +1,114 @@
+<form [id]="formId()" class="formulario-evento fs-form" appValidacionFormulario (submit)="enviar($event)">
+  <small
+    class="formulario-evento__error"
+    [class.formulario-evento__error--visible]="!!error()"
+    role="alert"
+  >
+    {{ error() || 'El formulario contiene errores.' }}
+  </small>
+
+  <!-- 1. Actividad -->
+  <section class="fs-seccion" aria-labelledby="fe-titulo-actividad">
+    <header class="fs-seccion__cabecera">
+      <span class="fs-seccion__numero" aria-hidden="true">1</span>
+      <div>
+        <h3 id="fe-titulo-actividad">¿De qué actividad es?</h3>
+        <p>El evento se asocia a una actividad ya creada.</p>
+      </div>
+    </header>
+    <div class="fs-seccion__cuerpo">
+      @if (actividadBloqueada()) {
+        <label class="formulario-evento__actividad">
+          <span>Actividad</span>
+          <input type="text" [value]="nombreActividadSeleccionada()" disabled />
+        </label>
+      } @else {
+        <app-select
+          class="formulario-evento__actividad"
+          etiqueta="Actividad *"
+          placeholder="Seleccionar actividad"
+          [opciones]="opcionesActividades()"
+          [value]="actividadUuid()"
+          [attr.data-app-invalido]="!actividadUuid() ? 'true' : null"
+          [maximoOpcionesVisibles]="5"
+          (valueChange)="actividadUuid.set($event)"
+        />
+      }
+    </div>
+  </section>
+
+  <!-- 2. Datos del evento -->
+  <section class="fs-seccion" aria-labelledby="fe-titulo-datos">
+    <header class="fs-seccion__cabecera">
+      <span class="fs-seccion__numero" aria-hidden="true">2</span>
+      <div>
+        <h3 id="fe-titulo-datos">¿Qué evento es?</h3>
+        <p>Un título claro, el lugar y una breve descripción.</p>
+      </div>
+    </header>
+    <div class="fs-seccion__cuerpo fs-grid">
+      <label>
+        <span>Título *</span>
+        <input
+          required
+          maxlength="120"
+          placeholder="Ej: Clase abierta, Torneo interno"
+          [value]="titulo()"
+          (input)="titulo.set($any($event.target).value)"
+        />
+      </label>
+      <label>
+        <span>Ubicación *</span>
+        <input
+          required
+          maxlength="160"
+          placeholder="Ej: Salón principal"
+          [value]="ubicacion()"
+          (input)="ubicacion.set($any($event.target).value)"
+        />
+      </label>
+      <label class="formulario-evento__descripcion fs-grid__completo">
+        <span>Descripción</span>
+        <textarea
+          required
+          maxlength="500"
+          placeholder="Contá de qué se trata, qué tienen que llevar los socios, etc."
+          [value]="descripcion()"
+          (input)="actualizarDescripcion($any($event.target).value)"
+        ></textarea>
+        <small class="formulario-evento__contador fs-contador"
+          ><span>{{ descripcion().length }}</span
+          >/500</small
+        >
+      </label>
+    </div>
+  </section>
+
+  <!-- 3. Fecha y hora -->
+  <section class="fs-seccion" aria-labelledby="fe-titulo-fecha">
+    <header class="fs-seccion__cabecera">
+      <span class="fs-seccion__numero" aria-hidden="true">3</span>
+      <div>
+        <h3 id="fe-titulo-fecha">¿Cuándo es?</h3>
+        <p>Fecha y hora de inicio y de fin.</p>
+      </div>
+    </header>
+    <div class="fs-seccion__cuerpo fs-grid">
+      <app-input-fecha
+        etiqueta="Inicio *"
+        modo="fecha-hora"
+        [requerido]="true"
+        [valorInicial]="inicio()"
+        (valorCambiado)="actualizarInicio($event)"
+      />
+      <app-input-fecha
+        etiqueta="Fin *"
+        modo="fecha-hora"
+        [requerido]="true"
+        [valorInicial]="fin()"
+        [minimo]="inicio()"
+        (valorCambiado)="actualizarFin($event)"
+      />
+    </div>
+  </section>
+</form>

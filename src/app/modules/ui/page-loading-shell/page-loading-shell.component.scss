@@ -1,0 +1,12 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.page-loading-shell {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: calc(100dvh - 10rem);
+  padding: 1rem;
+}

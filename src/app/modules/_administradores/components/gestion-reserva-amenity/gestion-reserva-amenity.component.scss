@@ -1,0 +1,26 @@
+:host { display: block; }
+.gestion-reserva-amenity { display: grid; gap: 1.5rem; }
+.gestion-reserva-amenity__contenido { min-height: 23rem; }
+.gestion-reserva-amenity__contenido > section { animation: aparecer .22s ease-out; }
+.gestion-reserva-amenity h3 { margin: 0 0 1rem; }
+.gestion-reserva-amenity__buscador { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 1rem; }
+.gestion-reserva-amenity__buscador input { flex: 1 1 16rem; min-height: 2.75rem; padding: .6rem .75rem; color: var(--app-text); background: var(--app-surface); border: 1px solid var(--app-surface-border); border-radius: .55rem; }
+:host-context(.theme-mode-dark) .gestion-reserva-amenity__buscador input, :host-context(.dark-mode-on) .gestion-reserva-amenity__buscador input { background: #000; }
+.gestion-reserva-amenity__resumen { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.gestion-reserva-amenity__resumen article, .gestion-reserva-amenity__horario { margin: 0; padding: 1rem; border: 1px solid var(--app-surface-border); border-radius: .65rem; background: color-mix(in srgb, var(--app-accent) 6%, var(--app-surface)); }
+.gestion-reserva-amenity__resumen h4 { margin: 0 0 .75rem; color: var(--color-primario, var(--app-accent)); }
+.gestion-reserva-amenity__resumen dl { display: grid; gap: .55rem; margin: 0; }
+.gestion-reserva-amenity__resumen dl div { display: grid; gap: .1rem; }
+.gestion-reserva-amenity__resumen dt { color: var(--app-text-soft); font-size: .8rem; }
+.gestion-reserva-amenity__resumen dd { margin: 0; font-weight: 600; }
+.gestion-reserva-amenity__chips { display: flex; flex-wrap: wrap; gap: .35rem; margin: 0; padding: 0; list-style: none; }
+.gestion-reserva-amenity__chips li { padding: .2rem .5rem; color: var(--app-text); background: color-mix(in srgb, var(--app-accent) 14%, var(--app-surface)); border: 1px solid color-mix(in srgb, var(--app-accent) 32%, var(--app-surface-border)); border-radius: 999px; font-size: .8rem; }
+.gestion-reserva-amenity__horario-disponible { display: inline-flex; align-items: center; gap: .4rem; }
+.gestion-reserva-amenity__horario-disponible ng-icon { width: 1em; height: 1em; color: var(--color-primario, var(--app-accent)); }
+.gestion-reserva-amenity__horario { display: grid; gap: .85rem; margin-top: 1rem; }
+.gestion-reserva-amenity__horario legend { padding-inline: .35rem; font-weight: 700; }
+.gestion-reserva-amenity__campos-horario { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
+.gestion-reserva-amenity__error { color: var(--semantic-danger); }
+@keyframes aparecer { from { opacity: 0; transform: translateX(1rem); } to { opacity: 1; transform: translateX(0); } }
+@media (max-width: 40rem) { .gestion-reserva-amenity__contenido { min-height: 28rem; } .gestion-reserva-amenity__resumen, .gestion-reserva-amenity__campos-horario { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .gestion-reserva-amenity__contenido > section { animation: none; transition: none; } }

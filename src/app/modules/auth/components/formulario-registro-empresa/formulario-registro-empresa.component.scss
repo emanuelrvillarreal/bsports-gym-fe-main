@@ -1,0 +1,422 @@
+:host {
+  display: block;
+  min-height: 0;
+}
+
+.sysadmin-registro {
+  &__form {
+    display: grid;
+    gap: 1rem;
+    min-height: 0;
+    overflow-y: auto;
+    padding-bottom: 2rem;
+  }
+
+  &__panel {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid color-mix(in srgb, var(--app-surface-border) 78%, transparent);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--app-surface) 88%, transparent);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 4%);
+  }
+
+  &__panel-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+
+    ng-icon {
+      margin-top: 0.1rem;
+      color: var(--app-accent);
+      font-size: 1.25rem;
+      flex: 0 0 auto;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.15;
+      text-transform: none;
+      font-weight: 800;
+      text-shadow: -1px 1px 2px rgba(0, 0, 0, 0.35);
+    }
+
+    p {
+      margin: 0.2rem 0 0;
+      color: var(--app-text-soft);
+      font-size: 0.84rem;
+      line-height: 1.35;
+    }
+
+    &--between {
+      justify-content: space-between;
+      gap: 1rem;
+    }
+  }
+
+  &__panel-copy {
+    min-width: 0;
+  }
+
+  &__leyenda-crm {
+    margin: 0;
+    color: var(--app-text-soft);
+    font-size: 0.84rem;
+    line-height: 1.45;
+    text-align: center;
+  }
+
+  &__error-formulario {
+    display: block;
+    min-height: 1rem;
+    color: transparent;
+    font-size: 0.85rem;
+    line-height: 1.25;
+  }
+
+  &__error-formulario--visible {
+    color: #fca5a5;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem;
+  }
+
+  &__field {
+    display: grid;
+    gap: 0.35rem;
+    min-width: 0;
+
+    span {
+      color: var(--app-text-soft);
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: normal;
+      text-transform: none;
+    }
+
+    input {
+      width: 100%;
+      min-height: 2.55rem;
+      padding: 0.65rem 0.75rem;
+      color: var(--app-text);
+      background: color-mix(in srgb, var(--app-surface-strong) 82%, transparent);
+      border: 1px solid color-mix(in srgb, var(--app-surface-border) 82%, transparent);
+      border-radius: 8px;
+      font: inherit;
+      outline: none;
+      transition:
+        border-color 160ms ease,
+        box-shadow 160ms ease,
+        background-color 160ms ease;
+
+      &:focus {
+        border-color: color-mix(in srgb, var(--app-accent) 82%, var(--app-surface-border));
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--app-accent) 20%, transparent);
+      }
+    }
+
+    &--error input {
+      border-color: color-mix(in srgb, #f87171 82%, var(--app-surface-border));
+      box-shadow: 0 0 0 2px rgb(248 113 113 / 14%);
+    }
+
+    &--full {
+      grid-column: 1 / -1;
+    }
+  }
+
+  &__secondary-action,
+  &__repeated-action button {
+    min-height: 2.25rem;
+    padding: 0.5rem 0.75rem;
+    color: var(--app-text);
+    background: color-mix(in srgb, var(--app-surface-strong) 82%, transparent);
+    border: 1px solid var(--app-surface-border);
+    border-radius: 8px;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+
+    &:hover:not(:disabled),
+    &:focus-visible {
+      border-color: var(--app-accent);
+      outline: none;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+  }
+
+  &__repeated {
+    padding-top: 0.9rem;
+    border-top: 1px solid color-mix(in srgb, var(--app-surface-border) 70%, transparent);
+  }
+
+  &__repeated-action {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  &__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    width: fit-content;
+    color: var(--app-text);
+    font-size: 0.86rem;
+    font-weight: 700;
+    cursor: pointer;
+
+    input {
+      width: 1.1rem;
+      height: 1.1rem;
+      accent-color: var(--app-accent);
+    }
+  }
+
+  &__field app-select {
+    width: 100%;
+  }
+
+  :host-context(.theme-mode-dark) &__field input:not([type='checkbox']),
+  :host-context(.dark-mode-on) &__field input:not([type='checkbox']) {
+    background: #000;
+  }
+
+  &__field-error {
+    min-height: 0.95rem;
+    color: #fca5a5;
+    font-size: 0.85rem;
+    line-height: 1.15;
+  }
+
+  &__date-input {
+    color-scheme: light dark;
+    padding-right: 3rem;
+    appearance: none;
+    -webkit-appearance: none;
+
+    &::-webkit-calendar-picker-indicator {
+      opacity: 0;
+      display: none;
+      pointer-events: none;
+    }
+
+    &::-webkit-clear-button,
+    &::-webkit-inner-spin-button {
+      display: none;
+    }
+  }
+
+  &__date-field {
+    position: relative;
+    width: 100%;
+  }
+
+  &__date-toggle {
+    position: absolute;
+    top: 50%;
+    right: 0.55rem;
+    width: 2rem;
+    height: 2rem;
+    min-height: 0;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    color: var(--app-text-soft);
+    background: transparent;
+    border: 0;
+    border-radius: 999px;
+    cursor: pointer;
+    transform: translateY(-50%);
+
+    ng-icon {
+      width: 1.05rem;
+      height: 1.05rem;
+    }
+
+    &:hover,
+    &:focus-visible {
+      color: var(--app-accent);
+      outline: none;
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--app-accent) 24%, white);
+    }
+  }
+
+  &__password-field {
+    position: relative;
+    width: 100%;
+
+    input {
+      padding-right: 3rem;
+
+      &::-ms-reveal,
+      &::-ms-clear {
+        display: none;
+      }
+    }
+  }
+
+  &__password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 0.55rem;
+    width: 2rem;
+    height: 2rem;
+    min-height: 0;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    color: var(--app-text-soft);
+    background: transparent;
+    border: 0;
+    border-radius: 999px;
+    cursor: pointer;
+    transform: translateY(-50%);
+
+    ng-icon {
+      width: 1.05rem;
+      height: 1.05rem;
+    }
+
+    &:hover,
+    &:focus-visible {
+      color: var(--app-text);
+      outline: none;
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--app-accent) 24%, white);
+    }
+
+    &--activa {
+      color: var(--app-accent);
+
+      ng-icon {
+        filter: drop-shadow(0 0 0.45rem color-mix(in srgb, var(--app-accent) 55%, transparent));
+      }
+    }
+  }
+
+  &__acciones {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid color-mix(in srgb, var(--app-surface-border) 78%, transparent);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--app-surface) 92%, transparent);
+    backdrop-filter: blur(8px);
+
+    button {
+      min-height: 2.5rem;
+      padding: 0.65rem 1rem;
+      display: grid;
+      place-items: center;
+      color: #03150f;
+      background: var(--app-accent);
+      border: 1px solid var(--app-accent);
+      border-radius: 8px;
+      font: inherit;
+      font-size: 0.86rem;
+      font-weight: 800;
+      text-transform: none;
+      cursor: pointer;
+
+      &:disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+      }
+
+      app-load-spinner {
+        width: 1em;
+        height: 1em;
+      }
+
+      &.sysadmin-registro__submit--error {
+        animation: sysadmin-submit-shake 280ms ease-in-out 0s 4;
+        box-shadow:
+          0 0 0 0.3rem rgb(239 68 68 / 40%),
+          0 0.85rem 1.7rem rgb(239 68 68 / 18%);
+      }
+    }
+  }
+
+  &__submit-content {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    width: 100%;
+  }
+}
+
+@keyframes sysadmin-submit-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-0.35rem);
+  }
+
+  40% {
+    transform: translateX(0.35rem);
+  }
+
+  60% {
+    transform: translateX(-0.25rem);
+  }
+
+  80% {
+    transform: translateX(0.25rem);
+  }
+}
+
+@media (max-width: 50rem) {
+  .sysadmin-registro {
+    &__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+@media (max-width: 42rem) {
+  .sysadmin-registro {
+    &__form {
+      gap: 0.75rem;
+      padding-bottom: 1rem;
+    }
+
+    &__panel {
+      padding: 0.85rem;
+    }
+
+    &__acciones {
+      align-items: stretch;
+      flex-direction: column;
+      padding: 0.8rem;
+
+      button {
+        width: 100%;
+      }
+    }
+  }
+}

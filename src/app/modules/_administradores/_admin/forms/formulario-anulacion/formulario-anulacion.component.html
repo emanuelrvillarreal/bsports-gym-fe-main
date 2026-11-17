@@ -1,0 +1,10 @@
+<form class="formulario" appValidacionFormulario (submit)="$event.preventDefault(); enviar()">
+  <small class="formulario__error" [class.formulario__error--visible]="error()" role="alert">{{ error() }}</small>
+  <label for="anulacion-motivo"><span>Motivo</span>
+    <textarea id="anulacion-motivo" [attr.maxlength]="limiteMotivo()" rows="4" required [value]="motivo()" (input)="actualizarMotivo($event)"></textarea>
+    @if (mostrarContador()) {
+      <small class="formulario__contador"><span>{{ motivo().length }}</span>/{{ limiteMotivo() }}</small>
+    }
+  </label>
+  <app-boton tipo="submit" [cargando]="enviando()">Confirmar anulación</app-boton>
+</form>

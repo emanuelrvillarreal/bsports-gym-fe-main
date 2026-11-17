@@ -1,0 +1,97 @@
+<section class="portal-trayectoria">
+  <div class="portal-trayectoria__barra">
+    <div class="portal-trayectoria__vistas" role="tablist" aria-label="Mi trayectoria">
+      <button type="button" role="tab" [attr.aria-selected]="vista() === 'asistencias'" [class.portal-trayectoria__vista--activa]="vista() === 'asistencias'" (click)="elegirVista('asistencias')">Mis asistencias</button>
+      <button type="button" role="tab" [attr.aria-selected]="vista() === 'trayectoria'" [class.portal-trayectoria__vista--activa]="vista() === 'trayectoria'" (click)="elegirVista('trayectoria')">Mi trayectoria deportiva</button>
+    </div>
+    @if (opcionesSocios().length) {
+      <app-select class="portal-trayectoria__socio" etiqueta="Ver de" [opciones]="opcionesSocios()" [value]="memberUuid()" (valueChange)="elegirSocio($event)" />
+    }
+  </div>
+
+  @if (vista() === 'asistencias') {
+    <div class="portal-trayectoria__periodos" role="group" aria-label="Período">
+      @for (opcion of opcionesPeriodo; track opcion.id) {
+        <button type="button" class="portal-trayectoria__periodo" [class.portal-trayectoria__periodo--activo]="periodo() === opcion.id" [attr.aria-pressed]="periodo() === opcion.id" (click)="elegirPeriodo(opcion.id)">
+          {{ opcion.etiqueta }}
+        </button>
+      }
+    </div>
+
+    @if (error()) {
+      <div class="portal-trayectoria__error" role="alert">
+        {{ error() }} <app-boton apariencia="texto" (accion)="reintentar()">Reintentar</app-boton>
+      </div>
+    } @else if (cargando() && !asistencias()) {
+      <p class="portal-trayectoria__vacio">Cargando asistencias…</p>
+    } @else if (asistencias(); as datos) {
+      <div class="portal-trayectoria__resumen" [class.portal-trayectoria__resumen--cargando]="cargando()">
+        <article><span>Asistencia</span><strong>{{ porcentaje(datos.resumen.promedioAsistencia) }}</strong></article>
+        <article><span>Clases</span><strong>{{ datos.resumen.presentes + datos.resumen.ausentes + datos.resumen.justificadas }}</strong></article>
+        <article><span>Presentes</span><strong>{{ datos.resumen.presentes }}</strong></article>
+        <article><span>Ausentes</span><strong>{{ datos.resumen.ausentes }}</strong></article>
+        @if (datos.resumen.justificadas) {
+          <article><span>Justificadas</span><strong>{{ datos.resumen.justificadas }}</strong></article>
+        }
+      </div>
+
+      @if (barras().length) {
+        <section class="portal-trayectoria__panel" aria-label="Evolución mensual">
+          <h3>Evolución mensual</h3>
+          <app-grafico-barras class="grafico-vertical" [barras]="barras()" estilo="compacto" orientacion="vertical" />
+        </section>
+      }
+
+      @if (!actividades().length) {
+        <p class="portal-trayectoria__vacio">Todavía no hay asistencias registradas en tus actividades.</p>
+      }
+      <div class="portal-trayectoria__actividades">
+        @for (fila of actividades(); track fila.inscripcionUuid) {
+          <article class="portal-trayectoria__actividad" [class.portal-trayectoria__actividad--baja]="!fila.activa">
+            <button type="button" class="portal-trayectoria__cabecera" [attr.aria-expanded]="abierta() === fila.inscripcionUuid" (click)="alternarDetalle(fila)">
+              <span>
+                <strong>{{ fila.actividadNombre }}</strong>
+                <small>{{ fila.activa ? 'Desde el ' + fecha(fila.fechaInscripcion) + ' · ' + fila.antiguedad : 'Baja el ' + fecha(fila.fechaBaja) }}</small>
+              </span>
+              <span [class]="claseNivel(fila)">{{ porcentaje(fila.porcentaje) }}</span>
+            </button>
+            <p class="portal-trayectoria__totales">
+              {{ fila.presentes }} presentes de {{ fila.clases }} clases
+              @if (fila.justificadas) { · {{ fila.justificadas }} justificadas }
+              @if (fila.ultimaAsistencia) { · última vez {{ fecha(fila.ultimaAsistencia) }} }
+            </p>
+            @if (abierta() === fila.inscripcionUuid) {
+              <div class="portal-trayectoria__detalle">
+                @if (cargandoDetalle()) {
+                  <p class="portal-trayectoria__vacio">Cargando…</p>
+                } @else if (detalle(); as detalle) {
+                  @if (barrasDetalle().length) {
+                    <app-grafico-barras class="grafico-vertical" [barras]="barrasDetalle()" estilo="compacto" orientacion="vertical" />
+                  }
+                  @if (detalle.clases.length) {
+                    <ol class="portal-trayectoria__clases">
+                      @for (clase of detalle.clases.slice(0, 12); track clase.inicio) {
+                        <li [class]="'portal-trayectoria__clase portal-trayectoria__clase--' + clase.estado.toLowerCase()">
+                          <time>{{ textoInicio(clase.inicio) }}</time>
+                          <span>{{ textoEstadoClase(clase.estado) }}</span>
+                        </li>
+                      }
+                    </ol>
+                  } @else {
+                    <p class="portal-trayectoria__vacio">Sin clases con asistencia en el período.</p>
+                  }
+                }
+              </div>
+            }
+          </article>
+        }
+      </div>
+    }
+  } @else {
+    @if (cargandoTrayectoria()) {
+      <p class="portal-trayectoria__vacio">Cargando trayectoria…</p>
+    } @else if (trayectoria(); as trayectoria) {
+      <app-trayectoria-deportiva [trayectoria]="trayectoria" [mostrarSocio]="!!memberUuid()" />
+    }
+  }
+</section>

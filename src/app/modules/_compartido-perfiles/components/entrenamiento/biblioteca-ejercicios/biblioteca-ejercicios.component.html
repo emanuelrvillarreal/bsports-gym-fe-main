@@ -1,0 +1,102 @@
+<section class="biblioteca" aria-label="Biblioteca de ejercicios">
+  <div class="biblioteca__filtros">
+    <label class="biblioteca__campo">
+      <span>Buscar</span>
+      <input type="search" placeholder="Nombre, grupo muscular o habilidad" [value]="busqueda()" (input)="buscar($any($event.target).value)" />
+    </label>
+    <app-select etiqueta="Tipo" [opciones]="opcionesTipoFiltro" [value]="tipo()" (valueChange)="filtrar('tipo', $event)" />
+    <app-select etiqueta="Dificultad" [opciones]="opcionesDificultadFiltro" [value]="dificultad()" (valueChange)="filtrar('dificultad', $event)" />
+    <app-boton (accion)="abrirFormulario()">Nuevo ejercicio</app-boton>
+  </div>
+
+  <app-tabla-responsive
+    [columnas]="columnas"
+    [filas]="filas()"
+    idFila="uuid"
+    [acciones]="acciones"
+    [cargando]="cargando()"
+    mensajeVacio="Todavía no hay ejercicios. Cargá el primero para armar rutinas."
+    (accionFila)="manejarAccion($event)"
+    (verFila)="detalle.set($event)"
+  />
+  @if (totalPaginas() > 1) {
+    <app-paginacion [paginaActual]="pagina()" [totalPaginas]="totalPaginas()" (paginaCambiada)="cambiarPagina($event)" />
+  }
+</section>
+
+<app-popup [abierto]="!!detalle()" [titulo]="detalle()?.nombre ?? 'Ejercicio'" ancho="mediano" textoCancelar="Cerrar" (cancelar)="detalle.set(null)">
+  @if (detalle(); as e) {
+    <div class="biblioteca__detalle">
+      @if (e.imagenUrl) {
+        <img [src]="e.imagenUrl" [alt]="'Imagen de ' + e.nombre" loading="lazy" />
+      }
+      <dl>
+        <div><dt>Tipo</dt><dd>{{ tipoTexto(e.tipo) }}</dd></div>
+        <div><dt>Dificultad</dt><dd>{{ dificultadTexto(e.dificultad) }}</dd></div>
+        @if (e.disciplina) { <div><dt>Disciplina</dt><dd>{{ e.disciplina }}</dd></div> }
+        @if (e.grupoMuscular) { <div><dt>Trabaja</dt><dd>{{ e.grupoMuscular }}</dd></div> }
+        @if (e.creadoPor) { <div><dt>Cargado por</dt><dd>{{ e.creadoPor }}</dd></div> }
+      </dl>
+      @if (e.descripcion) { <p>{{ e.descripcion }}</p> }
+      @if (e.indicaciones) {
+        <section><h4>Indicaciones</h4><p class="biblioteca__texto">{{ e.indicaciones }}</p></section>
+      }
+      @if (e.videoUrl) {
+        <app-reproductor-video [url]="e.videoUrl" [titulo]="e.nombre" />
+      }
+      @if (e.editable) {
+        <app-boton apariencia="texto" (accion)="abrirFormulario(e)">Editar ejercicio</app-boton>
+      }
+    </div>
+  }
+</app-popup>
+
+<app-popup
+  [abierto]="formularioAbierto()"
+  [titulo]="editandoUuid() ? 'Editar ejercicio' : 'Nuevo ejercicio'"
+  descripcion="Sirve para cualquier disciplina: fuerza, técnica, táctica, flexibilidad…"
+  ancho="grande"
+  [cancelarDeshabilitado]="guardando()"
+  (cancelar)="formularioAbierto.set(false)"
+>
+  @let datos = borrador();
+  <form class="biblioteca__formulario" (submit)="$event.preventDefault(); guardar()">
+    <label class="biblioteca__campo biblioteca__campo--ancho">
+      <span>Nombre *</span>
+      <input required maxlength="120" [value]="datos.nombre" (input)="cambiar('nombre', $any($event.target).value)" />
+    </label>
+    <app-select etiqueta="Tipo *" [opciones]="opcionesTipo" [value]="datos.tipo" (valueChange)="cambiar('tipo', $event)" />
+    <app-select etiqueta="Dificultad *" [opciones]="opcionesDificultad" [value]="datos.dificultad" (valueChange)="cambiar('dificultad', $event)" />
+    <label class="biblioteca__campo">
+      <span>Disciplina</span>
+      <input maxlength="80" placeholder="Ej. Fútbol, Natación" [value]="datos.disciplina ?? ''" (input)="cambiar('disciplina', $any($event.target).value)" />
+    </label>
+    <label class="biblioteca__campo">
+      <span>Grupo muscular o habilidad</span>
+      <input maxlength="120" placeholder="Ej. Piernas, Pase, Salto" [value]="datos.grupoMuscular ?? ''" (input)="cambiar('grupoMuscular', $any($event.target).value)" />
+    </label>
+    <label class="biblioteca__campo biblioteca__campo--ancho">
+      <span>Descripción</span>
+      <textarea rows="2" [value]="datos.descripcion ?? ''" (input)="cambiar('descripcion', $any($event.target).value)"></textarea>
+    </label>
+    <label class="biblioteca__campo biblioteca__campo--ancho">
+      <span>Indicaciones</span>
+      <textarea rows="3" placeholder="Postura, respiración, errores comunes…" [value]="datos.indicaciones ?? ''" (input)="cambiar('indicaciones', $any($event.target).value)"></textarea>
+    </label>
+    <label class="biblioteca__campo">
+      <span>Imagen (enlace)</span>
+      <input type="url" maxlength="500" placeholder="https://…" [value]="datos.imagenUrl ?? ''" (input)="cambiar('imagenUrl', $any($event.target).value)" />
+    </label>
+    <label class="biblioteca__campo">
+      <span>Video demostrativo (enlace)</span>
+      <input type="url" maxlength="500" placeholder="https://youtube.com/…" aria-describedby="ayuda-video" [value]="datos.videoUrl ?? ''" (input)="cambiar('videoUrl', $any($event.target).value)" />
+      <small id="ayuda-video" class="biblioteca__ayuda">Se reproduce en la app con YouTube, Vimeo, Google Drive (compartido con enlace) o un archivo .mp4/.webm. Otros enlaces se abren aparte.</small>
+    </label>
+    @if (errorFormulario()) {
+      <p class="biblioteca__error biblioteca__campo--ancho" role="alert">{{ errorFormulario() }}</p>
+    }
+    <div class="biblioteca__campo--ancho biblioteca__acciones">
+      <app-boton tipo="submit" [cargando]="guardando()">{{ editandoUuid() ? 'Guardar cambios' : 'Crear ejercicio' }}</app-boton>
+    </div>
+  </form>
+</app-popup>

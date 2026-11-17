@@ -1,0 +1,16 @@
+<section class="input-periodo" [style.--input-periodo-primario]="colorPrimario()" [attr.aria-label]="ariaLabel()">
+  @if (etiqueta()) {
+    <span class="input-periodo__etiqueta">{{ etiqueta() }}</span>
+  }
+  <label class="input-periodo__campo">
+    <span>Mes</span>
+    <input type="text" inputmode="numeric" maxlength="2" pattern="[0-9]*" placeholder="MM" aria-label="Mes del período" [disabled]="deshabilitado()" [value]="mes()" (input)="actualizarMes($event)" (blur)="marcarTocado()" />
+  </label>
+  <label class="input-periodo__campo">
+    <span>Año</span>
+    <input type="text" inputmode="numeric" maxlength="4" pattern="[0-9]*" placeholder="AAAA" aria-label="Año del período" [disabled]="deshabilitado()" [value]="anio()" (input)="actualizarAnio($event)" (blur)="marcarTocado()" />
+  </label>
+  <app-boton tipo="button" [apariencia]="tieneValor() ? 'solido' : 'texto'" [soloIcono]="true" class="input-periodo__limpiar" aria-label="Limpiar período" [deshabilitado]="deshabilitado() || !tieneValor()" (accion)="limpiar()">
+    <ng-icon name="heroXMark" aria-hidden="true" />
+  </app-boton>
+</section>

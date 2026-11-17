@@ -1,0 +1,95 @@
+<section class="registro-page" [class.registro-page--alto-rendimiento]="altoRendimiento()">
+  <div class="registro-page__theme">
+    <app-dark-mode [altoRendimiento]="altoRendimiento()" />
+  </div>
+
+  <div class="registro-page__background" aria-hidden="true">
+    <div class="registro-page__background-panel registro-page__background-panel--theme">
+      <div
+        class="registro-page__watermark-pattern"
+        [style.background-image]="'url(' + logoMarcaAgua() + ')'"
+      ></div>
+    </div>
+    <div class="registro-page__background-panel registro-page__background-panel--gradient">
+    </div>
+  </div>
+
+  @if (modalAbierto()) {
+    <div
+      class="registro-page__overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="registro-titulo"
+    >
+      <article class="registro-page__modal">
+        <header class="registro-page__header">
+          @if (esRutaEmpresa && empresaPublicaContext.logoUrl()) {
+            <img
+              class="registro-page__logo"
+              [src]="empresaPublicaContext.logoUrl()"
+              [alt]="empresaPublicaContext.nombreComercial()"
+            />
+          }
+          <div>
+            <p>{{ esRutaEmpresa ? empresaPublicaContext.nombreComercial() : appName }}</p>
+            <h1 id="registro-titulo">Registro</h1>
+          </div>
+          <app-boton
+            tipo="button"
+            apariencia="texto"
+            [soloIcono]="true"
+            aria-label="Cerrar registro"
+            (accion)="cerrarRegistro()"
+          >
+            <ng-icon name="heroXMark" />
+          </app-boton>
+        </header>
+
+        @if (esRutaEmpresa && !empresaPublicaContext.empresaDisponible()) {
+          <div class="registro-page__tenant-error" role="alert">
+            <strong>Gimnasio no encontrado</strong>
+            <p>Verificá el enlace provisto por el gimnasio e intentá nuevamente.</p>
+          </div>
+        } @else if (!companyUuidValido()) {
+          <div class="registro-page__tenant-error" role="alert">
+            <strong>No pudimos identificar el gimnasio</strong>
+            <p>
+              Abri el enlace de registro provisto por el gimnasio. Debe incluir un
+              <code>companyUuid</code> valido.
+            </p>
+          </div>
+        } @else if (solicitudEnviada()) {
+          <div class="registro-page__exito" role="status">
+            <strong>Solicitud enviada</strong>
+            <p>
+              El gimnasio debe revisar y aprobar tu registro. Esta solicitud no inicia sesión
+              automaticamente.
+            </p>
+          </div>
+        } @else {
+          <app-formulario-registro
+            textoBoton="Enviar solicitud"
+            [cargando]="registrando()"
+            [mensajeErrorExterno]="errorRegistro()"
+            (submitted)="registrar($event)"
+          />
+        }
+
+        <p class="registro-page__link"><a [routerLink]="rutaLogin()">Volver a iniciar sesión</a></p>
+      </article>
+    </div>
+  }
+
+  @if (mostrarToastConexion()) {
+    <app-toast-alert
+      posicion="centrada"
+      icono="heroExclamationTriangle"
+      titulo="Reintentelo mas tarde"
+      subtitulo="Error de conexion"
+      [fondoPeligro]="true"
+      [duracionMs]="4000"
+      [altoRendimiento]="altoRendimiento()"
+      (cerrada)="cerrarToastConexion()"
+    />
+  }
+</section>

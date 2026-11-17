@@ -1,0 +1,113 @@
+<section class="nueva-empresa-page">
+  <app-titulo-hero
+    titulo="Nueva empresa"
+    subtitulo="Registra el gimnasio, carga su logo y sincroniza los roles iniciales."
+    icono="nuevaEmpresa"
+  />
+
+  @if (empresaCreada()) {
+    <ol class="nueva-empresa-page__progreso" aria-label="Progreso del alta">
+      <li class="nueva-empresa-page__paso nueva-empresa-page__paso--completo">Gimnasio creado</li>
+      <li
+        class="nueva-empresa-page__paso"
+        [class.nueva-empresa-page__paso--completo]="logoCargado()"
+      >
+        Logo cargado
+      </li>
+      <li
+        class="nueva-empresa-page__paso"
+        [class.nueva-empresa-page__paso--completo]="onboardingCompleto()"
+      >
+        Roles sincronizados
+      </li>
+    </ol>
+  }
+
+  @if (errorEtapa()) {
+    <p class="nueva-empresa-page__mensaje nueva-empresa-page__mensaje--error" role="alert">
+      {{ errorEtapa() }}
+    </p>
+  }
+
+  @if (!empresaCreada() && catalogosCargados()) {
+    <app-card
+      titulo="Datos del gimnasio"
+      descripcion="Completa el perfil institucional y los datos del administrador."
+      icono="heroUsers"
+    >
+      <app-formulario-registro-empresa
+        textoBoton="Registrar empresa"
+        [cargando]="registrando()"
+        [provinciasCrm]="provinciasCrm()"
+        [condicionesImpositivasCrm]="condicionesImpositivasCrm()"
+        (submitted)="registrarEmpresa($event)"
+      />
+    </app-card>
+  } @else if (!empresaCreada()) {
+    <app-card
+      titulo="Catálogos CRM"
+      descripcion="Los datos fiscales deben estar disponibles antes de registrar el gimnasio."
+      icono="heroCog6Tooth"
+    >
+      <div class="nueva-empresa-page__sincronizacion">
+        <p>
+          @if (cargandoCatalogos()) {
+            Cargando provincias y condiciones impositivas…
+          } @else {
+            No se pudieron cargar los catálogos necesarios.
+          }
+        </p>
+        @if (!cargandoCatalogos()) {
+          <app-boton tipo="button" (accion)="cargarCatalogosCrm()">Reintentar</app-boton>
+        }
+      </div>
+    </app-card>
+  } @else if (!logoCargado()) {
+    <p class="nueva-empresa-page__mensaje nueva-empresa-page__mensaje--exito" role="status">
+      {{ nombreEmpresa() }} fue registrado. El UUID se conserva para completar los pasos restantes.
+    </p>
+
+    <app-card
+      titulo="Logo institucional"
+      descripcion="El logo es obligatorio para completar la puesta en marcha del gimnasio."
+      icono="heroSparkles"
+    >
+      <app-formulario-registro-foto
+        modo="logo-club"
+        [cargando]="subiendoLogo()"
+        [mensajeErrorExterno]="errorEtapa()"
+        textoBotonConfirmar="Guardar logo"
+        textoBotonRestablecer="Elegir otro"
+        (submitted)="subirLogo($event)"
+      />
+    </app-card>
+  } @else if (!onboardingCompleto()) {
+    <app-card
+      titulo="Sincronizacion de roles"
+      descripcion="Se aplican los roles y permisos plantilla a las empresas activas."
+      icono="heroCog6Tooth"
+    >
+      <div class="nueva-empresa-page__sincronizacion">
+        <p>
+          El gimnasio y su logo ya estan guardados. Este paso es idempotente y puede reintentarse de
+          forma segura.
+        </p>
+        <app-boton
+          tipo="button"
+          [cargando]="sincronizandoRoles()"
+          ariaLabelCarga="Sincronizando roles"
+          (accion)="sincronizarRoles()"
+        >
+          Reintentar sincronizacion
+        </app-boton>
+      </div>
+    </app-card>
+  } @else {
+    <p class="nueva-empresa-page__mensaje nueva-empresa-page__mensaje--exito" role="status">
+      {{ nombreEmpresa() }} quedo configurado correctamente.
+    </p>
+    <app-boton class="nueva-empresa-page__nuevo" tipo="button" (accion)="registrarOtroClub()">
+      Registrar otro gimnasio
+    </app-boton>
+  }
+</section>

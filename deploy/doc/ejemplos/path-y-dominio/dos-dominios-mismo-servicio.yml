@@ -1,0 +1,16 @@
+# Dos dominios apuntando al mismo servicio.
+#
+# El orquestador genera un único bloque server con ambos en server_name.
+# Útil cuando el mismo backend debe ser accesible desde dos URLs distintas.
+
+prod:
+  sb-habilitaciones:
+    branch: main
+    port: 8080
+
+    domain: sb-habilitaciones.malvinasargentinas.gob.ar, sb-vecitos-habilitaciones.malvinasargentinas.gob.ar
+
+    stack: spring
+    composer_file: plantillas/spring-3.9-java-17/docker-compose.yml
+    nginx_config: plantillas/spring-3.9-java-17/nginx.spring-boot-api-root.conf
+    application_properties: src/main/resources/application.prod.properties

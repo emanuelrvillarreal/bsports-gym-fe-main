@@ -1,0 +1,80 @@
+:host {
+  display: contents;
+}
+
+.operacion-evento {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+  max-width: 100%;
+  margin-top: 1.25rem;
+  overflow-x: hidden;
+  color: var(--app-text);
+
+  &__precio {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0.8rem 1rem;
+    background: var(--app-surface-strong);
+    border: 1px solid var(--app-surface-border);
+    border-radius: 0.75rem;
+
+    span {
+      color: var(--app-text-soft);
+    }
+
+    strong {
+      color: var(--app-accent);
+      font-size: 1.35rem;
+    }
+  }
+
+  &__estado {
+    display: grid;
+    gap: 0.3rem;
+    margin: 0;
+    padding: 0.85rem;
+    color: var(--app-text);
+    background: var(--app-surface-strong);
+    border: 1px solid var(--app-surface-border);
+    border-radius: 0.7rem;
+
+    &--exito {
+      color: var(--semantic-success);
+      border-color: color-mix(in srgb, var(--semantic-success) 45%, var(--app-surface-border));
+    }
+
+    &--pago {
+      color: var(--semantic-warning);
+      border-color: color-mix(in srgb, var(--semantic-warning) 45%, var(--app-surface-border));
+    }
+
+    &--rechazo,
+    &--error {
+      color: var(--semantic-danger);
+      border-color: color-mix(in srgb, var(--semantic-danger) 45%, var(--app-surface-border));
+    }
+  }
+
+  &__aviso {
+    margin: 0;
+    color: var(--app-text-soft);
+  }
+
+  &__monto-pendiente {
+    font-size: 1.25rem;
+  }
+
+  &__importe-error {
+    color: var(--semantic-danger);
+  }
+
+  &__acciones-pago {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-top: 0.35rem;
+  }
+}

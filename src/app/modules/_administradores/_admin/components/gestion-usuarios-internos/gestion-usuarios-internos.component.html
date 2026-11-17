@@ -1,0 +1,104 @@
+<section class="gestion-usuarios">
+  <app-card
+  
+  >
+    <form
+      class="gestion-usuarios__toolbar"
+      [class.gestion-usuarios__toolbar--profesor]="tipo() === 'profesor'"
+      (submit)="$event.preventDefault(); buscar()"
+    >
+      <div class="gestion-usuarios__busqueda">
+        <label for="usuarios-internos-busqueda">Buscar</label>
+        <input
+          id="usuarios-internos-busqueda"
+          type="search"
+          placeholder="Nombre, apellido o DNI"
+          [value]="busqueda()"
+          (input)="actualizarBusqueda($event)"
+        />
+      </div>
+
+      @if (tipo() === 'profesor') {
+        <app-select
+          etiqueta="Estado"
+          [opciones]="opcionesEstado"
+          [value]="estadoSelect()"
+          (valueChange)="cambiarEstado($event)"
+        />
+      }
+
+      <app-boton
+        class="gestion-usuarios__boton-buscar"
+        tipo="submit"
+        [cargando]="cargando()"
+        ariaLabelCarga="Buscando usuarios"
+      >
+        Buscar
+      </app-boton>
+    </form>
+
+    @if (error() && !formularioVisible()) {
+      <p class="gestion-usuarios__error" role="alert">{{ error() }}</p>
+    }
+
+    <app-tabla-responsive
+      [columnas]="columnas"
+      [filas]="filas()"
+      [cargando]="cargando()"
+      idFila="uuid"
+      [tbody_rows]="6"
+      [acciones]="acciones"
+      [tr_input]="true"
+      [tr_input_conmutador]="false"
+      [tr_input_boton_agregar]="true"
+      tr_input_boton_agregar_modo="emitir"
+      [tr_input_boton_agregar_texto]="textoNuevo()"
+      mensajeVacio="No hay usuarios para los filtros seleccionados."
+      (accionFila)="manejarAccion($event)"
+      (trInputNuevo)="abrirFormulario()"
+    />
+    <app-paginacion
+      [paginaActual]="paginaActual()"
+      [totalPaginas]="totalPaginas()"
+      [deshabilitado]="cargando()"
+      (paginaCambiada)="cambiarPagina($event)"
+    />
+  </app-card>
+
+  <app-popup
+    [abierto]="formularioVisible()"
+    [titulo]="tituloFormulario()"
+    [descripcion]="descripcionFormulario()"
+    [mostrarEncabezado]="false"
+    ancho="grande"
+    [cancelarDeshabilitado]="guardando()"
+    (cancelar)="cerrarFormulario()"
+  >
+    @if (error()) {
+      <p class="gestion-usuarios__error" role="alert">{{ error() }}</p>
+    }
+    @if (formularioVisible()) {
+      <app-titulo-hero
+        [titulo]="tituloFormulario()"
+        [subtitulo]="descripcionFormulario()"
+        [icono]="tipo() === 'profesor' ? 'profesores' : 'usuariosRecepcion'"
+      />
+      <app-formulario-usuario-interno
+        [mostrarFechaAlta]="false"
+        [modo]="modoFormulario()"
+        [usuarioInicial]="usuarioEditando()"
+        (enviado)="guardar($event)"
+      />
+    }
+
+    <app-boton
+      popupAcciones
+      tipo="submit"
+      form="formulario-usuario-interno"
+      [cargando]="guardando()"
+      [ariaLabelCarga]="modoFormulario() === 'editar' ? 'Guardando cambios' : 'Creando usuario'"
+    >
+      {{ textoGuardar() }}
+    </app-boton>
+  </app-popup>
+</section>

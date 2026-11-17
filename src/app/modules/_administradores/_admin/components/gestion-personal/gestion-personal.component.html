@@ -1,0 +1,176 @@
+<section class="personal">
+  <div class="personal__barra">
+    <label class="personal__buscar">
+      <span>Buscar</span>
+      <input
+        type="search"
+        placeholder="Nombre, apellido, DNI o email"
+        [value]="busqueda()"
+        (input)="busqueda.set(valor($event))"
+      />
+    </label>
+    <app-boton tipo="button" (accion)="abrirAlta()">Agregar persona</app-boton>
+  </div>
+
+  <p class="personal__cupo" [class.personal__cupo--lleno]="cupoLleno()">
+    @if (cupo().limite !== null) {
+      <strong>Administradores: {{ cupo().actuales }} de {{ cupo().limite }}</strong> según tu plan.
+      @if (cupoLleno()) {
+        Llegaste al límite: para sumar más administradores hay que mejorar el plan.
+      }
+    } @else {
+      <strong>Administradores: {{ cupo().actuales }}</strong>
+    }
+  </p>
+
+  <p class="personal__ayuda">
+    Tildá los roles de cada persona. Una misma persona puede ser, por ejemplo, profesor y administrador. Para que
+    alguien del personal también sea socio, dalo de alta en <strong>Socios</strong> con el mismo DNI y email.
+  </p>
+
+  @if (cargando() && !personas().length) {
+    <p class="personal__vacio">Cargando personal…</p>
+  } @else if (!personasFiltradas().length) {
+    <p class="personal__vacio">
+      {{ busqueda() ? 'No hay nadie que coincida con la búsqueda.' : 'Todavía no hay personal cargado.' }}
+    </p>
+  } @else {
+    <ul class="personal__lista">
+      @for (p of personasFiltradas(); track p.userUuid) {
+        <li class="persona" [class.persona--guardando]="guardandoUuid() === p.userUuid">
+          <div class="persona__datos">
+            <div class="persona__foto" aria-hidden="true">
+              @if (p.imageUrl) {
+                <img [src]="p.imageUrl" alt="" />
+              } @else {
+                {{ iniciales(p) }}
+              }
+            </div>
+            <div class="persona__texto">
+              <p class="persona__nombre">
+                {{ p.nombre }} {{ p.apellido }}
+                @if (p.yo) {
+                  <span class="persona__chip">Vos</span>
+                }
+              </p>
+              <p class="persona__suave">
+                {{ p.email }}@if (p.dni) { · DNI {{ p.dni }} }
+              </p>
+              <p class="persona__suave">
+                @if (p.socio) {
+                  <span class="persona__chip persona__chip--socio">
+                    Socio{{ p.socio.numeroSocio ? ' N.º ' + p.socio.numeroSocio : '' }}
+                  </span>
+                } @else {
+                  No es socio
+                }
+              </p>
+            </div>
+          </div>
+
+          <fieldset class="persona__roles">
+            <legend class="persona__legend">Roles de {{ p.nombre }} {{ p.apellido }}</legend>
+            @for (rol of roles; track rol) {
+              <label
+                class="persona__rol"
+                [class.persona__rol--activo]="p[rol] || (rol === 'recepcion' && p.admin)"
+                [class.persona__rol--deshabilitado]="rolDeshabilitado(p, rol)"
+                [attr.title]="ayudaRol(p, rol) || null"
+              >
+                <input
+                  type="checkbox"
+                  [checked]="p[rol] || (rol === 'recepcion' && p.admin)"
+                  [disabled]="rolDeshabilitado(p, rol)"
+                  (change)="cambiarRol(p, rol, $event)"
+                />
+                <span>{{ nombresRol[rol] }}</span>
+                @if (rol === 'recepcion' && p.admin) {
+                  <small>(incluido)</small>
+                }
+              </label>
+            }
+          </fieldset>
+        </li>
+      }
+    </ul>
+  }
+</section>
+
+<app-popup
+  [abierto]="popupAbierto()"
+  titulo="Agregar persona al personal"
+  descripcion="Si ya es socio o ya está en el sistema, poné su DNI o email y tocá Buscar: se completan sus datos y no hace falta contraseña."
+  [cancelarDeshabilitado]="guardandoAlta()"
+  (cancelar)="cerrarAlta()"
+>
+  <form class="alta" (submit)="$event.preventDefault(); guardarAlta()">
+    <div class="alta__buscar alta__ancho">
+      <label class="alta__campo">
+        <span>DNI</span>
+        <input type="text" inputmode="numeric" autocomplete="off" [value]="dni()" (input)="dni.set(valor($event))" />
+      </label>
+      <button type="button" class="alta__boton-buscar" [disabled]="buscando() || (!dni().trim() && !email().trim())" (click)="buscarPersona()">
+        {{ buscando() ? 'Buscando…' : 'Buscar' }}
+      </button>
+    </div>
+
+    @if (encontrada(); as e) {
+      <p class="alta__aviso alta__ancho" role="status">
+        @if (!e.existe) {
+          No está en el sistema: completá los datos y una contraseña para que pueda entrar.
+        } @else if (e.nombre) {
+          Encontramos a <strong>{{ e.nombre }} {{ e.apellido }}</strong>{{ e.socio ? ' (es socio)' : '' }}.
+          {{ e.yaEsPersonal ? 'Ya es parte del personal: los roles que elijas se suman.' : 'Elegí sus roles.' }}
+        } @else {
+          Esa persona ya tiene usuario en el sistema: completá su nombre, apellido y el mismo email para sumarla.
+        }
+      </p>
+    }
+
+    <label class="alta__campo">
+      <span>Nombre *</span>
+      <input type="text" autocomplete="off" [value]="nombre()" (input)="nombre.set(valor($event))" />
+    </label>
+    <label class="alta__campo">
+      <span>Apellido *</span>
+      <input type="text" autocomplete="off" [value]="apellido()" (input)="apellido.set(valor($event))" />
+    </label>
+    <label class="alta__campo">
+      <span>Email *</span>
+      <input type="email" autocomplete="off" [value]="email()" (input)="email.set(valor($event))" />
+    </label>
+    <label class="alta__campo">
+      <span>Teléfono <small>(opcional)</small></span>
+      <input type="tel" autocomplete="off" [value]="telefono()" (input)="telefono.set(valor($event))" />
+    </label>
+    @if (pidePassword()) {
+      <label class="alta__campo alta__ancho">
+        <span>Contraseña para entrar *</span>
+        <input type="text" autocomplete="new-password" [value]="password()" (input)="password.set(valor($event))" />
+      </label>
+    }
+
+    <fieldset class="alta__roles alta__ancho">
+      <legend>¿Qué va a hacer en el gimnasio? <small>(podés elegir más de uno)</small></legend>
+      @for (rol of roles; track rol) {
+        <label class="persona__rol" [class.persona__rol--activo]="altaRoles()[rol]">
+          <input
+            type="checkbox"
+            [checked]="altaRoles()[rol] || (rol === 'recepcion' && altaRoles().admin)"
+            [disabled]="(rol === 'recepcion' && altaRoles().admin) || (rol === 'admin' && cupoLleno())"
+            (change)="cambiarRolAlta(rol, $event)"
+          />
+          <span>{{ nombresRol[rol] }}</span>
+          @if (rol === 'admin' && cupoLleno()) {
+            <small>(sin lugar en tu plan)</small>
+          }
+        </label>
+      }
+    </fieldset>
+
+    @if (errorAlta()) {
+      <p class="alta__error alta__ancho" role="alert">{{ errorAlta() }}</p>
+    }
+  </form>
+  <app-boton popupAcciones [cargando]="guardandoAlta()" (accion)="guardarAlta()">Agregar</app-boton>
+</app-popup>

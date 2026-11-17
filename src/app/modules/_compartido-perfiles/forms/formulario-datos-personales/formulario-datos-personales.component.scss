@@ -1,0 +1,65 @@
+:host {
+  display: block;
+}
+
+.formulario-datos-personales {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+  align-items: end;
+  padding: 0.4rem;
+
+  &__error {
+    grid-column: 1 / -1;
+    min-height: 1.2rem;
+    color: var(--semantic-danger);
+    visibility: hidden;
+  }
+
+  &__error--visible {
+    visibility: visible;
+  }
+
+  label {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  app-boton {
+    grid-column: 1 / -1;
+  }
+
+  input {
+    min-height: 2.75rem;
+    padding: 0.65rem;
+    color: var(--app-text);
+    background: var(--app-surface);
+    border: 1px solid var(--app-surface-border);
+    border-radius: 0.55rem;
+
+    &:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--app-accent) 35%, white);
+      outline-offset: 2px;
+    }
+
+    &:read-only {
+      background: #e5e7eb;
+      border-color: #c5cbd3;
+    }
+  }
+}
+
+:host-context(.theme-mode-dark) .formulario-datos-personales input {
+  background: #000;
+}
+
+:host-context(.theme-mode-dark) .formulario-datos-personales input:read-only {
+  background: #2f3338;
+  border-color: #4b5159;
+}
+
+@media (max-width: 26.5625rem) {
+  .formulario-datos-personales {
+    grid-template-columns: 1fr;
+  }
+}

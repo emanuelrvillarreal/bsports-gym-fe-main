@@ -1,0 +1,49 @@
+<section class="asistencias" aria-labelledby="titulo-asistencias">
+  <div class="asistencias__rangos" role="group" aria-label="Rango de calendario">
+    <app-boton tipo="button" [class.asistencias__rango--activo]="rango() === 'hoy'" [colorFondo]="rango() === 'hoy' ? gradiente() : 'var(--app-surface-strong)'" colorInteraccion="var(--app-accent)" (accion)="seleccionarRango('hoy')">Hoy</app-boton>
+    <app-boton tipo="button" [class.asistencias__rango--activo]="rango() === 'tres-dias'" [colorFondo]="rango() === 'tres-dias' ? gradiente() : 'var(--app-surface-strong)'" colorInteraccion="var(--app-accent)" (accion)="seleccionarRango('tres-dias')">Próximos 3 días</app-boton>
+    <app-boton tipo="button" [class.asistencias__rango--activo]="rango() === 'semana'" [colorFondo]="rango() === 'semana' ? gradiente() : 'var(--app-surface-strong)'" colorInteraccion="var(--app-accent)" (accion)="seleccionarRango('semana')">Semana</app-boton>
+  </div>
+  @if (error()) { <p class="asistencias__error" role="alert">{{ error() }}</p> }
+  @if (cargando()) { <app-card class="asistencias__carga-card" titulo="Asistencias" descripcion="Cargando actividades…" [compacto]="true"><div class="asistencias__carga" role="status" aria-label="Cargando actividades"><app-load-spinner-blue /></div></app-card> }
+  @else if (!cards().length) { <div class="asistencias__vacio" role="status"><ng-icon name="heroCalendarDays" aria-hidden="true" /><p>No hay actividades con slot para este rango.</p></div> }
+  @else {
+    <div class="asistencias__cards" aria-live="polite">
+      @for (card of cards(); track card.slotUuid) {
+        <ng-container [ngTemplateOutlet]="tarjetaAsistencia" [ngTemplateOutletContext]="{ $implicit: card, activa: true }" />
+      }
+    </div>
+    <div class="asistencias__carrusel" aria-live="polite">
+      <app-carrusel-3d [items]="cards()" ariaLabel="Actividades para tomar asistencia" [altura]="altoCarrusel()" [anchoSlide]="anchoCarrusel()" [radio]="radioCarrusel()" [perspectiva]="perspectivaCarrusel()" modoMovil="three-d">
+        <ng-template appCarrusel3dItem let-card let-activa="active">
+          <ng-container [ngTemplateOutlet]="tarjetaAsistencia" [ngTemplateOutletContext]="{ $implicit: card, activa: activa }" />
+        </ng-template>
+      </app-carrusel-3d>
+    </div>
+  }
+  <ng-template #tarjetaAsistencia let-card let-activa="activa">
+    <article class="asistencias__card" [class.asistencias__card--seleccionada]="cardSeleccionada()?.slotUuid === card.slotUuid" [class.asistencias__card--inactiva]="!activa" (click)="$event.stopPropagation(); seleccionarCard(card, activa)">
+      <div class="asistencias__card-icon"><ng-icon name="heroAcademicCap" aria-hidden="true" /></div>
+      <div class="asistencias__card-contenido"><span class="asistencias__eyebrow">{{ card.referenciaNombre || 'Actividad' }}</span><h2>{{ card.titulo || card.referenciaNombre || 'Actividad' }}</h2><dl><div><dt>Fecha</dt><dd>{{ formatoFecha(card.inicio) }}</dd></div><div><dt>Horario</dt><dd>{{ formatoHora(card.inicio) }} a {{ formatoHora(card.fin) }}</dd></div></dl></div>
+      <app-boton tipo="button" [colorPaleta]="colorPaletaAsistencia(card)" aria-label="Pasar asistencia" [deshabilitado]="card.estado === 'CANCELADO' || activa === false" (click)="$event.stopPropagation(); abrirAsistencia(card, activa)"><ng-icon name="heroClipboardDocumentCheck" aria-hidden="true" /> Pasar asistencia</app-boton>
+    </article>
+  </ng-template>
+  <app-card titulo="Historial de asistencias" [descripcion]="cardSeleccionada() ? 'Actividad: ' + (cardSeleccionada()?.referenciaNombre || 'seleccionada') : 'Seleccioná una actividad'" [compacto]="true">
+    <div class="asistencias__filtros-historial">
+      <app-select etiqueta="Actividad" placeholder="Seleccionar actividad" [opciones]="opcionesActividades()" [value]="actividadHistorialUuid()" (valueChange)="seleccionarActividad($event)" />
+      <div class="asistencias__fecha-filtro">
+        <app-input-fecha etiqueta="Fecha" ariaLabel="Filtrar historial por fecha" modo="fecha" [valorInicial]="fechaHistorial()" (valorCambiado)="cambiarFechaHistorial($event)" />
+        <app-boton tipo="button" [soloIcono]="true" aria-label="Aplicar filtros del historial" (accion)="aplicarFiltrosHistorial()"><ng-icon name="heroArrowPath" aria-hidden="true" /></app-boton>
+      </div>
+    </div>
+    <div class="asistencias__historial-scroll"><app-tabla-responsive [columnas]="[{id: 'fecha', titulo: 'Fecha', ancho: '8rem'}, {id: 'memberNombre', titulo: 'Alumno', ancho: 'minmax(10rem, 1fr)'}, {id: 'estado', titulo: 'Estado', tipo: 'estado', ancho: '8rem', estadoTexto: estadoHistorial, estadoClase: claseHistorial}]" [filas]="historial()" idFila="historialUuid" [cargando]="cargandoHistorial()" [altoRendimiento]="true" [tbody_rows]="5" [max_altura]="'22rem'" [mostrarAcciones]="false" mensajeVacio="No hay historial para esta actividad." /></div>
+    @if (totalPaginasHistorial() > 1) { <app-paginacion [paginaActual]="paginaHistorial()" [totalPaginas]="totalPaginasHistorial()" [deshabilitado]="cargandoHistorial()" (paginaCambiada)="cambiarPaginaHistorial($event)" /> }
+  </app-card>
+</section>
+
+<app-popup [abierto]="popupAbierto()" [titulo]="'Asistencia · ' + (cardSeleccionada()?.referenciaNombre || '')" descripcion="Declará la asistencia de cada alumno." ancho="extraGrande" [altoCompleto]="true" textoCancelar="Cerrar" [cancelarDeshabilitado]="guardando()" (cancelar)="cerrarPopup()">
+  <app-titulo-hero titulo="Pasar asistencia" [subtitulo]="cardSeleccionada()?.referenciaNombre || 'Actividad seleccionada'" icono="heroClipboardDocumentList" [altoRendimiento]="true" />
+  @if (errorPlanilla()) { <p class="asistencias__error" role="alert">{{ errorPlanilla() }}</p> }
+  <app-tabla-responsive [columnas]="columnas" [filas]="alumnos()" idFila="memberUuid" [acciones]="acciones" [cargando]="cargandoPlanilla()" [altoRendimiento]="true" [tbody_rows]="5" [mostrarAcciones]="true" mensajeVacio="No hay alumnos inscriptos." (accionFila)="accionAsistencia($event)" />
+  <div popupAcciones><app-boton tipo="button" [cargando]="guardando()" (accion)="guardar()">Guardar asistencia</app-boton></div>
+</app-popup>

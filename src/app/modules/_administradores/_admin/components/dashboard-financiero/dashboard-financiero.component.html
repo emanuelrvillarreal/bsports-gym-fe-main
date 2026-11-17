@@ -1,0 +1,70 @@
+<section class="dashboard-financiero" aria-label="Resumen financiero">
+  @if (error()) {
+    <div class="dashboard-financiero__estado" role="alert">
+      <p>{{ error() }}</p>
+      <app-boton tipo="button" (accion)="reintentar()">Reintentar</app-boton>
+    </div>
+  } @else if (cargando() && !balanceSeleccionado()) {
+    <app-cards-hero [cargando]="true" [columnas]="4" [cantidadCarga]="4" />
+  } @else if (balanceSeleccionado()) {
+    <app-cards-hero [items]="cards()" [columnas]="4" />
+
+    <div class="dashboard-financiero__contenido">
+      <app-card
+        titulo="Cobranza y caja"
+        [descripcion]="descripcionComparacion()"
+        icono="heroBanknotes"
+      >
+        @if (tieneComparacion()) {
+          <app-grafico-barras
+            class="dashboard-financiero__grafico"
+            [barras]="barrasComparacion()"
+            estilo="vs"
+            [escala]="true"
+          />
+        } @else {
+          <p class="dashboard-financiero__vacio">
+            No hay datos para comparar con el mismo mes del año anterior.
+          </p>
+        }
+      </app-card>
+
+      <aside class="dashboard-financiero__lateral">
+        <app-card titulo="Alertas" descripcion="Prioridades del mes" icono="heroCalendarDays">
+          <ul class="dashboard-financiero__alertas">
+            @for (alerta of alertas(); track alerta) {
+              <li>{{ alerta }}</li>
+            }
+          </ul>
+        </app-card>
+
+        <app-card titulo="Cobros" descripcion="Movimientos recientes" icono="heroBanknotes">
+          @if (movimientos().length) {
+            <ul class="dashboard-financiero__movimientos">
+              @for (movimiento of movimientos(); track movimiento.movimientoUuid) {
+                <li>
+                  <span>{{ movimiento.concepto }}</span>
+                  <strong
+                    [class.dashboard-financiero__monto--egreso]="movimiento.tipo === 'EGRESO'"
+                  >
+                    {{ movimiento.tipo === 'EGRESO' ? '- ' : ''
+                    }}{{ formatearMoneda(movimiento.monto) }}
+                  </strong>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="dashboard-financiero__vacio">No hay movimientos visibles para el período.</p>
+          }
+        </app-card>
+      </aside>
+    </div>
+  } @else {
+    <div class="dashboard-financiero__estado dashboard-financiero__estado--sin-balance" role="status">
+      <span class="dashboard-financiero__estado-icon" aria-hidden="true">!</span>
+      <strong class="dashboard-financiero__estado-titulo">Sin datos financieros</strong>
+      <p>No hay un balance registrado para el período seleccionado.</p>
+      <small class="dashboard-financiero__estado-ayuda">Seleccioná otro mes o año para consultar la información disponible.</small>
+    </div>
+  }
+</section>

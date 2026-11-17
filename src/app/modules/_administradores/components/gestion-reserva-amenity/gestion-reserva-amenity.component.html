@@ -1,0 +1,62 @@
+<section class="gestion-reserva-amenity" aria-label="Nueva reserva de amenity">
+  <app-titulo-hero titulo="Nueva reserva" subtitulo="Seleccioná socio, instalación y horario." icono="heroCalendarDays" />
+
+  <app-wizard-pasos
+    [pasos]="pasosWizard"
+    [pasoActual]="pasoWizardActual()"
+    etiquetaProgreso="Progreso de la reserva"
+  >
+    <div class="gestion-reserva-amenity__contenido" [attr.data-paso]="paso()">
+    @if (paso() === 1) {
+      <section aria-labelledby="reserva-socio-titulo">
+        <h3 id="reserva-socio-titulo">Elegí el socio titular</h3>
+        <div class="gestion-reserva-amenity__buscador">
+          <input type="search" placeholder="Buscar por nombre, DNI o número" [value]="busqueda()" (input)="cambiarBusqueda($event)" (keyup.enter)="buscarSocios()" />
+          <app-boton (accion)="buscarSocios()">Buscar</app-boton>
+        </div>
+        @if (errorSocios()) { <p class="gestion-reserva-amenity__error" role="alert">{{ errorSocios() }}</p> }
+        <app-tabla-responsive [columnas]="columnasSocios" [filas]="socios()" idFila="memberUuid" [acciones]="accionesSocios" [cargando]="cargandoSocios()" [tbody_rows]="4" mensajeVacio="No hay socios titulares activos." (accionFila)="manejarAccionSocio($event)" />
+        <app-paginacion [paginaActual]="pagina()" [totalPaginas]="totalPaginas()" [deshabilitado]="cargandoSocios()" (paginaCambiada)="cambiarPagina($event)" />
+      </section>
+    } @else if (paso() === 2) {
+      <section aria-labelledby="reserva-amenity-titulo">
+        <h3 id="reserva-amenity-titulo">Elegí la instalación</h3>
+        <app-tabla-responsive [columnas]="columnasAmenities" [filas]="filasAmenities()" idFila="amenityUuid" [acciones]="accionesAmenities" [tbody_rows]="4" mensajeVacio="No hay instalaciones activas para reservar." (accionFila)="manejarAccionAmenity($event)" />
+      </section>
+    } @else {
+      <section aria-labelledby="reserva-horario-titulo">
+        <h3 id="reserva-horario-titulo">Confirmá la reserva</h3>
+        <div class="gestion-reserva-amenity__resumen">
+          <article>
+            <h4>Socio</h4>
+            <dl>
+              <div><dt>Nombre</dt><dd>{{ socioSeleccionado()?.nombre }}</dd></div>
+              <div><dt>Apellido</dt><dd>{{ socioSeleccionado()?.apellido }}</dd></div>
+              <div><dt>DNI</dt><dd>{{ formatearDni(socioSeleccionado()?.dni) }}</dd></div>
+              <div><dt>N.º de socio</dt><dd>{{ socioSeleccionado()?.numeroSocio || '—' }}</dd></div>
+            </dl>
+          </article>
+          <article>
+            <h4>Instalación</h4>
+            <dl>
+              <div><dt>Nombre</dt><dd>{{ amenitySeleccionado()?.nombre }}</dd></div>
+              <div><dt>Días</dt><dd><ul class="gestion-reserva-amenity__chips">@for (dia of resumirDias(amenitySeleccionado()?.diasSemana ?? ''); track dia) { <li>{{ dia }}</li> }</ul></dd></div>
+              <div><dt>Horario disponible</dt><dd class="gestion-reserva-amenity__horario-disponible">{{ formatearHora24(amenitySeleccionado()?.horaInicio) }} – {{ formatearHora24(amenitySeleccionado()?.horaFin) }}<ng-icon name="heroClock" aria-hidden="true" /></dd></div>
+            </dl>
+          </article>
+        </div>
+        <fieldset class="gestion-reserva-amenity__horario">
+          <legend>Horario de la reserva</legend>
+          <div class="gestion-reserva-amenity__campos-horario">
+            <app-input-fecha etiqueta="Fecha" modo="fecha" [minimo]="fechaMinima" [maximo]="fechaMaxima" [diasPermitidos]="diasPermitidos()" posicionCalendario="arriba" [ngModel]="fecha()" (ngModelChange)="fecha.set($event)" />
+            <app-input-hora etiqueta="Desde" [valor]="horaInicio()" [minimo]="horaInicioDisponible()" [maximo]="maximoHoraInicio()" [requerido]="true" (valorCambiado)="actualizarHoraInicio($event)" />
+            <app-input-hora etiqueta="Hasta" [valor]="horaFin()" [minimo]="minimoHoraFin()" [maximo]="maximoHoraFin()" [requerido]="true" [invalido]="!!errorHorario()" (valorCambiado)="actualizarHoraFin($event)" />
+          </div>
+        </fieldset>
+        @if (errorHorario()) { <p class="gestion-reserva-amenity__error" role="alert">{{ errorHorario() }}</p> }
+      </section>
+    }
+    </div>
+  </app-wizard-pasos>
+
+</section>

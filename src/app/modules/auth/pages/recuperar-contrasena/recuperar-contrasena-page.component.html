@@ -1,0 +1,50 @@
+<section class="auth-page" [class.auth-page--alto-rendimiento]="altoRendimiento()">
+  <aside class="auth-page__visual">
+    <app-decoracion-auth [altoRendimiento]="altoRendimiento()" />
+    <div class="auth-page__marca">
+      <div class="auth-page__brand" [attr.aria-label]="appName">
+        @if (!logoCargado() || logoConError()) {
+          <span class="auth-page__brand-spinner" aria-hidden="true">
+            <app-load-spinner tipo="imagen" [altoRendimiento]="altoRendimiento()" />
+          </span>
+        }
+        <img
+          [ngSrc]="logoUrl()"
+          [alt]="'Logo de ' + nombreEmpresa()"
+          width="512"
+          height="512"
+          sizes="(max-width: 980px) 5rem, 12rem"
+          priority
+          [class.auth-page__brand-image--oculta]="!logoCargado() || logoConError()"
+          (load)="manejarLogoCargado()"
+          (error)="manejarLogoError()"
+        />
+      </div>
+      <div class="auth-page__bienvenida">
+        <p class="auth-page__saludo">Nueva contraseña</p>
+        <p class="auth-page__brand-text">{{ nombreEmpresa() }}</p>
+        <p class="auth-page__bajada">Elegí una contraseña que te acuerdes y después entrás con tu email.</p>
+      </div>
+    </div>
+  </aside>
+
+  <div class="auth-page__form-shell">
+    <app-formulario-cambio-contrasena
+      [usuario]="usuario()"
+      [email]="email()"
+      [code]="code()"
+      [cargando]="cargando()"
+      [mensajeErrorExterno]="mensajeError()"
+      [linkValido]="linkValido()"
+      (volverLogin)="volverALogin()"
+      (submitted)="restablecerContrasena($event)"
+    />
+
+    <div class="auth-page__powered-by">
+      <a href="https://blueopendata.com/" target="_blank" rel="noopener noreferrer" aria-label="B Sports Gym, de Blue Open Data">
+        <span>B Sports Gym</span>
+        <img src="assets/Logo BOP Solo.svg" alt="" width="144" height="24" />
+      </a>
+    </div>
+  </div>
+</section>

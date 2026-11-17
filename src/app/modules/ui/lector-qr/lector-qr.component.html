@@ -1,0 +1,94 @@
+<section class="lector-qr" aria-labelledby="lector-qr-titulo">
+  <header class="lector-qr__encabezado">
+    <div>
+      <p class="lector-qr__eyebrow">Acceso</p>
+      <h2 id="lector-qr-titulo">Lector de código QR</h2>
+    </div>
+
+    <span
+      class="lector-qr__indicador"
+      [class.lector-qr__indicador--activo]="estado() === 'leyendo'"
+    >
+      {{ estado() === 'leyendo' ? 'Cámara activa' : 'Cámara inactiva' }}
+    </span>
+  </header>
+
+  <div class="lector-qr__camara">
+    <div
+      class="lector-qr__visor"
+      [class.lector-qr__visor--activo]="estado() === 'leyendo'"
+      [attr.aria-busy]="estado() === 'iniciando'"
+    >
+      <video
+        #video
+        muted
+        autoplay
+        playsinline
+        aria-label="Vista previa de la cámara para leer códigos QR"
+      ></video>
+      @if (estado() === 'iniciando') {
+        <span class="lector-qr__spinner">
+          <app-load-spinner-blue ariaLabel="Conectando cámara" />
+        </span>
+      }
+      <span class="lector-qr__marco" aria-hidden="true"></span>
+    </div>
+
+    <p id="lector-qr-estado" class="lector-qr__estado" role="status" aria-live="polite">
+      {{ mensajeEstado() }}
+    </p>
+
+    @if (camaras().length > 1) {
+      <app-select
+        etiqueta="Cámara"
+        placeholder="Seleccionar cámara"
+        [opciones]="camaras()"
+        [value]="camaraSeleccionada()"
+        (valueChange)="seleccionarCamara($event)"
+      />
+    }
+
+    @if (
+      activo() &&
+      (estado() === 'permiso-denegado' || estado() === 'sin-camara' || estado() === 'error')
+    ) {
+      <app-boton apariencia="texto" (accion)="reintentar()">Reintentar cámara</app-boton>
+    }
+  </div>
+
+  @if (mostrarIngresoManual()) {
+    <div class="lector-qr__separador" aria-hidden="true">
+    <span>o usá ingreso manual / lector USB</span>
+    </div>
+
+  <form class="lector-qr__manual" (submit)="$event.preventDefault(); enviarContenidoManual()">
+    <label for="lector-qr-manual">{{ manualEtiqueta() }}</label>
+    <p id="lector-qr-manual-ayuda">{{ manualAyuda() }}</p>
+
+    <div class="lector-qr__manual-fila">
+      <input
+        id="lector-qr-manual"
+        type="text"
+        [attr.inputmode]="manualFormato() === 'dni' ? 'numeric' : 'text'"
+        [pattern]="manualFormato() === 'dni' ? '[0-9.]*' : null"
+        autocomplete="off"
+        [placeholder]="manualPlaceholder()"
+        [value]="contenidoManual()"
+        aria-describedby="lector-qr-manual-ayuda lector-qr-aviso"
+        (input)="actualizarContenidoManual($event)"
+      />
+      <app-boton
+        tipo="submit"
+        [cargando]="manualCargando()"
+        [deshabilitado]="manualCargando() || !contenidoManual().trim()"
+      >
+        Ingresar socio
+      </app-boton>
+    </div>
+
+    <p id="lector-qr-aviso" class="lector-qr__aviso" aria-live="polite">
+      {{ aviso() }}
+    </p>
+    </form>
+  }
+</section>

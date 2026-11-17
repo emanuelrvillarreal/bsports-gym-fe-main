@@ -1,0 +1,95 @@
+:host {
+  display: block;
+  --solapas-texto: var(--app-text);
+  --solapas-texto-suave: var(--app-text-soft);
+  --solapas-borde: var(--app-surface-border);
+  --solapas-acento: var(--app-accent);
+  --solapas-acento-suave: var(--app-accent-soft);
+}
+
+.solapas {
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--solapas-borde);
+}
+
+.solapas__lista {
+  display: flex;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  // En pantallas chicas las solapas se deslizan en lugar de apilarse.
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.solapas__item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.625rem 1rem;
+  border-radius: 0.625rem 0.625rem 0 0;
+  color: var(--solapas-texto-suave);
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+
+  ng-icon {
+    font-size: 1.15rem;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    right: 0.75rem;
+    bottom: -1px;
+    left: 0.75rem;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+    background: transparent;
+  }
+
+  &:hover:not(.solapas__item--activa) {
+    color: var(--solapas-texto);
+    background: color-mix(in srgb, var(--solapas-acento) 8%, transparent);
+  }
+
+  &:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--solapas-acento) 40%, white);
+    outline-offset: -3px;
+  }
+
+  &--activa {
+    color: var(--solapas-acento);
+    background: var(--solapas-acento-suave);
+
+    &::after {
+      background: var(--solapas-acento);
+    }
+  }
+}
+
+.solapas__contador {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--app-danger);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.solapas__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

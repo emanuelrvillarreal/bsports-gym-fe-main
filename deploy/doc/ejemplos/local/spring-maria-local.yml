@@ -1,0 +1,23 @@
+# Ejemplo: Spring Boot + MariaDB en local
+# Bloque local para un backend Spring con BD embebida.
+# No incluye branch, domain ni nginx_config (no aplican en local).
+
+local:
+  mi-api:
+    port: 9080
+    stack: spring_maria
+
+    env:
+      RESTART_POLICY: "no"
+      # Variables que application.server.properties referencia con ${...}
+      EXTERNAL_API_URL: "http://localhost:8081"
+      FEATURE_EXPORT_ENABLED: true
+      HTTP_TIMEOUT: 45
+
+    mysql_user: mi-api
+    mysql_db: mi-api
+    mysql_pass: mi-api
+    mysql_external_port: 3307
+
+    composer_file: plantillas/spring-3.9-java-17-maria-11/docker-compose.yml
+    application_properties: src/main/resources/application.server.properties

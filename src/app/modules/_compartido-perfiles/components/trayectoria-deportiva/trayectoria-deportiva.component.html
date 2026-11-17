@@ -1,0 +1,88 @@
+@let datos = trayectoria();
+<div class="trayectoria">
+  @if (mostrarSocio()) {
+    <header class="trayectoria__socio">
+      <div>
+        <strong>{{ datos.nombre }} {{ datos.apellido }}</strong>
+        @if (datos.categoriaActual) {
+          <span class="trayectoria__dato">Categoría {{ datos.categoriaActual }}</span>
+        }
+      </div>
+      @if (datos.fechaAltaClub) {
+        <span class="trayectoria__dato">
+          Socio desde el {{ fecha(datos.fechaAltaClub) }} · {{ datos.antiguedadClub }}
+        </span>
+      }
+    </header>
+  }
+
+  @if (!datos.actividades.length) {
+    <p class="trayectoria__vacio">Todavía no tiene inscripciones en actividades.</p>
+  }
+
+  @for (grupo of [{ titulo: 'Actividades actuales', items: actuales() }, { titulo: 'Actividades anteriores', items: anteriores() }]; track grupo.titulo) {
+    @if (grupo.items.length) {
+      <section class="trayectoria__grupo" [attr.aria-label]="grupo.titulo">
+        <h3>{{ grupo.titulo }} <span>{{ grupo.items.length }}</span></h3>
+        <div class="trayectoria__actividades">
+          @for (actividad of grupo.items; track actividad.actividadUuid) {
+            <article class="trayectoria__actividad" [class.trayectoria__actividad--anterior]="!actividad.activa">
+              <header>
+                <h4>{{ actividad.nombre }}</h4>
+                <span class="trayectoria__nivel" [class]="claseNivel(actividad.nivel)">
+                  {{ porcentaje(actividad.porcentaje) }}
+                </span>
+              </header>
+              <dl>
+                <div><dt>Ingreso</dt><dd>{{ fecha(actividad.primeraInscripcion) }}</dd></div>
+                <div><dt>Antigüedad</dt><dd>{{ actividad.antiguedad }}</dd></div>
+                <div><dt>Tiempo activo</dt><dd>{{ actividad.tiempoActivo }}</dd></div>
+                <div>
+                  <dt>Asistencia</dt>
+                  <dd>{{ actividad.presentes }} de {{ actividad.clases }} clases
+                    @if (actividad.justificadas) { · {{ actividad.justificadas }} justificadas }
+                  </dd>
+                </div>
+                @if (actividad.reinscripciones) {
+                  <div><dt>Reinscripciones</dt><dd>{{ actividad.reinscripciones }}</dd></div>
+                }
+                @if (actividad.profesores.length) {
+                  <div><dt>Profesores</dt><dd>{{ actividad.profesores.join(', ') }}</dd></div>
+                }
+                @if (actividad.categorias.length) {
+                  <div><dt>Categorías</dt><dd>{{ actividad.categorias.join(', ') }}</dd></div>
+                }
+              </dl>
+              @if (actividad.periodos.length > 1 || !actividad.activa) {
+                <ol class="trayectoria__periodos" aria-label="Períodos de inscripción">
+                  @for (periodo of actividad.periodos; track periodo.inscripcionUuid) {
+                    <li>
+                      {{ fecha(periodo.desde) }} → {{ periodo.activa ? 'hoy' : fecha(periodo.hasta) }}
+                      <span>({{ periodo.duracion }})</span>
+                      @if (periodo.motivoBaja) { <em>· {{ periodo.motivoBaja }}</em> }
+                    </li>
+                  }
+                </ol>
+              }
+            </article>
+          }
+        </div>
+      </section>
+    }
+  }
+
+  @if (datos.hitos.length) {
+    <section class="trayectoria__grupo" aria-label="Historial">
+      <h3>Historial</h3>
+      <ol class="trayectoria__linea">
+        @for (hito of datos.hitos; track $index) {
+          <li [class]="'trayectoria__hito trayectoria__hito--' + hito.tipo.toLowerCase()">
+            <time>{{ fecha(hito.fecha) }}</time>
+            <strong>{{ textoHito(hito.tipo) }} · {{ hito.actividad }}</strong>
+            <span>{{ hito.detalle }}</span>
+          </li>
+        }
+      </ol>
+    </section>
+  }
+</div>

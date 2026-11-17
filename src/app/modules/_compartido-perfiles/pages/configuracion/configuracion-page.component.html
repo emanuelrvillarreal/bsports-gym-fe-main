@@ -1,0 +1,34 @@
+<section class="configuracion-page">
+  <app-titulo-hero titulo="Configuración" icono="configuracion" />
+  @if (puedeGestionarBranding) {
+    <app-gestion-branding-empresa />
+  }
+  @if (puedeGestionarPerfilEmpresa) {
+    <app-gestion-configuracion-empresa />
+  }
+  @if (puedeAccederCrmManager) {
+    <app-card
+      titulo="CRM Manager"
+      descripcion="Consultá las facturas de la suscripción del gimnasio y regularizá pagos pendientes."
+      icono="heroBanknotes"
+    >
+      <div class="configuracion-page__crm-accion">
+        <app-boton
+          colorPaleta="primario"
+          class="configuracion-page__crm-boton"
+          ariaLabel="Abrir CRM Manager"
+          (accion)="abrirCrmManager()"
+        >
+          <app-load-spinner-blue
+            class="configuracion-page__crm-spinner"
+            colorInicio="currentColor"
+            colorFin="currentColor"
+            ariaLabel="Acceso CRM Manager"
+            aria-hidden="true"
+          />
+          <span>Abrir CRM Manager</span>
+        </app-boton>
+      </div>
+    </app-card>
+  }
+</section>

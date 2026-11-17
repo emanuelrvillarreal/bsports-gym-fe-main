@@ -1,0 +1,162 @@
+:host {
+  display: block;
+}
+
+:host-context(.config-page--alto-rendimiento) {
+  .onboarding-panel__toggle,
+  .onboarding-panel__toggle-ui,
+  .onboarding-panel__toggle-ui::after,
+  .onboarding-panel__expand span {
+    transition: none;
+  }
+}
+
+.onboarding-panel {
+  display: grid;
+}
+
+.onboarding-panel__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.onboarding-panel__copy {
+  display: grid;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.onboarding-panel__copy > div {
+  display: grid;
+  gap: 0.28rem;
+}
+
+.onboarding-panel__copy strong {
+  color: var(--app-text);
+  font-size: 0.95rem;
+}
+
+.onboarding-panel__copy small {
+  color: var(--app-text-soft);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.onboarding-panel__expand {
+  display: inline-grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  color: var(--app-text);
+  font: inherit;
+  background: color-mix(in srgb, var(--app-surface-strong) 86%, #ffffff);
+  border: 1px solid color-mix(in srgb, var(--app-surface-border) 72%, #ffffff);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.onboarding-panel__expand span {
+  display: inline-block;
+  font-size: 1rem;
+  line-height: 1;
+  transform: rotate(-90deg);
+  transition: transform 160ms ease;
+}
+
+.onboarding-panel__expand--abierto span {
+  transform: rotate(90deg);
+}
+
+.onboarding-panel__toggle--master {
+  margin-top: 0.9rem;
+}
+
+.onboarding-panel__list {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+}
+
+.onboarding-panel__toggle {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.9rem;
+  width: 100%;
+  padding: 0.7rem 0.8rem;
+  color: inherit;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: 0.9rem;
+  cursor: pointer;
+  transition:
+    background-color 180ms ease,
+    box-shadow 220ms ease;
+}
+
+.onboarding-panel__toggle--activa {
+  background: color-mix(in srgb, var(--app-accent) 12%, transparent);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--app-accent) 20%, transparent),
+    inset 0 0 26px color-mix(in srgb, var(--app-warning) 12%, transparent);
+}
+
+.onboarding-panel__toggle-ui {
+  position: relative;
+  width: 2.9rem;
+  height: 1.6rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--app-surface-border) 78%, transparent);
+  background: color-mix(in srgb, var(--app-surface-strong) 82%, transparent);
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.onboarding-panel__toggle-ui--activa {
+  background: color-mix(in srgb, var(--app-warning) 30%, var(--app-surface));
+  border-color: color-mix(in srgb, var(--app-warning) 55%, var(--app-surface-border));
+}
+
+.onboarding-panel__toggle-ui::after {
+  content: '';
+  position: absolute;
+  top: 0.14rem;
+  left: 0.16rem;
+  width: 1.04rem;
+  height: 1.04rem;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 18%);
+  transition: transform 160ms ease;
+}
+
+.onboarding-panel__toggle-ui--activa::after {
+  transform: translateX(1.22rem);
+}
+
+.onboarding-panel__toggle:focus-visible .onboarding-panel__toggle-ui {
+  outline: 3px solid color-mix(in srgb, var(--app-accent) 28%, white);
+  outline-offset: 2px;
+}
+
+.onboarding-panel__toggle-copy {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.onboarding-panel__toggle-copy strong {
+  color: var(--app-text);
+  font-size: 0.9rem;
+}
+
+.onboarding-panel__toggle-copy small {
+  color: var(--app-text-soft);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.onboarding-panel__toggle-meta {
+  font-size: 0.85rem;
+}

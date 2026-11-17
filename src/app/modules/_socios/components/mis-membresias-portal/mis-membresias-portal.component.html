@@ -1,0 +1,73 @@
+<section class="portal-membresias" aria-label="Mis pases">
+  @if (pendientePago(); as p) {
+    <div class="portal-membresias__aviso" role="status">
+      <span>Listo: el pase <strong>{{ p.pase.nombre }}</strong> se habilita cuando pagues la cuota{{ p.cobro?.vencimiento ? ' (vence el ' + fecha(p.cobro!.vencimiento!) + ')' : '' }}.</span>
+      <a [routerLink]="rutaCuotas">Ir a Mis cuotas</a>
+    </div>
+  }
+
+  @if (cargando() && !datos()) {
+    <p class="portal-membresias__vacio">Cargando…</p>
+  } @else if (datos(); as d) {
+    <section class="portal-membresias__bloque" aria-label="Pases vigentes">
+      <h3>Mis pases</h3>
+      @for (m of vigentes(); track m.uuid) {
+        <app-tarjeta-membresia [membresia]="m" [mostrarSocio]="variosSocios()" [compacta]="false" (accion)="accion(m, $event)" />
+      } @empty {
+        <p class="portal-membresias__vacio">No tenés pases vigentes.{{ d.puedeContratar && d.pasesDisponibles.length ? ' Podés contratar uno acá abajo.' : '' }}</p>
+      }
+    </section>
+
+    @if (d.puedeContratar && d.pasesDisponibles.length) {
+      <section class="portal-membresias__bloque" aria-label="Pases disponibles">
+        <h3>Pases que podés contratar</h3>
+        <div class="portal-membresias__oferta">
+          @for (p of d.pasesDisponibles; track p.uuid) {
+            <article class="portal-membresias__pase">
+              <header><strong>{{ p.nombre }}</strong><span>{{ precio(p) }}</span></header>
+              <p>{{ resumen(p) }}</p>
+              @if (p.descripcion) { <p class="portal-membresias__texto">{{ p.descripcion }}</p> }
+              @if (p.restricciones) { <small>{{ p.restricciones }}</small> }
+              <app-boton apariencia="texto" (accion)="abrirContratar(p)">Contratar</app-boton>
+            </article>
+          }
+        </div>
+      </section>
+    }
+
+    @if (contratando(); as pase) {
+      <form class="portal-membresias__formulario" (submit)="$event.preventDefault(); contratar()">
+        <h3 class="portal-membresias__ancho">Contratar {{ pase.nombre }} · {{ precio(pase) }}</h3>
+        @if (!pase.familiar && variosSocios()) {
+          <app-select etiqueta="¿Para quién?" [opciones]="opcionesBeneficiario()" [value]="beneficiario()" (valueChange)="beneficiario.set($event)" />
+        }
+        <app-input-fecha etiqueta="Empieza el *" [valorInicial]="fechaInicio()" [minimo]="hoy" (valorCambiado)="fechaInicio.set($event)" />
+        @if (pase.familiar) {
+          <fieldset class="portal-membresias__opciones portal-membresias__ancho">
+            <legend>¿Quiénes del grupo quedan cubiertos? (además de vos, hasta {{ pase.maxIntegrantes }} personas)</legend>
+            @for (g of otrosIntegrantes(); track g.uuid) {
+              <label class="portal-membresias__check"><input type="checkbox" [checked]="integrantes().has(g.uuid)" (change)="alternarIntegrante(g.uuid, $any($event.target).checked)" />{{ g.nombre }}</label>
+            } @empty {
+              <p class="portal-membresias__vacio">Tu grupo no tiene otros integrantes.</p>
+            }
+          </fieldset>
+        }
+        <p class="portal-membresias__vacio portal-membresias__ancho">Se genera una cuota que pagás en Mis cuotas. El pase se habilita cuando está paga.</p>
+        @if (error()) { <p class="portal-membresias__error portal-membresias__ancho" role="alert">{{ error() }}</p> }
+        <div class="portal-membresias__pie portal-membresias__ancho">
+          <app-boton apariencia="texto" (accion)="contratando.set(null)">Cancelar</app-boton>
+          <app-boton tipo="submit" [cargando]="guardando()">Contratar</app-boton>
+        </div>
+      </form>
+    }
+
+    @if (historial().length) {
+      <section class="portal-membresias__bloque" aria-label="Historial">
+        <h3>Historial ({{ historial().length }})</h3>
+        @for (m of historial(); track m.uuid) {
+          <app-tarjeta-membresia [membresia]="m" [mostrarSocio]="variosSocios()" [compacta]="true" (accion)="accion(m, $event)" />
+        }
+      </section>
+    }
+  }
+</section>

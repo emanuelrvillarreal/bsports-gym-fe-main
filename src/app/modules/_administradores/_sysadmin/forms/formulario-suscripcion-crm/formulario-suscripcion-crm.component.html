@@ -1,0 +1,167 @@
+<form
+  id="formulario-suscripcion-crm"
+  class="formulario-suscripcion-crm"
+  appValidacionFormulario
+  (submit)="$event.preventDefault(); enviar()"
+  novalidate
+>
+  <div>
+    <h3 id="titulo-selector-plan">Plan a aplicar</h3>
+    <p>El plan que se ve en el carrusel es el que se aplicará.</p>
+  </div>
+
+  <section class="formulario-suscripcion-crm__planes" aria-labelledby="titulo-selector-plan">
+    <app-carrusel-fade
+      [items]="planesVista()"
+      [claveReinicio]="codigoPlanActual()"
+      [mostrarControles]="planesVista().length > 1"
+      [navegacionMovilPorDeslizamiento]="true"
+      [alturaAutomatica]="true"
+      altura="26rem"
+      ariaLabel="Planes disponibles"
+      (cambioIndice)="seleccionarPlanVisible($event)"
+    >
+      <ng-template appCarruselFadeItem let-planVista>
+        <div
+          class="formulario-suscripcion-crm__plan"
+          [class.formulario-suscripcion-crm__plan--seleccionado]="
+            codigoPlan() === planVista.plan.codigo
+          "
+        >
+          <app-cards [item]="planVista.tarjeta" (itemSeleccionado)="seleccionarPlan(planVista)" />
+        </div>
+      </ng-template>
+    </app-carrusel-fade>
+
+    @if (planSeleccionado(); as planSeleccionado) {
+      <p class="formulario-suscripcion-crm__plan-vigente" role="status">
+        Se aplicará <strong>{{ planSeleccionado.nombre }}</strong> a este gimnasio.
+      </p>
+    }
+
+    @if (mostrarErrores() && !codigoPlan()) {
+      <p class="formulario-suscripcion-crm__error" role="alert">Seleccioná un plan.</p>
+    }
+  </section>
+
+  @if (planSeleccionado(); as plan) {
+    <p class="formulario-suscripcion-crm__seleccion" role="status">
+      Seleccionaste <strong>{{ plan.nombre }}</strong>.
+    </p>
+  }
+
+  <section class="formulario-suscripcion-crm__descuento" aria-label="Descuento temporal">
+    <label class="formulario-suscripcion-crm__checkbox" for="aplicar-descuento-crm">
+      <input
+        id="aplicar-descuento-crm"
+        name="aplicarDescuento"
+        type="checkbox"
+        [checked]="aplicarDescuento()"
+        [disabled]="procesando()"
+        (change)="actualizarAplicarDescuento($event)"
+      />
+      Aplicar descuento temporal a la suscripción
+    </label>
+
+    @if (aplicarDescuento()) {
+      <div class="formulario-suscripcion-crm__descuento-campos">
+        <h3 id="titulo-descuento-crm">Descuento</h3>
+
+        <app-select
+          [attr.data-app-invalido]="mostrarErrores() && !tipoDescuento() ? 'true' : null"
+          etiqueta="Tipo de descuento *"
+          placeholder="Seleccionar tipo"
+          [opciones]="opcionesTipoDescuento"
+          [value]="tipoDescuento()"
+          [deshabilitado]="procesando()"
+          (valueChange)="actualizarTipoDescuento($event)"
+        />
+
+        @if (esDescuentoPorMonto()) {
+          <label for="monto-descuento-crm">
+            Monto por factura *
+            <span class="formulario-suscripcion-crm__entrada-con-prefijo">
+              <span aria-hidden="true">$</span>
+              <input
+                id="monto-descuento-crm"
+                name="montoDescuento"
+                type="number"
+                inputmode="decimal"
+                min="1"
+                step="0.01"
+                required
+                [value]="montoDescuento()"
+                [disabled]="procesando()"
+                [attr.data-app-invalido]="
+                  mostrarErrores() && !!mensajeErrorFormulario() ? 'true' : null
+                "
+                (input)="actualizarMontoDescuento($event)"
+              />
+            </span>
+          </label>
+        }
+
+        @if (esDescuentoPorPorcentaje()) {
+          <label for="porcentaje-descuento-crm">
+            Porcentaje por factura *
+            <span class="formulario-suscripcion-crm__entrada-con-prefijo">
+              <span aria-hidden="true">%</span>
+              <input
+                id="porcentaje-descuento-crm"
+                name="porcentajeDescuento"
+                type="number"
+                inputmode="numeric"
+                min="1"
+                max="100"
+                step="1"
+                required
+                [value]="porcentajeDescuento()"
+                [disabled]="procesando()"
+                [attr.data-app-invalido]="
+                  mostrarErrores() && !!mensajeErrorFormulario() ? 'true' : null
+                "
+                (input)="actualizarPorcentajeDescuento($event)"
+              />
+            </span>
+          </label>
+        }
+
+        <label for="cantidad-periodos-descuento-crm">
+          Cantidad de meses con descuento *
+          <input
+            id="cantidad-periodos-descuento-crm"
+            name="cantidadPeriodosDescuento"
+            type="number"
+            inputmode="numeric"
+            min="1"
+            step="1"
+            required
+            [value]="cantidadPeriodosDescuento()"
+            [disabled]="procesando()"
+            [attr.data-app-invalido]="
+              mostrarErrores() && !!mensajeErrorFormulario() ? 'true' : null
+            "
+            (input)="actualizarCantidadPeriodosDescuento($event)"
+          />
+        </label>
+      </div>
+    }
+  </section>
+
+  @if (mostrarErrores() && codigoPlan() && mensajeErrorFormulario()) {
+    <p class="formulario-suscripcion-crm__error" role="alert">{{ mensajeErrorFormulario() }}</p>
+  }
+
+  @if (mostrarAcciones()) {
+    <div class="formulario-suscripcion-crm__acciones">
+      <app-boton
+        tipo="submit"
+        [cargando]="procesando()"
+        [deshabilitado]="!formularioValido()"
+        ariaLabelCarga="Guardando suscripción"
+      >
+        {{ modo() === 'suscribir' ? 'Suscribir gimnasio' : 'Confirmar cambio de plan' }}
+      </app-boton>
+    </div>
+  }
+</form>

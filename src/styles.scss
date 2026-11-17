@@ -1,0 +1,279 @@
+/* Estilos globales */
+html {
+  /* Base de 17px: más fácil de leer para gente grande. "Letra grande" la sube más. */
+  font-size: 106.25%;
+}
+
+html,
+body {
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  list-style-type: none;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--app-scrollbar-thumb) 34%, transparent)
+    color-mix(in srgb, var(--app-scrollbar-track) 22%, transparent);
+}
+
+/* Feedback transversal de appValidacionFormulario. */
+input.app-control--invalido,
+select.app-control--invalido,
+textarea.app-control--invalido,
+fieldset.app-control--invalido,
+label.app-control--invalido,
+button.app-control--invalido,
+app-select.app-control--invalido .app-select__control {
+  border-color: var(--app-danger);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--app-danger) 28%, transparent);
+}
+
+input.app-control--invalido:focus-visible,
+select.app-control--invalido:focus-visible,
+textarea.app-control--invalido:focus-visible,
+button.app-control--invalido:focus-visible,
+app-select.app-control--invalido .app-select__control:focus-visible {
+  outline-color: var(--app-danger);
+}
+
+/*
+ * Los buscadores se renderizan dentro de contenedores con overflow para el
+ * comportamiento responsive de las tablas. Un outline externo puede quedar
+ * recortado en esos casos, por eso el foco se dibuja hacia adentro del input.
+ */
+input[type='search']:not(.app-control--invalido):focus-visible {
+  outline: none;
+  border-color: var(--app-accent);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--app-accent) 62%, transparent);
+}
+
+body {
+  /* Branding: controlado por ColorThemeService */
+  --color-primario: #4982fd;
+  --color-secundario: #2563eb;
+  --color-terciario: #06b6d4;
+
+  /* Aliases descriptivos (preferidos en código nuevo) */
+  --brand-primary: var(--color-primario);
+  --brand-secondary: var(--color-secundario);
+  --brand-tertiary: var(--color-terciario);
+
+  /* Semánticos reales — no dependen del color de marca */
+  --semantic-success: #22c55e;
+  --semantic-warning: #f59e0b;
+  --semantic-info: #0ea5e9;
+  --semantic-danger: #ef4444;
+
+  /* Esquema estructural: controlado por ThemeModeService */
+  --app-bg: #060000;
+  --app-text: whitesmoke;
+  --app-surface: #0f1622;
+  --app-surface-border: #2a3b54;
+  --app-surface-strong: #111f31;
+  --app-text-soft: #b8c6da;
+  --app-calendar-indicator-filter: invert(0.92) brightness(1.08);
+
+  /* Alias semanticos derivados */
+  --interactive-primary: var(--color-primario);
+  --app-accent: var(--interactive-primary);
+  --app-accent-soft: color-mix(in srgb, var(--color-primario) 22%, var(--app-bg));
+  --app-success: var(--semantic-success);
+  --app-success-soft: color-mix(in srgb, var(--semantic-success) 20%, var(--app-bg));
+  --app-success-border: color-mix(in srgb, var(--semantic-success) 42%, var(--app-surface-border));
+  --app-warning: var(--semantic-warning);
+  --app-warning-soft: color-mix(in srgb, var(--semantic-warning) 18%, var(--app-bg));
+  --app-warning-border: color-mix(in srgb, var(--semantic-warning) 44%, var(--app-surface-border));
+  --app-info: var(--semantic-info);
+  --app-info-soft: color-mix(in srgb, var(--semantic-info) 18%, var(--app-bg));
+  --app-info-border: color-mix(in srgb, var(--semantic-info) 44%, var(--app-surface-border));
+  --app-danger: var(--semantic-danger);
+  --app-danger-soft: color-mix(in srgb, var(--app-danger) 16%, var(--app-bg));
+  --app-danger-border: color-mix(in srgb, var(--app-danger) 42%, var(--app-surface-border));
+  --app-positive: var(--app-success);
+  --app-positive-soft: var(--app-success-soft);
+  --app-positive-border: var(--app-success-border);
+  --app-scrollbar-track: color-mix(in srgb, var(--app-surface) 82%, #000000);
+  --app-scrollbar-thumb: color-mix(in srgb, var(--app-accent) 58%, var(--app-surface-border));
+  --app-scrollbar-thumb-hover: color-mix(in srgb, var(--app-accent) 82%, #ffffff);
+  --app-splash-color-a: color-mix(in srgb, var(--color-primario) 68%, #000000);
+  --app-splash-color-b: color-mix(in srgb, var(--color-secundario) 54%, #000000);
+  --app-splash-color-c: color-mix(in srgb, var(--color-terciario) 42%, #000000);
+
+  --app-font: 'Inter', 'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif;
+  font-family: var(--app-font);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  background-color: var(--app-bg);
+  color: var(--app-text);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+#app-cortina-f5 {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background:
+    radial-gradient(
+      circle at 18% 20%,
+      color-mix(in srgb, var(--app-splash-color-a) 58%, transparent),
+      transparent 42%
+    ),
+    radial-gradient(
+      circle at 80% 22%,
+      color-mix(in srgb, var(--app-splash-color-b) 52%, transparent),
+      transparent 40%
+    ),
+    linear-gradient(180deg, color-mix(in srgb, var(--app-bg) 82%, #000000), #000000);
+  opacity: 1;
+  pointer-events: none;
+  animation: app-cortina-f5-fade 1s linear forwards;
+}
+
+html[data-ui-high-performance='true'] #app-cortina-f5 {
+  display: none;
+  animation: none;
+}
+
+@keyframes app-cortina-f5-fade {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+html.theme-mode-dark body,
+body.theme-mode-dark,
+html.dark-mode-on body,
+body.dark-mode-on {
+  --app-bg: #060000;
+  --app-text: whitesmoke;
+  --app-surface: #0f1622;
+  --app-surface-border: #2a3b54;
+  --app-surface-strong: #111f31;
+  --app-text-soft: #b8c6da;
+  --app-calendar-indicator-filter: invert(0.92) brightness(1.08);
+}
+
+html.theme-mode-light body,
+body.theme-mode-light,
+html.dark-mode-off body,
+body.dark-mode-off {
+  --app-bg: #ffffff;
+  --app-text: #111827;
+  --app-surface: #f8fafc;
+  --app-surface-border: #e2e8f0;
+  --app-surface-strong: #ffffff;
+  --app-text-soft: #4b5563;
+  --app-accent-fuerza: 68%;
+  --app-calendar-indicator-filter: invert(0.12) brightness(0.72);
+}
+
+body.theme-mode-dark input[type='date'],
+html.theme-mode-dark body input[type='date'],
+body.dark-mode-on input[type='date'],
+html.dark-mode-on body input[type='date'] {
+  color-scheme: dark;
+}
+
+body.theme-mode-light input[type='date'],
+html.theme-mode-light body input[type='date'],
+body.dark-mode-off input[type='date'],
+html.dark-mode-off body input[type='date'] {
+  color-scheme: light;
+}
+
+body.theme-mode-dark input[type='date']::-webkit-calendar-picker-indicator,
+html.theme-mode-dark body input[type='date']::-webkit-calendar-picker-indicator,
+body.dark-mode-on input[type='date']::-webkit-calendar-picker-indicator,
+html.dark-mode-on body input[type='date']::-webkit-calendar-picker-indicator {
+  filter: invert(0.92) brightness(1.08) !important;
+  opacity: 1 !important;
+}
+
+body.theme-mode-light input[type='date']::-webkit-calendar-picker-indicator,
+html.theme-mode-light body input[type='date']::-webkit-calendar-picker-indicator,
+body.dark-mode-off input[type='date']::-webkit-calendar-picker-indicator,
+html.dark-mode-off body input[type='date']::-webkit-calendar-picker-indicator {
+  filter: invert(0.12) brightness(0.72) !important;
+  opacity: 1 !important;
+}
+
+*::-webkit-scrollbar {
+  width: 0.7rem;
+  height: 0.7rem;
+}
+
+*::-webkit-scrollbar-track {
+  background-color: color-mix(in srgb, var(--app-scrollbar-track) 22%, transparent);
+  border-radius: 999px;
+  transition: background-color 0.3s ease;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: color-mix(in srgb, var(--app-scrollbar-thumb) 34%, transparent);
+  border: 2px solid color-mix(in srgb, var(--app-scrollbar-track) 22%, transparent);
+  border-right-width: calc(2px + 0.5rem);
+  background-clip: padding-box;
+  border-radius: 999px;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.app-scrollbar-activa {
+  scrollbar-color: var(--app-scrollbar-thumb) var(--app-scrollbar-track);
+}
+
+.app-scrollbar-activa::-webkit-scrollbar-track {
+  background-color: var(--app-scrollbar-track);
+}
+
+.app-scrollbar-activa::-webkit-scrollbar-thumb {
+  background-color: var(--app-scrollbar-thumb);
+  border-color: var(--app-scrollbar-track);
+}
+
+.app-scrollbar-activa::-webkit-scrollbar-thumb:hover {
+  background-color: var(--app-scrollbar-thumb-hover);
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* "Letra grande" (botón Aa del encabezado): agranda texto, botones y espacios de toda la app (todo va en rem). */
+html.letra-grande {
+  font-size: 125%;
+}
+
+/* Rediseño B: controles de formulario con la misma letra que el resto. */
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}

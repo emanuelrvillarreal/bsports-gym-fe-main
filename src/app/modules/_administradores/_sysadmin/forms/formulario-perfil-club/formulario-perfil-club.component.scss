@@ -1,0 +1,107 @@
+:host {
+  display: block;
+}
+
+.formulario-perfil-club {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.9rem;
+
+  fieldset {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.8rem;
+    min-width: 0;
+    margin: 0;
+    padding: 0.9rem;
+    border: 1px solid var(--app-surface-border);
+    border-radius: 0.8rem;
+  }
+
+  legend {
+    padding: 0 0.35rem;
+    color: var(--app-text);
+    font-weight: 750;
+  }
+
+  &__ancho-completo {
+    grid-column: 1 / -1;
+  }
+
+  &__domicilios,
+  &__persona {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.8rem;
+    grid-column: 1 / -1;
+  }
+
+  &__domicilios section {
+    display: grid;
+    gap: 0.65rem;
+    min-width: 0;
+    padding: 0.75rem;
+    border-radius: 0.65rem;
+    background: color-mix(in srgb, var(--app-surface-border) 25%, transparent);
+  }
+
+  &__domicilios h3 {
+    margin: 0;
+    color: var(--app-text);
+    font-size: 0.9rem;
+  }
+
+  &__persona {
+    align-items: end;
+    margin-bottom: 0.75rem;
+  }
+
+  &__checkbox {
+    display: flex !important;
+    grid-column: 1 / -1;
+    align-items: center;
+    gap: 0.55rem !important;
+  }
+
+  &__checkbox input {
+    width: 1.1rem;
+    min-height: 1.1rem;
+  }
+
+  &__error {
+    grid-column: 1 / -1;
+    display: block;
+    min-height: 1.1rem;
+    color: var(--semantic-danger);
+    visibility: hidden;
+
+    &--visible {
+      visibility: visible;
+    }
+  }
+
+  label {
+    display: grid;
+    gap: 0.35rem;
+    color: var(--app-text-soft);
+    font-size: 0.85rem;
+    font-weight: 650;
+  }
+
+  input {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 2.5rem;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid var(--app-surface-border);
+    border-radius: 0.6rem;
+    background: var(--app-surface);
+    color: var(--app-text);
+    font: inherit;
+
+    &:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--app-accent) 36%, transparent);
+      outline-offset: 2px;
+    }
+  }
+}

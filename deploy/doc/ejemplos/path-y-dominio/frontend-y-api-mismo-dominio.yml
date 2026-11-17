@@ -1,0 +1,30 @@
+# Ejemplo: frontend + API bajo el mismo dominio usando domain
+# Ambos servicios usan el mismo domain → el orquestador nginx los agrupa
+# en un único server { server_name stg.blueopendata.com; }
+
+st7:
+  ecommerce-fe:
+    branch: develop
+    port: 9051
+    path: ecommerce
+    domain: stg.blueopendata.com
+
+    stack: angular
+    environment: st7
+    composer_file: plantillas/angular-21-node-22/docker-compose.yml
+    nginx_config: plantillas/angular-21-node-22/nginx.host-reverse-proxy.conf
+
+  ecommerce-api:
+    branch: develop
+    port: 9050
+    path: ecommerce
+    domain: stg.blueopendata.com
+
+    stack: spring
+    composer_file: plantillas/spring-3.9-java-17/docker-compose.yml
+    nginx_config: plantillas/spring-3.9-java-17/nginx.spring-boot-api.conf
+    application_properties: src/main/resources/application.st7.properties
+
+# Resultado:
+#   Frontend:  https://stg.blueopendata.com/ecommerce/
+#   API:       https://stg.blueopendata.com/ecommerce/api

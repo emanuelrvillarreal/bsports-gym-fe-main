@@ -1,0 +1,79 @@
+.driver-onboarding__popover {
+  color: var(--app-text);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--app-surface-strong) 94%, #000000), var(--app-surface));
+  border: 1px solid color-mix(in srgb, var(--app-accent) 20%, var(--app-surface-border));
+  border-radius: 1rem;
+  box-shadow: 0 20px 48px rgb(0 0 0 / 32%);
+}
+
+.driver-onboarding__popover .driver-popover-title {
+  color: var(--app-text);
+}
+
+.driver-onboarding__popover .driver-popover-description {
+  color: var(--app-text-soft);
+}
+
+.driver-onboarding__popover .driver-popover-progress-text {
+  color: var(--app-text-soft);
+}
+
+.driver-onboarding__popover .driver-popover-next-btn,
+.driver-onboarding__popover .driver-popover-prev-btn,
+.driver-onboarding__popover .driver-popover-close-btn {
+  color: var(--app-text);
+  text-shadow: none;
+}
+
+.driver-onboarding__popover .driver-popover-next-btn {
+  background: color-mix(in srgb, var(--app-accent) 82%, #ffffff);
+  border-radius: 999px;
+}
+
+.driver-onboarding__popover .driver-popover-prev-btn {
+  background: color-mix(in srgb, var(--app-surface-strong) 86%, #ffffff);
+  border: 1px solid color-mix(in srgb, var(--app-surface-border) 82%, #ffffff);
+  border-radius: 999px;
+}
+
+.driver-onboarding__popover .driver-popover-prev-btn:hover,
+.driver-onboarding__popover .driver-popover-prev-btn:focus-visible {
+  background: color-mix(in srgb, var(--app-surface-border) 60%, var(--app-surface-strong));
+}
+
+.driver-onboarding-skip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 1000000002;
+  padding: 0.65rem 0.85rem;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: whitesmoke;
+  text-shadow: none;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  pointer-events: auto !important;
+}
+
+.driver-onboarding-skip-btn:hover,
+.driver-onboarding-skip-btn:focus-visible {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: whitesmoke;
+  opacity: 0.9;
+}
+
+.driver-onboarding-skip-icon {
+  color: whitesmoke;
+  font-size: 1.15rem;
+  line-height: 1;
+}

@@ -1,0 +1,44 @@
+@use '../../../ui/formulario-secciones/formulario-secciones' as fs;
+
+:host {
+  display: block;
+}
+
+@include fs.estilos;
+
+.formulario-amenity {
+  &__error {
+    display: block;
+    min-height: 1.1rem;
+    color: var(--semantic-danger, #ef4444);
+    font-weight: 600;
+    visibility: hidden;
+
+    &--visible {
+      visibility: visible;
+    }
+  }
+
+  &__campo-con-sufijo {
+    position: relative;
+    display: block;
+
+    input {
+      padding-right: 2.5rem;
+    }
+
+    > span {
+      position: absolute;
+      top: 50%;
+      right: 0.85rem;
+      color: var(--app-text-soft);
+      font-weight: 700;
+      pointer-events: none;
+      transform: translateY(-50%);
+    }
+  }
+
+  &__opciones[data-app-invalido='true'] .fs-chip span {
+    border-color: var(--app-danger, #ef4444);
+  }
+}

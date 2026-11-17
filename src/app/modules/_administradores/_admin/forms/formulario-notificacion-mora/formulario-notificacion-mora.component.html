@@ -1,0 +1,72 @@
+<form
+  class="formulario-notificacion-mora"
+  [class.formulario-notificacion-mora--whatsapp]="canal() === 'WHATSAPP'"
+  [class.formulario-notificacion-mora--email]="canal() === 'EMAIL'"
+  appValidacionFormulario
+  (submit)="$event.preventDefault(); enviar()"
+>
+  <small
+    class="formulario-notificacion-mora__error"
+    [class.formulario-notificacion-mora__error--visible]="error()"
+    role="alert"
+  >{{ error() }}</small>
+
+  <fieldset class="formulario-notificacion-mora__canales">
+    <legend>Canal de contacto</legend>
+    <label class="formulario-notificacion-mora__canal">
+      <input
+        type="checkbox"
+        name="canal-notificacion-mora"
+        role="switch"
+        [checked]="canal() === 'WHATSAPP'"
+        (change)="cambiarCanal(canal() === 'WHATSAPP' ? 'EMAIL' : 'WHATSAPP')"
+      />
+      <span class="formulario-notificacion-mora__canal-opcion formulario-notificacion-mora__canal-opcion--whatsapp">
+        <ng-icon name="heroChatBubbleLeftRight" aria-hidden="true" />
+        WhatsApp
+      </span>
+      <span class="formulario-notificacion-mora__canal-opcion formulario-notificacion-mora__canal-opcion--email">
+        <ng-icon name="heroEnvelope" aria-hidden="true" />
+        Correo electrónico
+      </span>
+    </label>
+  </fieldset>
+
+  <p class="formulario-notificacion-mora__leyenda" role="note">
+    @if (canal() === 'WHATSAPP') {
+      El mensaje de WhatsApp se abrirá con la cuenta vinculada en este dispositivo.
+    } @else {
+      El correo se abrirá con la cuenta configurada como predeterminada en este dispositivo.
+    }
+  </p>
+
+  <label for="notificacion-mora-asunto">
+    <span>Asunto</span>
+    <input
+      id="notificacion-mora-asunto"
+      type="text"
+      required
+      [value]="asunto()"
+      (input)="actualizarAsunto($event)"
+    />
+  </label>
+
+  <label for="notificacion-mora-mensaje">
+    <span>Mensaje</span>
+    <textarea
+      id="notificacion-mora-mensaje"
+      rows="7"
+      required
+      maxlength="700"
+      [value]="mensaje()"
+      (input)="actualizarMensaje($event)"
+    ></textarea>
+    <small class="formulario-notificacion-mora__contador" aria-live="polite">
+      {{ cantidadCaracteresMensaje() }} / {{ maximoCaracteresMensaje }} caracteres
+    </small>
+  </label>
+
+  <app-boton tipo="submit">
+    {{ canal() === 'WHATSAPP' ? 'Abrir WhatsApp' : 'Abrir correo' }}
+  </app-boton>
+</form>

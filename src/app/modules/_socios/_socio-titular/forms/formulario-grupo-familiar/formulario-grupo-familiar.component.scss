@@ -1,0 +1,90 @@
+:host {
+  display: block;
+}
+
+.formulario-grupo-familiar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.8rem;
+  align-items: end;
+
+  &__error {
+    grid-column: 1 / -1;
+    min-height: 1.2rem;
+    color: var(--semantic-danger);
+    visibility: hidden;
+
+    &--visible {
+      visibility: visible;
+    }
+  }
+
+  &__passwords {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem;
+    padding: 1rem;
+    background: color-mix(in srgb, var(--app-surface-strong) 82%, var(--app-surface));
+    border: 1px solid color-mix(in srgb, var(--app-accent) 28%, var(--app-surface-border));
+    border-radius: 0.75rem;
+
+    &-titulo {
+      grid-column: 1 / -1;
+      margin: 0;
+      color: var(--app-text-soft);
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+  }
+
+  &__confirmacion-password {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  &__estado-password {
+    min-height: 1.2rem;
+
+    &--coincide {
+      color: var(--semantic-success);
+    }
+
+    &--no-coincide {
+      color: var(--semantic-danger);
+    }
+  }
+
+  label {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  input:not([type='checkbox']) {
+    min-height: 2.75rem;
+    padding: 0.65rem;
+    color: var(--app-text);
+    background: var(--app-surface);
+    border: 1px solid var(--app-surface-border);
+    border-radius: 0.55rem;
+
+    &:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--app-accent) 35%, white);
+      outline-offset: 2px;
+    }
+  }
+}
+
+:host-context(.theme-mode-dark) .formulario-grupo-familiar {
+  --app-surface: #000;
+
+  input:not([type='checkbox']) {
+    background: #000;
+  }
+}
+
+@media (max-width: 36rem) {
+  .formulario-grupo-familiar__passwords {
+    grid-template-columns: 1fr;
+  }
+}

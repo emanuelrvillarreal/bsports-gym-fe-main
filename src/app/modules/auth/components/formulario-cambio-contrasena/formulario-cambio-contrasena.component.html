@@ -1,0 +1,71 @@
+<article class="reset-card">
+  <header class="reset-card__header">
+    <div class="reset-card__heading">
+      <h1>Creá tu contraseña nueva</h1>
+      <small
+        class="reset-card__message"
+        [class.reset-card__message--error]="!!mensajeErrorExterno()"
+      >
+        {{ mensajeErrorExterno() || mensajeContexto() }}
+      </small>
+    </div>
+  </header>
+
+  <form [formGroup]="formulario" appValidacionFormulario (ngSubmit)="restablecer()" novalidate>
+    <div class="reset-card__identity">
+      <span class="reset-card__identity-label">Cuenta</span>
+      <strong class="reset-card__identity-value">{{ tituloUsuario() }}</strong>
+    </div>
+
+    <div class="reset-field">
+      <app-input-password
+        class="reset-password-input"
+        etiqueta="Nueva contraseña"
+        formControlName="password"
+        autocomplete="new-password"
+        placeholder="Escribí tu nueva contraseña"
+        [requerido]="true"
+      />
+      @if (passwordError()) {
+        <small class="reset-field__error">{{ passwordError() }}</small>
+      }
+    </div>
+
+    <div class="reset-field">
+      <app-input-password
+        class="reset-password-input"
+        etiqueta="Repetir contraseña"
+        formControlName="confirmPassword"
+        autocomplete="new-password"
+        placeholder="Escribila de nuevo"
+        [requerido]="true"
+        [attr.data-app-invalido]="confirmPasswordError() ? 'true' : null"
+      />
+      @if (confirmPasswordError()) {
+        <small class="reset-field__error">{{ confirmPasswordError() }}</small>
+      }
+    </div>
+
+    <div class="reset-actions">
+      <app-boton
+        tipo="button"
+        apariencia="texto"
+        class="reset-actions__ghost"
+        [deshabilitado]="cargando()"
+        (accion)="regresarALogin()"
+      >
+        Volver al inicio
+      </app-boton>
+
+      <app-boton
+        tipo="submit"
+        class="reset-actions__primary"
+        [deshabilitado]="bloqueoEnvio() && !cargando()"
+        [cargando]="cargando()"
+        ariaLabelCarga="Restableciendo contraseña"
+      >
+        Guardar contraseña
+      </app-boton>
+    </div>
+  </form>
+</article>

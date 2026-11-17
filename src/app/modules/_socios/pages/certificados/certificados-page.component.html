@@ -1,0 +1,20 @@
+<app-titulo-hero
+  icono="perfil"
+  titulo="Certificados"
+  subtitulo="Cargá y consultá tus certificados médicos."
+/>
+
+@if (cargando() && !perfil()) {
+  <div class="certificados-page__carga"><app-load-spinner-blue /></div>
+} @else if (perfil(); as datosPerfil) {
+  <app-certificados-medicos-portal
+    [memberUuid]="datosPerfil.memberUuid"
+    [certificados]="datosPerfil.certificados ?? null"
+    (actualizado)="cargar()"
+  />
+} @else {
+  <div class="certificados-page__error">
+    <p role="alert">{{ error() }}</p>
+    <app-boton tipo="button" (accion)="cargar()">Reintentar</app-boton>
+  </div>
+}

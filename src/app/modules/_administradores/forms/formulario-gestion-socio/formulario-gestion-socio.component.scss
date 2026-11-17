@@ -1,0 +1,188 @@
+:host {
+  display: block;
+}
+
+.formulario-gestion-socio {
+  display: grid;
+  gap: 1rem;
+
+  &__error {
+    display: block;
+    min-height: 1.1rem;
+    color: var(--app-danger);
+    font-size: 0.85rem;
+    font-weight: 650;
+    visibility: hidden;
+  }
+
+  &__error--visible {
+    visibility: visible;
+  }
+
+  &__grilla {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+
+    label {
+      display: grid;
+      gap: 0.35rem;
+
+      small {
+        color: var(--app-text-soft);
+        font-size: 0.85rem;
+      }
+
+      span,
+      > label {
+        color: var(--app-text-soft);
+        font-size: 0.85rem;
+        font-weight: 650;
+      }
+    }
+
+    input {
+      min-height: 2.5rem;
+      padding: 0.55rem 0.75rem;
+      color: var(--app-text);
+      background: var(--app-bg);
+      border: 1px solid var(--app-surface-border);
+      border-radius: 0.6rem;
+      font: inherit;
+
+      &:focus-visible {
+        outline: 3px solid color-mix(in srgb, var(--app-accent) 36%, white);
+        outline-offset: 2px;
+        border-color: var(--app-accent);
+      }
+    }
+
+    app-select {
+      align-self: end;
+      width: 100%;
+    }
+
+    ::ng-deep .app-select__etiqueta {
+      margin-bottom: 0.35rem;
+      color: var(--app-text-soft);
+      font-size: 0.85rem;
+      font-weight: 650;
+      text-transform: none;
+    }
+
+    ::ng-deep .app-select__control {
+      --app-boton-fondo-texto-interaccion: transparent;
+      --app-boton-radio: 0.6rem;
+
+      height: 2.5rem;
+      min-height: 2.5rem;
+      padding: 0;
+      background: var(--app-bg);
+      border-color: var(--app-surface-border);
+      border-radius: 0.6rem;
+    }
+
+    ::ng-deep .app-select__control .app-boton {
+      height: 2.5rem;
+      min-height: 2.5rem;
+      padding: 0.55rem 0.75rem;
+      border-radius: 0.6rem;
+    }
+  }
+
+  &__descuentos {
+    display: grid;
+    gap: 0.85rem;
+    min-width: 0;
+    margin: 0;
+    padding: 1rem;
+    border: 1px solid var(--app-surface-border);
+    border-radius: 0.75rem;
+
+    legend {
+      padding: 0 0.35rem;
+      color: var(--app-text);
+      font-weight: 700;
+    }
+
+    p,
+    small {
+      margin: 0;
+      color: var(--app-text-soft);
+    }
+
+    // Igual que los inputs nativos del formulario, el selector usa el fondo
+    // base de la app; en dark mode esto conserva el negro del resto de campos.
+    ::ng-deep .app-select__control {
+      --app-boton-fondo-texto: var(--app-bg);
+      --app-boton-fondo-texto-interaccion: color-mix(
+        in srgb,
+        var(--app-accent-soft) 42%,
+        var(--app-bg)
+      );
+    }
+  }
+
+  &__grilla-descuento {
+    display: grid;
+    grid-template-columns: minmax(12rem, 1.25fr) repeat(2, minmax(10rem, 1fr)) auto;
+    gap: 0.75rem;
+    align-items: end;
+
+    ::ng-deep .app-select__control,
+    ::ng-deep .app-select__control .app-boton {
+      min-height: 2.5rem;
+      height: 2.5rem;
+    }
+  }
+
+  &__agregar-descuento {
+    align-self: end;
+    min-height: 2.5rem;
+    margin-inline-start: 0.5rem;
+
+    ::ng-deep .app-boton {
+      min-height: 2.5rem;
+      height: 2.5rem;
+    }
+  }
+
+  &__descuentos-seleccionados {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.55rem 0.7rem;
+      border: 1px solid var(--app-surface-border);
+      border-radius: 0.6rem;
+      color: var(--app-text);
+      background: var(--app-surface);
+    }
+  }
+}
+
+@media (max-width: 48rem) {
+  .formulario-gestion-socio {
+    &__grilla,
+    &__grilla-descuento {
+      grid-template-columns: 1fr;
+    }
+
+    &__descuentos-seleccionados li {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    &__agregar-descuento {
+      width: 100%;
+      margin: 0.25rem 0 0;
+    }
+  }
+}

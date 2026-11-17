@@ -1,0 +1,129 @@
+<main class="seleccion-contexto" [attr.aria-label]="titulo()">
+  <app-titulo-hero
+    [titulo]="titulo()"
+    [subtitulo]="subtitulo()"
+    [icono]="mostrandoRoles() ? 'cambiarRol' : 'cambiarEmpresa'"
+  />
+
+  <p class="seleccion-contexto__saludo">Hola, <strong>{{ nombreUsuario() }}</strong></p>
+
+  <section class="seleccion-contexto__contenido" aria-live="polite">
+    @if (empresaSeleccionada(); as empresa) {
+      <div
+        class="seleccion-contexto__opciones"
+        [class.seleccion-contexto__opciones--dos]="empresa.roles.length === 2"
+        [style.--cantidad-clubes]="empresa.roles.length"
+        aria-label="Roles disponibles"
+      >
+        @for (rol of empresa.roles; track rol) {
+          <app-boton
+            tipo="button"
+            apariencia="texto"
+            [contenidoVertical]="true"
+            class="seleccion-contexto__opcion seleccion-contexto__opcion--rol"
+            [style.--empresa-primario]="obtenerPaleta(empresa.uuid).primario"
+            [style.--empresa-secundario]="obtenerPaleta(empresa.uuid).secundario"
+            [aria-label]="'Ingresar como ' + etiquetaRol(rol)"
+            (accion)="seleccionarRol(rol)"
+          >
+            <app-card [altoImpactoVisual]="true">
+              <div class="seleccion-contexto__card-contenido">
+                <div class="seleccion-contexto__marca seleccion-contexto__marca--rol">
+                  <ng-icon [name]="iconos.obtenerNombre(iconoRol(rol))" aria-hidden="true" />
+                </div>
+                <div class="seleccion-contexto__datos">
+                  <h2>{{ etiquetaRol(rol) }}</h2>
+                  <p>{{ descripcionRol(rol) }}</p>
+                  <span>{{ empresa.nombre }}</span>
+                </div>
+                <span class="seleccion-contexto__flecha" aria-hidden="true">→</span>
+              </div>
+            </app-card>
+          </app-boton>
+        } @empty {
+          <app-card titulo="Sin roles disponibles" descripcion="Este gimnasio no tiene roles asignados." />
+        }
+      </div>
+    } @else {
+      <div
+        class="seleccion-contexto__opciones"
+        [class.seleccion-contexto__opciones--dos]="empresas.length === 2"
+        aria-label="Gimnasios disponibles"
+        [style.--cantidad-clubes]="empresas.length"
+      >
+        @for (empresa of empresas; track empresa.uuid) {
+          <app-boton
+            tipo="button"
+            apariencia="texto"
+            [contenidoVertical]="true"
+            class="seleccion-contexto__opcion"
+            [style.--empresa-primario]="obtenerPaleta(empresa.uuid).primario"
+            [style.--empresa-secundario]="obtenerPaleta(empresa.uuid).secundario"
+            [style.--empresa-logo-url]="empresa.logoUrl ? 'url(\'' + empresa.logoUrl + '\')' : 'none'"
+            [aria-label]="'Ingresar a ' + empresa.nombre"
+            (accion)="seleccionarEmpresa(empresa.uuid)"
+          >
+            <app-card [altoImpactoVisual]="true">
+              <div class="seleccion-contexto__card-contenido">
+                <div
+                  class="seleccion-contexto__marca"
+                  [class.seleccion-contexto__marca--logo]="!!empresa.logoUrl"
+                >
+                  @if (empresa.logoUrl) {
+                    <img [src]="empresa.logoUrl" [alt]="'Logo de ' + empresa.nombre" />
+                  } @else {
+                    <span aria-hidden="true">{{ obtenerIniciales(empresa.nombre) }}</span>
+                  }
+                </div>
+                <div class="seleccion-contexto__datos">
+                  <h2>{{ empresa.nombre }}</h2>
+                  <p>{{ empresa.cuit ? 'CUIT ' + formatearCuil(empresa.cuit) : 'Gimnasio disponible' }}</p>
+                  <span>{{ empresa.roles.length }} rol(es) disponible(s)</span>
+                </div>
+                @if (cargandoPaletas()) {
+                  <div class="seleccion-contexto__carga" role="status" aria-label="Cargando colores del gimnasio">
+                    <app-load-spinner-blue
+                      [colorInicio]="obtenerPaleta(empresa.uuid).primario"
+                      [colorFin]="obtenerPaleta(empresa.uuid).secundario"
+                      ariaLabel="Cargando colores"
+                    />
+                  </div>
+                }
+                <span class="seleccion-contexto__flecha" aria-hidden="true">→</span>
+              </div>
+            </app-card>
+          </app-boton>
+        } @empty {
+          <app-card titulo="Sin empresas disponibles" descripcion="Tu usuario no tiene empresas asignadas." />
+        }
+      </div>
+    }
+  </section>
+
+  <div class="seleccion-contexto__acciones">
+    @if (mostrarAtras()) {
+      <app-boton
+        tipo="button"
+        apariencia="solido"
+        colorFondo="var(--app-surface-strong)"
+        colorInteraccion="var(--app-accent-soft)"
+        aria-label="Volver a seleccionar gimnasio"
+        (accion)="volverAEmpresas()"
+      >
+        <ng-icon name="heroChevronLeft" aria-hidden="true" />
+        <span>Atrás</span>
+      </app-boton>
+    }
+
+    <app-boton
+      tipo="button"
+      apariencia="solido"
+      colorFondo="var(--semantic-danger)"
+      aria-label="Cerrar sesión"
+      (accion)="cerrarSesion()"
+    >
+      <ng-icon name="heroArrowLeftStartOnRectangle" aria-hidden="true" />
+      <span>Cerrar sesión</span>
+    </app-boton>
+  </div>
+</main>

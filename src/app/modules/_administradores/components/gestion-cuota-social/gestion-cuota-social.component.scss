@@ -1,0 +1,4 @@
+:host { display: block; }
+.gestion-cuota-social { display: grid; gap: 1rem; }
+.gestion-cuota-social__error { margin: 0; color: var(--semantic-danger); }
+.gestion-cuota-social__listado { display: grid; gap: .75rem; }

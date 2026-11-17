@@ -1,0 +1,47 @@
+<section class="dashboard-financiero-hero" aria-label="Resumen de cobranza activa">
+  <app-titulo-hero
+    [titulo]="empresa() || 'Dashboard financiero'"
+    [subtitulo]="'Lectura ejecutiva del período ' + periodo().mes + '/' + periodo().anio"
+    [logoUrl]="logoUrl()"
+    color="var(--app-text)"
+  >
+    <div tituloHeroContenido class="dashboard-financiero-hero__saldo">
+      <span>Saldo neto</span>
+      <strong aria-live="polite">{{ saldoNetoAnimado() }}</strong>
+      <p>{{ detalleSaldoNeto() }}</p>
+    </div>
+    <aside
+      tituloHeroAcciones
+      class="dashboard-financiero-hero__filtros"
+      aria-label="Período del dashboard"
+    >
+      <div class="dashboard-financiero-hero__selectores">
+        <app-select
+          etiqueta="Año"
+          placeholder="Año"
+          [opciones]="anios()"
+          [value]="periodo().anio"
+          [altoRendimiento]="cargando()"
+          (valueChange)="cambiarAnio($event)"
+        />
+        <app-select
+          etiqueta="Mes"
+          placeholder="Mes"
+          [opciones]="meses()"
+          [value]="periodo().mes"
+          [altoRendimiento]="cargando()"
+          (valueChange)="cambiarMes($event)"
+        />
+      </div>
+
+      <app-boton
+        tipo="button"
+        [deshabilitado]="cargando()"
+        aria-label="Restablecer período al mes actual"
+        (accion)="solicitarRestablecimiento()"
+      >
+        Restablecer
+      </app-boton>
+    </aside>
+  </app-titulo-hero>
+</section>

@@ -1,0 +1,39 @@
+@use '../../../../ui/formulario-secciones/formulario-secciones' as fs;
+
+:host {
+  display: block;
+}
+
+@include fs.estilos;
+
+.formulario {
+  &__error {
+    display: block;
+    min-height: 1.2rem;
+    color: var(--app-danger, #b42318);
+    font-weight: 600;
+    visibility: hidden;
+
+    &--visible {
+      visibility: visible;
+    }
+  }
+
+  // El <select> nativo se ve igual que el resto de los campos.
+  select {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--app-surface-border);
+    border-radius: 0.6rem;
+    background: var(--app-surface);
+    color: var(--app-text);
+    font: inherit;
+    font-weight: 400;
+  }
+
+  app-boton {
+    justify-self: stretch;
+  }
+}

@@ -1,0 +1,47 @@
+<section class="gestion-branding-empresa" aria-labelledby="identidad-visual-titulo">
+  <header class="gestion-branding-empresa__encabezado">
+    <h2 id="identidad-visual-titulo">Identidad visual</h2>
+    <p>Personaliza el logo institucional y los colores de la empresa activa.</p>
+  </header>
+
+  <app-card
+    titulo="Logo institucional"
+    descripcion="La nueva imagen reemplazara el logo actual en toda la aplicacion."
+  >
+    <app-formulario-registro-foto
+      modo="logo-club"
+      [fotoInicial]="logoUrl() || null"
+      [cargando]="procesandoLogo()"
+      [mensajeErrorExterno]="errorLogo()"
+      textoBotonConfirmar="Guardar logo"
+      [mostrarBotonRestablecer]="false"
+      [mostrarBotonEliminar]="!!logoUrl()"
+      textoBotonEliminar="Borrar logo"
+      (submitted)="subirLogo($event)"
+      (eliminar)="eliminarLogo()"
+    />
+  </app-card>
+
+  <app-card
+    titulo="Colores de la empresa"
+    descripcion="Los cambios se aplican como vista previa antes de guardarlos."
+  >
+    @if (cargandoPaleta()) {
+      <div class="gestion-branding-empresa__carga" role="status" aria-label="Cargando colores">
+        <app-load-spinner-blue />
+      </div>
+    } @else {
+      @if (errorPaleta()) {
+        <p class="gestion-branding-empresa__error" role="alert">{{ errorPaleta() }}</p>
+      }
+
+      <app-color-mod
+        [paletaPersistida]="paletaPersistida()"
+        [guardando]="guardandoPaleta()"
+        [restableciendo]="restableciendoPaleta()"
+        (guardarSolicitado)="guardarPaleta($event)"
+        (restablecerSolicitado)="restablecerPaleta($event)"
+      />
+    }
+  </app-card>
+</section>

@@ -1,0 +1,25 @@
+@if (error()) {
+  <div class="credencial-profesor__error">
+    <p role="alert">{{ error() }}</p>
+    <app-boton tipo="button" (accion)="cargar()">Reintentar</app-boton>
+  </div>
+} @else if (cargando() || datosCarnet()) {
+  @let carnet = datosCarnet() ?? datosCarnetVacio;
+  <div class="credencial-profesor__carnet">
+    <app-carnet
+      [foto]="fotoCarnet()"
+      [nombre]="carnet.nombre"
+      [apellido]="carnet.apellido"
+      [logo]="logoEmpresa()"
+      [campos]="carnet.campos"
+      [qrContenido]="carnet.qrContenido"
+      [qrImagen]="carnet.qrImagen"
+      [altoRendimiento]="altoRendimiento()"
+      [cargando]="cargando()"
+    />
+  </div>
+} @else {
+  <div class="credencial-profesor__vacia" role="status">
+    <p>No hay datos disponibles para generar la credencial de profesor.</p>
+  </div>
+}

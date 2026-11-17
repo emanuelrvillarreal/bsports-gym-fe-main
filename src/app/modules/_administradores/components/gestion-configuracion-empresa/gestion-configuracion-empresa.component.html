@@ -1,0 +1,37 @@
+<section class="gestion-configuracion-empresa" aria-labelledby="configuracion-empresa-titulo">
+  <header class="gestion-configuracion-empresa__encabezado">
+    <h2 id="configuracion-empresa-titulo">Configuración institucional</h2>
+    <p>Administra los canales de contacto y comunicación del gimnasio.</p>
+  </header>
+
+  @if (cargando()) {
+    <div class="gestion-configuracion-empresa__cargas" aria-busy="true">
+      <app-card titulo="Contacto y comunicaciones">
+        <div
+          class="gestion-configuracion-empresa__carga"
+          role="status"
+          aria-label="Cargando contacto"
+        >
+          <app-load-spinner-blue />
+        </div>
+      </app-card>
+    </div>
+  } @else if (perfil()) {
+    @if (error()) {
+      <p class="gestion-configuracion-empresa__error" role="alert">{{ error() }}</p>
+    }
+    <app-formulario-configuracion-empresa
+      [perfil]="perfil()"
+      [bloqueado]="bloqueado()"
+      [cargando]="guardando()"
+      (configuracionEnviada)="guardarConfiguracion($event)"
+    />
+  } @else {
+    <div class="gestion-configuracion-empresa__estado-error" role="alert">
+      <p>{{ error() || 'No se encontró el perfil institucional del gimnasio.' }}</p>
+      <app-boton tipo="button" [deshabilitado]="bloqueado()" (accion)="reintentar()">
+        Reintentar
+      </app-boton>
+    </div>
+  }
+</section>

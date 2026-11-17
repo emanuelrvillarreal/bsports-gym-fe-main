@@ -1,0 +1,59 @@
+@use '../../../ui/formulario-secciones/formulario-secciones' as fs;
+
+:host {
+  display: block;
+}
+
+@include fs.estilos;
+
+.formulario-evento-acceso {
+  &__resumen-error {
+    display: block;
+    min-height: 1.25rem;
+    color: var(--semantic-danger, #ef4444);
+    font-weight: 600;
+    visibility: hidden;
+
+    &--visible {
+      visibility: visible;
+    }
+  }
+
+  &__ayuda {
+    color: var(--app-text-soft);
+    font-weight: 400;
+  }
+}
+
+// Una tarjeta por tipo de asistente: el interruptor y su precio quedan juntos.
+.fea-entradas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: 0.8rem;
+  align-items: stretch;
+}
+
+.fea-entrada {
+  display: grid;
+  align-content: start;
+  gap: 0.75rem;
+  padding: 0.9rem;
+  border: 1px solid var(--app-surface-border);
+  border-radius: 0.7rem;
+  background: var(--app-surface);
+
+  &__titulo {
+    display: grid;
+    gap: 0.1rem;
+    color: var(--app-text);
+
+    small {
+      color: var(--app-text-soft);
+      font-weight: 400;
+    }
+  }
+
+  &--apagada {
+    background: color-mix(in srgb, var(--app-surface-border) 25%, var(--app-surface));
+  }
+}

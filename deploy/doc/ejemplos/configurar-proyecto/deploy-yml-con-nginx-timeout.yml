@@ -1,0 +1,61 @@
+# Ejemplo: deploy.yml con configuración de timeouts nginx
+# Proyecto con backend Spring Maria con timeouts personalizados
+
+st7:
+  mi-app-be:
+    branch: develop
+    port: 9050
+    path: mi-app
+    domain: stg.blueopendata.com
+
+    stack: spring_maria
+
+    env:
+      EXTERNAL_API_URL: "https://api.staging.ejemplo.com"
+      FEATURE_EXPORT_ENABLED: true
+      HTTP_TIMEOUT: 45
+
+    mysql_user: mi-app
+    mysql_db: mi-app
+    mysql_pass: mi-app
+    mysql_external_port: 9083
+
+    composer_file: plantillas/spring-3.9-java-17-maria-11/docker-compose.yml
+    nginx_config: plantillas/spring-3.9-java-17-maria-11/nginx.spring-boot-api.conf
+    application_properties: src/main/resources/application.st7.properties
+
+    # Configuración de timeouts para nginx (opcional)
+    # Si no se especifican, se usan valores por defecto de 60s
+    nginx_connect_timeout: 300s
+    nginx_send_timeout: 1800s
+    nginx_read_timeout: 1800s
+    nginx_request_timeout: 1800s
+
+prod:
+  mi-app-be:
+    branch: main
+    port: 9050
+    path: mi-app
+    domain: blueopendata.com
+
+    stack: spring_maria
+
+    env:
+      EXTERNAL_API_URL: "https://api.ejemplo.com"
+      FEATURE_EXPORT_ENABLED: true
+      HTTP_TIMEOUT: 60
+
+    mysql_user: mi-app
+    mysql_db: mi-app
+    mysql_pass: $MYSQL_PASS
+    mysql_external_port: 9083
+
+    composer_file: plantillas/spring-3.9-java-17-maria-11/docker-compose.yml
+    nginx_config: plantillas/spring-3.9-java-17-maria-11/nginx.spring-boot-api.conf
+    application_properties: src/main/resources/application.prod.properties
+
+    # Timeouts más altos para producción
+    nginx_connect_timeout: 300s
+    nginx_send_timeout: 3600s
+    nginx_read_timeout: 3600s
+    nginx_request_timeout: 3600s

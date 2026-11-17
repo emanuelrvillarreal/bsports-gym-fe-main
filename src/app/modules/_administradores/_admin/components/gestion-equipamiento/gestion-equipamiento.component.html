@@ -1,0 +1,140 @@
+<section class="equipos" aria-label="Equipamiento">
+  @if (resumen(); as r) {
+    <div class="equipos__kpis">
+      <article class="equipos__kpi"><span>Ítems en inventario</span><strong>{{ r.items }}</strong><small>{{ r.unidades }} unidades</small></article>
+      <article class="equipos__kpi" [class.equipos__kpi--alerta]="r.enReparacion"><span>En reparación</span><strong>{{ r.enReparacion }}</strong></article>
+      <article class="equipos__kpi" [class.equipos__kpi--alerta]="r.fueraDeServicio"><span>Fuera de servicio</span><strong>{{ r.fueraDeServicio }}</strong></article>
+      <button type="button" class="equipos__kpi equipos__kpi--boton" [class.equipos__kpi--alerta]="r.mantenimientosVencidos" (click)="verAlerta('VENCIDO')">
+        <span>Mantenimiento vencido</span><strong>{{ r.mantenimientosVencidos }}</strong><small>Ver cuáles</small>
+      </button>
+      <button type="button" class="equipos__kpi equipos__kpi--boton" (click)="verAlerta('PROXIMO')">
+        <span>Mantenimiento en 30 días</span><strong>{{ r.mantenimientosProximos }}</strong><small>Ver cuáles</small>
+      </button>
+      <article class="equipos__kpi"><span>Costo de mantenimiento</span><strong>{{ moneda(r.costoAnio) }}</strong><small>En lo que va del año</small></article>
+    </div>
+  }
+
+  <div class="equipos__filtros">
+    <label class="equipos__campo">
+      <span>Buscar</span>
+      <input type="search" placeholder="Nombre, código, tipo, marca o ubicación" [value]="busqueda()" (input)="buscar($any($event.target).value)" />
+    </label>
+    <app-select etiqueta="Estado" [opciones]="opcionesEstadoFiltro" [value]="estado()" (valueChange)="filtrar('estado', $event)" />
+    <app-select etiqueta="Mantenimiento" [opciones]="opcionesAlerta" [value]="alerta()" (valueChange)="filtrar('alerta', $event)" />
+    <app-boton (accion)="nuevo()">Nuevo equipamiento</app-boton>
+  </div>
+
+  <app-tabla-responsive
+    [columnas]="columnas"
+    [filas]="filas()"
+    idFila="uuid"
+    [acciones]="acciones"
+    [cargando]="cargando()"
+    mensajeVacio="No hay equipamiento con estos filtros. Cargá el primero con “Nuevo equipamiento”."
+    (accionFila)="manejarAccion($event)"
+    (verFila)="abrirDetalle($event.uuid)"
+  />
+  @if (totalPaginas() > 1) {
+    <app-paginacion [paginaActual]="pagina()" [totalPaginas]="totalPaginas()" (paginaCambiada)="cambiarPagina($event)" />
+  }
+</section>
+
+<app-popup
+  [abierto]="!!detalle() || cargandoDetalle()"
+  [titulo]="detalle()?.nombre ?? 'Equipamiento'"
+  [descripcion]="detalle() ? estadoTexto(detalle()!.estado) + (detalle()!.codigo ? ' · ' + detalle()!.codigo : '') : ''"
+  ancho="grande"
+  textoCancelar="Cerrar"
+  (cancelar)="cerrarDetalle()"
+>
+  @if (cargandoDetalle()) {
+    <p class="equipos__vacio">Cargando…</p>
+  } @else if (detalle(); as d) {
+    <div class="equipos__detalle">
+      <div class="equipos__acciones">
+        <app-boton (accion)="nuevoMantenimiento()">Registrar mantenimiento</app-boton>
+        <app-boton apariencia="texto" (accion)="editar()">Editar</app-boton>
+        <app-boton apariencia="texto" (accion)="eliminar()">Eliminar</app-boton>
+      </div>
+      <dl class="equipos__ficha">
+        @if (d.tipo) { <div><dt>Tipo</dt><dd>{{ d.tipo }}</dd></div> }
+        @if (d.disciplina) { <div><dt>Disciplina</dt><dd>{{ d.disciplina }}</dd></div> }
+        @if (d.marca || d.modelo) { <div><dt>Marca y modelo</dt><dd>{{ d.marca }} {{ d.modelo }}</dd></div> }
+        <div><dt>Cantidad</dt><dd>{{ d.cantidad }}</dd></div>
+        @if (d.ubicacion) { <div><dt>Ubicación</dt><dd>{{ d.ubicacion }}</dd></div> }
+        @if (d.fechaAdquisicion) { <div><dt>Adquirido</dt><dd>{{ fecha(d.fechaAdquisicion) }}</dd></div> }
+        <div><dt>Próximo mantenimiento</dt><dd>{{ d.proximoMantenimiento ? fecha(d.proximoMantenimiento) : '—' }}</dd></div>
+        <div><dt>Costo acumulado</dt><dd>{{ moneda(d.costoMantenimientos) }}</dd></div>
+      </dl>
+      @if (d.observaciones) { <p class="equipos__texto">{{ d.observaciones }}</p> }
+
+      <section aria-label="Historial de mantenimientos">
+        <h4>Historial de mantenimientos ({{ d.mantenimientos.length }})</h4>
+        @if (!d.mantenimientos.length) {
+          <p class="equipos__vacio">Todavía no se registraron mantenimientos.</p>
+        }
+        <ol class="equipos__historial">
+          @for (m of d.mantenimientos; track m.uuid) {
+            <li [class]="'equipos__hito equipos__hito--' + m.tipo.toLowerCase()">
+              <header>
+                <strong>{{ textoTipo(m.tipo) }} · {{ fecha(m.fecha) }}</strong>
+                @if (m.costo) { <span>{{ moneda(m.costo) }}{{ m.movimientoUuid ? ' · registrado como egreso' : '' }}</span> }
+              </header>
+              <p>{{ m.descripcion }}</p>
+              <small>
+                {{ m.responsable ? 'Responsable: ' + m.responsable + ' · ' : '' }}cargó {{ m.registradoPor }}
+                {{ m.proximoMantenimiento ? ' · próximo: ' + fecha(m.proximoMantenimiento) : '' }}
+              </small>
+              @if (!m.movimientoUuid) {
+                <app-boton apariencia="texto" (accion)="eliminarMantenimiento(m)">Eliminar</app-boton>
+              }
+            </li>
+          }
+        </ol>
+      </section>
+    </div>
+  }
+</app-popup>
+
+<app-popup [abierto]="formularioAbierto()" [titulo]="editandoUuid() ? 'Editar equipamiento' : 'Nuevo equipamiento'" ancho="grande" [cancelarDeshabilitado]="guardando()" (cancelar)="formularioAbierto.set(false)">
+  @let b = borrador();
+  <form class="equipos__formulario" (submit)="$event.preventDefault(); guardar()">
+    <label class="equipos__campo equipos__campo--ancho"><span>Nombre *</span><input required maxlength="120" placeholder="Ej. Pelotas de fútbol N.º 5" [value]="b.nombre" (input)="cambiar('nombre', $any($event.target).value)" /></label>
+    <label class="equipos__campo"><span>Código</span><input maxlength="40" placeholder="Ej. FUT-001" [value]="b.codigo" (input)="cambiar('codigo', $any($event.target).value)" /></label>
+    <label class="equipos__campo"><span>Tipo</span><input maxlength="80" placeholder="Pelota, red, máquina…" [value]="b.tipo" (input)="cambiar('tipo', $any($event.target).value)" /></label>
+    <label class="equipos__campo"><span>Disciplina</span><input maxlength="80" [value]="b.disciplina" (input)="cambiar('disciplina', $any($event.target).value)" /></label>
+    <label class="equipos__campo"><span>Marca</span><input maxlength="80" [value]="b.marca" (input)="cambiar('marca', $any($event.target).value)" /></label>
+    <label class="equipos__campo"><span>Modelo</span><input maxlength="80" [value]="b.modelo" (input)="cambiar('modelo', $any($event.target).value)" /></label>
+    <label class="equipos__campo"><span>Cantidad *</span><input type="number" min="0" step="1" inputmode="numeric" [value]="b.cantidad" (input)="cambiar('cantidad', $any($event.target).value)" /></label>
+    <app-select etiqueta="Estado *" [opciones]="opcionesEstado" [value]="b.estado" (valueChange)="cambiar('estado', $event)" />
+    <label class="equipos__campo"><span>Ubicación</span><input maxlength="120" placeholder="Depósito, gimnasio…" [value]="b.ubicacion" (input)="cambiar('ubicacion', $any($event.target).value)" /></label>
+    <app-input-fecha etiqueta="Fecha de adquisición" [valorInicial]="b.fechaAdquisicion" [maximo]="hoy" (valorCambiado)="cambiar('fechaAdquisicion', $event)" />
+    <label class="equipos__campo equipos__campo--ancho"><span>Observaciones</span><textarea rows="2" [value]="b.observaciones" (input)="cambiar('observaciones', $any($event.target).value)"></textarea></label>
+    @if (error()) { <p class="equipos__error equipos__campo--ancho" role="alert">{{ error() }}</p> }
+    <div class="equipos__pie equipos__campo--ancho"><app-boton tipo="submit" [cargando]="guardando()">{{ editandoUuid() ? 'Guardar cambios' : 'Crear' }}</app-boton></div>
+  </form>
+</app-popup>
+
+<app-popup [abierto]="mantenimientoAbierto()" titulo="Registrar mantenimiento" [descripcion]="detalle()?.nombre ?? ''" ancho="grande" [cancelarDeshabilitado]="guardando()" (cancelar)="mantenimientoAbierto.set(false)">
+  @let m = borradorMantenimiento();
+  <form class="equipos__formulario" (submit)="$event.preventDefault(); guardarMantenimiento()">
+    <app-select etiqueta="Tipo *" [opciones]="opcionesTipoMantenimiento" [value]="m.tipo" (valueChange)="cambiarMantenimiento('tipo', $event)" />
+    <app-input-fecha etiqueta="Fecha *" [valorInicial]="m.fecha" [maximo]="hoy" (valorCambiado)="cambiarMantenimiento('fecha', $event)" />
+    <label class="equipos__campo"><span>Responsable</span><input maxlength="120" placeholder="Quién lo hizo" [value]="m.responsable" (input)="cambiarMantenimiento('responsable', $any($event.target).value)" /></label>
+    <label class="equipos__campo equipos__campo--ancho"><span>Qué se hizo *</span><textarea rows="3" [value]="m.descripcion" (input)="cambiarMantenimiento('descripcion', $any($event.target).value)"></textarea></label>
+    <label class="equipos__campo"><span>Costo ($)</span><input type="number" min="0" step="0.01" inputmode="decimal" [value]="m.costo" (input)="cambiarMantenimiento('costo', $any($event.target).value)" /></label>
+    <app-input-fecha etiqueta="Próximo mantenimiento" [valorInicial]="m.proximoMantenimiento" [minimo]="m.fecha" (valorCambiado)="cambiarMantenimiento('proximoMantenimiento', $event)" />
+    <app-select etiqueta="Estado en que queda" [opciones]="opcionesEstadoResultante" [value]="m.estadoResultante" (valueChange)="cambiarMantenimiento('estadoResultante', $event)" />
+    <div class="equipos__egreso equipos__campo--ancho">
+      <label class="equipos__check">
+        <input type="checkbox" [checked]="m.registrarEgreso" (change)="cambiarMantenimiento('registrarEgreso', $any($event.target).checked)" />
+        Registrar el costo como egreso en Cobros
+      </label>
+      @if (m.registrarEgreso) {
+        <small>Queda en Cobros › Ingresos como egreso y aparece en los reportes económicos.</small>
+      }
+    </div>
+    @if (errorMantenimiento()) { <p class="equipos__error equipos__campo--ancho" role="alert">{{ errorMantenimiento() }}</p> }
+    <div class="equipos__pie equipos__campo--ancho"><app-boton tipo="submit" [cargando]="guardando()">Registrar</app-boton></div>
+  </form>
+</app-popup>

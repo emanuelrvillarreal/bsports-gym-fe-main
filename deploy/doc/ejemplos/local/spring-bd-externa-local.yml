@@ -1,0 +1,14 @@
+# Ejemplo: Spring Boot con BD externa en local
+# La conexión a la base se define en application.server.properties
+
+local:
+  mi-api:
+    port: 9050
+    stack: spring
+
+    env:
+      RESTART_POLICY: "no"
+      EXTERNAL_API_URL: "http://localhost:8081"
+
+    composer_file: plantillas/spring-3.9-java-17/docker-compose.yml
+    application_properties: src/main/resources/application.server.properties

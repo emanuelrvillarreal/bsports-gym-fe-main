@@ -1,0 +1,79 @@
+:host {
+  display: block;
+}
+
+.actividades-portal {
+  &__filtros {
+    display: grid;
+    grid-template-columns: minmax(12rem, 1fr) minmax(11rem, 14rem);
+    align-items: end;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+
+    label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    input {
+      box-sizing: border-box;
+      width: 100%;
+      min-height: 2.75rem;
+      padding: 0.65rem 0.8rem;
+      color: var(--app-text);
+      background: var(--app-surface);
+      border: 1px solid var(--app-surface-border);
+      border-radius: 0.65rem;
+
+      &:focus-visible {
+        outline: 3px solid color-mix(in srgb, var(--app-accent) 36%, white);
+        outline-offset: 2px;
+      }
+    }
+  }
+
+  &__busqueda {
+    display: flex;
+    gap: 0.5rem;
+    min-width: 0;
+
+    input {
+      min-width: 0;
+    }
+  }
+
+  &__estado,
+  &__inscripcion {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem 0;
+
+    p {
+      margin: 0;
+    }
+  }
+
+  &__estado {
+    justify-items: center;
+    padding: 2rem 1rem;
+  }
+
+  &__inscripcion {
+    min-width: min(100%, 22rem);
+  }
+}
+
+:host-context(.theme-mode-dark) .actividades-portal__busqueda input {
+  background: #000;
+}
+
+@media (max-width: 42rem) {
+  .actividades-portal__filtros {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+}

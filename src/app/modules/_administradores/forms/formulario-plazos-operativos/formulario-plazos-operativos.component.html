@@ -1,0 +1,137 @@
+<form
+  id="formulario-plazos-operativos"
+  class="formulario-plazos-operativos"
+  appValidacionFormulario
+  [attr.aria-busy]="cargando()"
+  (submit)="$event.preventDefault(); guardar()"
+  novalidate
+>
+  <small
+    class="formulario-plazos-operativos__error"
+    [class.formulario-plazos-operativos__error--visible]="errorVisible()"
+    role="alert"
+    >{{ mensajeError() }}</small
+  >
+
+  <app-card
+    titulo="Plazos operativos"
+    descripcion="Configurá la periodicidad y los tiempos de generación de cuotas sociales."
+  >
+    <div class="formulario-plazos-operativos__campos">
+      <app-select
+        etiqueta="Periodicidad de la cuota social"
+        placeholder="Seleccionar periodicidad"
+        [opciones]="opcionesPeriodicidad"
+        [value]="periodicidad()"
+        [deshabilitado]="bloqueado() || cargando()"
+        (valueChange)="seleccionarPeriodicidad($event)"
+      />
+      <label for="plazos-dias-vencimiento-cuota"
+        ><span>Días de vencimiento de la cuota social</span
+        ><input
+          id="plazos-dias-vencimiento-cuota"
+          type="number"
+          inputmode="numeric"
+          min="1"
+          step="1"
+          [attr.data-app-invalido]="diasInvalidos(diasVencimientoCuota(), true) ? 'true' : null"
+          [disabled]="bloqueado() || cargando()"
+          [value]="diasVencimientoCuota()"
+          (input)="actualizarNumero('diasVencimientoCuota', $event)"
+      /></label>
+      <label for="plazos-dias-moroso"
+        ><span>Días para pasar a moroso</span
+        ><input
+          id="plazos-dias-moroso"
+          type="number"
+          inputmode="numeric"
+          min="1"
+          step="1"
+          [attr.data-app-invalido]="diasInvalidos(diasVencimientoMoroso()) ? 'true' : null"
+          [disabled]="bloqueado() || cargando()"
+          [value]="diasVencimientoMoroso()"
+          (input)="actualizarNumero('diasVencimientoMoroso', $event)"
+      /></label>
+      <label for="plazos-dias-inhabilitacion"
+        ><span>Días de inhabilitación</span
+        ><input
+          id="plazos-dias-inhabilitacion"
+          type="number"
+          inputmode="numeric"
+          min="1"
+          step="1"
+          [attr.data-app-invalido]="diasInvalidos(diasInhabilitacion()) ? 'true' : null"
+          [disabled]="bloqueado() || cargando()"
+          [value]="diasInhabilitacion()"
+          (input)="actualizarNumero('diasInhabilitacion', $event)"
+      /></label>
+    </div>
+
+    <fieldset class="formulario-plazos-operativos__recargo">
+      <legend>Recargo de la cuota social por pago fuera de término</legend>
+      <p class="formulario-plazos-operativos__ayuda">
+        Opcional. Rige solo para la cuota social; cada actividad tiene su propio recargo en su formulario. Si una cuota social sigue impaga pasado su vencimiento más los días de gracia, se le suma el
+        recargo una única vez. Las cuotas pagadas a término no lo reciben.
+      </p>
+      <label class="formulario-plazos-operativos__check" for="plazos-recargo-habilitado">
+        <input
+          id="plazos-recargo-habilitado"
+          type="checkbox"
+          [checked]="recargoHabilitado()"
+          [disabled]="bloqueado() || cargando()"
+          (change)="alternarRecargo($event)"
+        />
+        <span>Aplicar recargo a cuotas vencidas</span>
+      </label>
+      @if (recargoHabilitado()) {
+        <div class="formulario-plazos-operativos__campos">
+          <app-select
+            etiqueta="Tipo de recargo"
+            placeholder="Seleccionar tipo"
+            [opciones]="opcionesRecargoTipo"
+            [value]="recargoTipo()"
+            [deshabilitado]="bloqueado() || cargando()"
+            (valueChange)="seleccionarRecargoTipo($event)"
+          />
+          <label for="plazos-recargo-valor"
+            ><span>{{
+              recargoTipo() === 'PORCENTAJE' ? 'Porcentaje de recargo (%)' : 'Monto de recargo ($)'
+            }}</span
+            ><input
+              id="plazos-recargo-valor"
+              type="number"
+              inputmode="decimal"
+              min="0"
+              step="0.01"
+              [attr.data-app-invalido]="recargoValorInvalido() ? 'true' : null"
+              [disabled]="bloqueado() || cargando()"
+              [value]="recargoValor()"
+              (input)="actualizarNumero('recargoValor', $event)"
+          /></label>
+          <label for="plazos-recargo-gracia"
+            ><span>Días de gracia después del vencimiento</span
+            ><input
+              id="plazos-recargo-gracia"
+              type="number"
+              inputmode="numeric"
+              min="0"
+              step="1"
+              [attr.data-app-invalido]="recargoGraciaInvalida() ? 'true' : null"
+              [disabled]="bloqueado() || cargando()"
+              [value]="recargoDiasGracia()"
+              (input)="actualizarNumero('recargoDiasGracia', $event)"
+          /></label>
+        </div>
+      }
+    </fieldset>
+    <div class="formulario-plazos-operativos__acciones">
+      <app-boton
+        tipo="submit"
+        [deshabilitado]="bloqueado()"
+        [cargando]="cargando()"
+        ariaLabelCarga="Guardando plazos operativos"
+        >Guardar plazos operativos</app-boton
+      >
+    </div>
+  </app-card>
+</form>

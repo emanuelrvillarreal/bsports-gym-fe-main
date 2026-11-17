@@ -1,0 +1,383 @@
+<form
+  id="formulario-actividad"
+  class="formulario-actividad fs-form"
+  appValidacionFormulario
+  (submit)="$event.preventDefault(); enviar()"
+  novalidate
+>
+  <small
+    class="formulario-actividad__error"
+    [class.formulario-actividad__error--visible]="errorVisible()"
+    role="alert"
+    >{{ mensajeError() }}</small
+  >
+
+  <!-- 1. Datos generales -->
+  <section class="fs-seccion" aria-labelledby="fs-titulo-datos">
+    <header class="fs-seccion__cabecera">
+      <span class="fs-seccion__numero" aria-hidden="true">1</span>
+      <div>
+        <h3 id="fs-titulo-datos">¿Qué actividad es?</h3>
+        <p>Nombre, lugar y categorías para que tus socios la encuentren fácil.</p>
+      </div>
+    </header>
+    <div class="fs-seccion__cuerpo fs-grid">
+      <label for="actividad-nombre">
+        <span>Nombre *</span>
+        <input
+          id="actividad-nombre"
+          required
+          placeholder="Ej: Yoga, Natación, Kung Fu"
+          [attr.data-app-invalido]="!nombre().trim() ? 'true' : null"
+          [value]="nombre()"
+          (input)="actualizarTexto('nombre', $event)"
+        />
+      </label>
+      <label for="actividad-ubicacion">
+        <span>Dónde se dicta *</span>
+        <input
+          id="actividad-ubicacion"
+          required
+          placeholder="Ej: Salón principal, Pileta, Cancha 2"
+          [attr.data-app-invalido]="!ubicacion().trim() ? 'true' : null"
+          [value]="ubicacion()"
+          (input)="actualizarTexto('ubicacion', $event)"
+        />
+      </label>
+
+      <div class="fs-categorias fs-grid__completo">
+        <app-select
+          class="formulario-actividad__categoria"
+          etiqueta="Categorías (opcional)"
+          placeholder="Agregar una categoría"
+          [opciones]="opcionesCategorias()"
+          [value]="valorCategoriaSinSeleccion"
+          [deshabilitado]="!opcionesCategorias().length"
+          (valueChange)="actualizarCategoria($event)"
+        />
+        @if (!categorias().length) {
+          <small class="formulario-actividad__nota">Todavía no hay categorías creadas en el gimnasio.</small>
+        } @else if (!opcionesCategorias().length && categoriaUuids().length) {
+          <small class="formulario-actividad__nota">Ya agregaste todas las categorías disponibles.</small>
+        }
+        @if (categoriasSeleccionadas().length) {
+          <ul class="fs-chips" aria-label="Categorías seleccionadas">
+            @for (categoria of categoriasSeleccionadas(); track categoria.categoriaUuid) {
+              <li class="fs-chip-quitable">
+                <span>{{ categoria.nombre }}</span>
+                <button
+                  type="button"
+                  class="fs-chip-quitable__quitar"
+                  [attr.aria-label]="'Quitar categoría ' + categoria.nombre"
+                  (click)="quitarCategoria(categoria.categoriaUuid)"
+                >
+                  ×
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+      <div class="fs-grid__completo">
+        <label class="fs-interruptor" for="actividad-requiere-certificado">
+          <input
+            id="actividad-requiere-certificado"
+            type="checkbox"
+            role="switch"
+            [checked]="requiereCertificado()"
+            (change)="alternarCertificado($event)"
+          />
+          <span class="fs-interruptor__control" aria-hidden="true"></span>
+          <span class="fs-interruptor__texto">Exigir certificado médico vigente</span>
+        </label>
+        @if (requiereCertificado()) {
+          <small class="formulario-actividad__nota fs-detalle">
+            Quien no tenga un certificado vigente <strong>no podrá inscribirse</strong> ni se le podrá marcar
+            presente hasta que lo cargue o lo renueve. Cuánto dura el certificado se configura en Socios →
+            Certificados médicos.
+          </small>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Horarios -->
+  <section class="fs-seccion formulario-actividad__horarios" aria-labelledby="actividad-horarios-titulo">
+    <header class="fs-seccion__cabecera">
+      <span class="fs-seccion__numero" aria-hidden="true">2</span>
+      <div>
+        <h3 id="actividad-horarios-titulo">¿Cuándo se dicta? *</h3>
+        <p>
+          Agregá un horario por cada clase. Podés tener varios el mismo día (por ejemplo, lunes 12:00 y
+          lunes 14:00); el socio elige a cuáles va.
+        </p>
+      </div>
+    </header>
+    <div class="fs-seccion__cuerpo">
+      <ul class="formulario-actividad__horarios-lista">
+        @for (horario of horarios(); track horario.clave; let posicion = $index) {
+          <li class="formulario-actividad__horario">
+            <div class="fs-horario__cabecera">
+              <strong>Horario {{ posicion + 1 }}</strong>
+              <app-boton
+                tipo="button"
+                apariencia="texto"
+                [soloIcono]="true"
+                [deshabilitado]="horarios().length === 1 || horario.inscriptos > 0"
+                [aria-label]="
+                  horario.inscriptos > 0
+                    ? 'No se puede quitar el horario ' + (posicion + 1) + ': tiene inscriptos'
+                    : 'Quitar horario ' + (posicion + 1)
+                "
+                [attr.title]="horario.inscriptos > 0 ? 'Tiene inscriptos: pasalos a otro horario antes de quitarlo' : null"
+                (accion)="quitarHorario(horario.clave)"
+              >
+                <ng-icon
+                  name="heroTrash"
+                  aria-hidden="true"
+                  [style.color]="'var(--color-secundario, var(--app-secondary))'"
+                />
+              </app-boton>
+            </div>
+            <div class="fs-horario__campos">
+              <app-select
+                etiqueta="Día"
+                placeholder="Elegir día"
+                [opciones]="opcionesDia"
+                [value]="horario.diaSemana"
+                [attr.data-app-invalido]="!horario.diaSemana ? 'true' : null"
+                (valueChange)="actualizarHorario(horario.clave, 'diaSemana', $event)"
+              />
+              <app-input-hora
+                [inputId]="'actividad-horario-inicio-' + horario.clave"
+                etiqueta="Desde"
+                [valor]="horario.horaInicio"
+                [requerido]="true"
+                [invalido]="!horario.horaInicio || franjaInvalida(horario)"
+                [attr.data-app-invalido]="!horario.horaInicio || franjaInvalida(horario) ? 'true' : null"
+                (valorCambiado)="actualizarHorario(horario.clave, 'horaInicio', $event)"
+              />
+              <app-input-hora
+                [inputId]="'actividad-horario-fin-' + horario.clave"
+                etiqueta="Hasta"
+                [valor]="horario.horaFin"
+                [requerido]="true"
+                [invalido]="!horario.horaFin || franjaInvalida(horario)"
+                [attr.data-app-invalido]="!horario.horaFin || franjaInvalida(horario) ? 'true' : null"
+                (valorCambiado)="actualizarHorario(horario.clave, 'horaFin', $event)"
+              />
+              <label class="formulario-actividad__horario-cupo" [for]="'actividad-horario-cupo-' + horario.clave">
+                <span>Cupo (personas)</span>
+                <input
+                  [id]="'actividad-horario-cupo-' + horario.clave"
+                  type="number"
+                  inputmode="numeric"
+                  min="1"
+                  required
+                  [attr.data-app-invalido]="cupoInvalido(horario) ? 'true' : null"
+                  [value]="horario.cupo"
+                  (input)="actualizarHorario(horario.clave, 'cupo', $any($event.target).value)"
+                />
+                @if (horario.inscriptos) {
+                  <small>{{ horario.inscriptos }} {{ horario.inscriptos === 1 ? 'inscripto' : 'inscriptos' }}</small>
+                }
+              </label>
+            </div>
+          </li>
+        }
+      </ul>
+
+      <button type="button" class="fs-agregar" (click)="agregarHorario()">
+        <ng-icon name="heroPlus" aria-hidden="true" />
+        Agregar otro horario
+      </button>
+    </div>
+  </section>
+
+  <!-- 3. Cuota -->
+  <section class="fs-seccion" aria-labelledby="fs-titulo-cuota">
+    <header class="fs-seccion__cabecera">
+      <span class="fs-seccion__numero" aria-hidden="true">3</span>
+      <div>
+        <h3 id="fs-titulo-cuota">¿Cuánto y cada cuánto se cobra?</h3>
+        <p>El importe de la cuota y cuándo vence.</p>
+      </div>
+    </header>
+    <div class="fs-seccion__cuerpo fs-grid">
+      <label for="actividad-importe">
+        <span>Importe de la cuota *</span>
+        <input
+          id="actividad-importe"
+          type="text"
+          required
+          autocomplete="off"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          placeholder="$ 0"
+          [attr.data-app-invalido]="!importeCuota() || importeCuota() <= 0 ? 'true' : null"
+          [value]="formatearImporte(importeCuota())"
+          (keydown)="bloquearCaracterNoNumerico($event)"
+          (input)="actualizarTexto('importeCuota', $event)"
+          (blur)="formatearInputImporte($event)"
+        />
+      </label>
+
+      <fieldset class="formulario-actividad__periodicidad fs-opciones fs-grid__completo">
+        <legend>¿Cada cuánto se genera la cuota? *</legend>
+        <div class="fs-opciones__lista" role="radiogroup" aria-label="Periodicidad de la cuota">
+          @for (opcion of opcionesPeriodicidad; track opcion.value) {
+            <label class="fs-chip" [class.fs-chip--activo]="periodicidadCuota() === opcion.value">
+              <input
+                type="radio"
+                name="actividad-periodicidad"
+                [value]="opcion.value"
+                [checked]="periodicidadCuota() === opcion.value"
+                (change)="actualizarPeriodicidad(opcion.value)"
+              />
+              <span>{{ opcion.label }}</span>
+            </label>
+          }
+        </div>
+      </fieldset>
+
+      <fieldset class="fs-opciones fs-grid__completo">
+        <legend>¿Cuándo vence cada cuota?</legend>
+        @if (admiteDiaFijo()) {
+          <div class="formulario-actividad__modo-vencimiento fs-tarjetas" role="radiogroup" aria-label="Cómo vence la cuota">
+            @for (opcion of opcionesModoVencimiento; track opcion.value) {
+              <label class="fs-tarjeta" [class.fs-tarjeta--activa]="modoVencimiento() === opcion.value">
+                <input
+                  type="radio"
+                  name="actividad-modo-vencimiento"
+                  [value]="opcion.value"
+                  [checked]="modoVencimiento() === opcion.value"
+                  (change)="actualizarModoVencimiento(opcion.value)"
+                />
+                <span class="fs-tarjeta__titulo">{{ opcion.label }}</span>
+                <span class="fs-tarjeta__detalle">
+                  {{
+                    opcion.value === 'DIAS'
+                      ? 'Cada cuota vence una cantidad de días después de generarse.'
+                      : 'Todas las cuotas vencen el mismo día de cada mes.'
+                  }}
+                </span>
+              </label>
+            }
+          </div>
+        }
+
+        @if (modoVencimiento() === 'DIA_FIJO' && admiteDiaFijo()) {
+          <div class="fs-grid fs-detalle">
+            <app-select
+              class="formulario-actividad__dia-vencimiento"
+              etiqueta="Vence todos los meses el"
+              [opciones]="opcionesDiaMes"
+              [value]="diaVencimientoFijo()"
+              (valueChange)="diaVencimientoFijo.set($event)"
+            />
+            <app-select
+              class="formulario-actividad__dia-vencimiento"
+              etiqueta="Si alguien se inscribe tarde en el mes"
+              [opciones]="opcionesDiaCorte"
+              [value]="diaCorteInscripcion()"
+              (valueChange)="diaCorteInscripcion.set($event)"
+            />
+            <small class="formulario-actividad__nota fs-grid__completo">
+              La primera cuota vence el próximo día {{ diaVencimientoFijo() }}. Desde la segunda, las cuotas de
+              todos los socios se generan el 1 de cada mes y vencen el día {{ diaVencimientoFijo() }}.
+              {{ diaCorteInscripcion()
+                ? 'Quien se inscribe después del día ' + diaCorteInscripcion() + ' no paga ese mes: su primera cuota es la del mes siguiente.'
+                : 'Quien se inscribe paga el mes de la inscripción completo, aunque falten pocos días.' }}
+            </small>
+          </div>
+        } @else {
+          <div class="fs-detalle">
+            <label for="actividad-dias-vencimiento">
+              <span class="formulario-actividad__etiqueta-vencimiento">
+                <span>Días hasta el vencimiento</span>
+                <small class="formulario-actividad__ayuda-vencimiento">30 días por defecto</small>
+              </span>
+              <input
+                id="actividad-dias-vencimiento"
+                type="number"
+                inputmode="numeric"
+                min="1"
+                step="1"
+                placeholder="30"
+                [attr.data-app-invalido]="diasInvalidos(diasVencimientoCuota()) ? 'true' : null"
+                [value]="diasVencimientoCuota()"
+                (input)="actualizarTexto('diasVencimientoCuota', $event)"
+              />
+            </label>
+          </div>
+        }
+      </fieldset>
+    </div>
+  </section>
+
+  <!-- 4. Recargo -->
+  <section class="fs-seccion" aria-labelledby="fs-titulo-recargo">
+    <header class="fs-seccion__cabecera">
+      <span class="fs-seccion__numero" aria-hidden="true">4</span>
+      <div>
+        <h3 id="fs-titulo-recargo">Recargo por pago tardío <span class="fs-opcional">(opcional)</span></h3>
+        <p>Sumá un importe extra a quienes no paguen la cuota a tiempo.</p>
+      </div>
+    </header>
+    <div class="fs-seccion__cuerpo">
+      <label class="fs-interruptor formulario-actividad__check" for="actividad-recargo-habilitado">
+        <input
+          id="actividad-recargo-habilitado"
+          type="checkbox"
+          role="switch"
+          [checked]="recargoHabilitado()"
+          (change)="alternarRecargo($event)"
+        />
+        <span class="fs-interruptor__control" aria-hidden="true"></span>
+        <span class="fs-interruptor__texto">Cobrar recargo si la cuota se paga fuera de término</span>
+      </label>
+
+      @if (recargoHabilitado()) {
+        <div class="fs-grid fs-detalle">
+          <app-select
+            etiqueta="¿Cómo se calcula?"
+            placeholder="Seleccionar tipo"
+            [opciones]="opcionesRecargoTipo"
+            [value]="recargoTipo()"
+            (valueChange)="seleccionarRecargoTipo($event)"
+          />
+          <label for="actividad-recargo-valor">
+            <span>{{ recargoTipo() === 'PORCENTAJE' ? 'Porcentaje de recargo (%)' : 'Monto de recargo ($)' }}</span>
+            <input
+              id="actividad-recargo-valor"
+              type="number"
+              inputmode="decimal"
+              min="0"
+              step="0.01"
+              [attr.data-app-invalido]="recargoValorInvalido() ? 'true' : null"
+              [value]="recargoValor()"
+              (input)="actualizarRecargo('recargoValor', $event)"
+            />
+          </label>
+          <label for="actividad-recargo-gracia">
+            <span>Días de gracia después del vencimiento</span>
+            <input
+              id="actividad-recargo-gracia"
+              type="number"
+              inputmode="numeric"
+              min="0"
+              step="1"
+              [attr.data-app-invalido]="recargoGraciaInvalida() ? 'true' : null"
+              [value]="recargoDiasGracia()"
+              (input)="actualizarRecargo('recargoDiasGracia', $event)"
+            />
+          </label>
+          <small class="formulario-actividad__nota fs-grid__completo">
+            {{ resumenRecargo() }} Se suma una única vez y solo a las cuotas que sigan impagas; quienes pagan a
+            término no lo reciben.
+          </small>
+        </div>
+      }
+    </div>
+  </section>
+</form>

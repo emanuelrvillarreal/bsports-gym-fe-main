@@ -1,0 +1,39 @@
+:host { display: block; }
+
+.mis-actividades-profesor {
+  display: grid;
+  gap: 1rem;
+
+  &__encabezado { margin-bottom: 1rem; }
+  &__encabezado h2 { margin: 0.2rem 0 0; color: var(--app-text); font-size: 1.15rem; }
+  &__eyebrow, .detalle-actividad__eyebrow { color: var(--app-accent); font-size: 0.85rem; font-weight: 800; letter-spacing: normal; text-transform: none; }
+  &__error { color: var(--semantic-danger); }
+}
+
+:host ::ng-deep .tabla-responsive__horario ng-icon {
+  color: var(--app-accent);
+}
+
+.detalle-actividad { display: grid; gap: 1.25rem; }
+.detalle-actividad__cargando { min-height: 8rem; color: var(--app-text-soft); }
+.detalle-actividad__seccion, .detalle-actividad__planilla { display: grid; gap: 0.8rem; }
+.detalle-actividad__planilla { padding-top: 1rem; border-top: 1px solid var(--app-surface-border); }
+.detalle-actividad__titulo-seccion h2, .detalle-actividad__titulo-planilla h2 { margin: 0.2rem 0 0; color: var(--app-text); font-size: 1.15rem; }
+.detalle-actividad__titulo-planilla { display: flex; align-items: end; justify-content: space-between; gap: 1rem; }
+.detalle-actividad__titulo-planilla > span { color: var(--app-text-soft); font-size: 0.85rem; }
+.detalle-actividad__datos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; margin: 0; }
+.detalle-actividad__datos div { padding: 0.8rem; background: var(--app-surface-strong); border: 1px solid var(--app-surface-border); border-radius: 0.75rem; }
+.detalle-actividad__datos dt { color: var(--app-text-soft); font-size: 0.85rem; text-transform: none; }
+.detalle-actividad__datos dd { margin: 0.25rem 0 0; color: var(--app-text); font-weight: 650; }
+.detalle-actividad__horario { display: inline-flex; align-items: center; gap: 0.4rem; }
+.detalle-actividad__horario ng-icon { width: 1em; height: 1em; color: var(--app-accent); }
+.detalle-actividad__dato--ancho-completo { grid-column: 1 / -1; }
+.detalle-actividad__chips { display: flex; flex-wrap: wrap; gap: 0.4rem; padding: 0; margin: 0; list-style: none; }
+.detalle-actividad__chip { display: inline-flex; align-items: center; width: fit-content; padding: 0.35rem 0.65rem; color: var(--app-text); background: var(--app-surface); border: 1px solid var(--app-surface-border); border-radius: 999px; font-size: 0.85rem; font-weight: 800; }
+.detalle-actividad__chip--exito { color: var(--semantic-success); border-color: color-mix(in srgb, var(--semantic-success) 55%, transparent); }
+.detalle-actividad__chip--peligro { color: var(--semantic-danger); border-color: color-mix(in srgb, var(--semantic-danger) 55%, transparent); }
+
+@media (max-width: 48rem) {
+  .detalle-actividad__datos { grid-template-columns: 1fr; }
+  .detalle-actividad__titulo-planilla { align-items: flex-start; flex-direction: column; }
+}

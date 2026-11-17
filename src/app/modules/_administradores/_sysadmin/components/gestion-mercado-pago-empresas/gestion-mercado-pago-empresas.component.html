@@ -1,0 +1,28 @@
+<section class="gestion-mp-empresas">
+  <app-card titulo="Comercios y Mercado Pago" descripcion="Administrá credenciales por empresa sin exponer secretos.">
+    <form class="gestion-mp-empresas__busqueda" (submit)="$event.preventDefault(); buscar()">
+      <label for="busqueda-mp">Buscar comercio</label>
+      <input id="busqueda-mp" name="busqueda" type="search" [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" placeholder="Nombre, razón social o CUIT" />
+      <app-boton tipo="submit" [deshabilitado]="cargando()">Buscar</app-boton>
+    </form>
+    @if (error()) { <p class="gestion-mp-empresas__error" role="alert">{{ error() }}</p> }
+    <app-tabla-responsive [columnas]="columnas" [filas]="filas()" idFila="uuid" [acciones]="acciones" [accionesCabecera]="accionesCabecera" [tr_input_conmutador]="false" [cargando]="cargando()" [tbody_rows]="tamanoPagina" mensajeVacio="No hay comercios para mostrar." (accionFila)="manejarAccionFila($event)" (accionCabecera)="manejarAccionCabecera($event)" />
+    <app-paginacion [paginaActual]="pagina()" [totalPaginas]="totalPaginas()" [deshabilitado]="cargando()" (paginaCambiada)="cambiarPagina($event)" />
+  </app-card>
+
+  <app-popup [abierto]="popupUuidAbierto()" titulo="Configurar por UUID" [cancelarDeshabilitado]="guardando()" (cancelar)="cerrarUuid()">
+    <label class="gestion-mp-empresas__campo" for="company-uuid"><span>UUID del comercio</span><input id="company-uuid" name="companyUuid" type="text" autocomplete="off" [value]="uuidManual()" (input)="uuidManual.set($any($event.target).value); errorUuidManual.set('')" /></label>
+    @if (errorUuidManual()) { <p class="gestion-mp-empresas__error" role="alert">{{ errorUuidManual() }}</p> }
+    <app-boton popupAcciones [deshabilitado]="guardando()" (accion)="abrirConfiguracionPorUuid()">Continuar</app-boton>
+  </app-popup>
+
+  <app-popup [abierto]="popupConfiguracionAbierto()" titulo="Configurar Mercado Pago" [mostrarEncabezado]="false" [mostrarCancelar]="false" ancho="grande" (cancelar)="cerrarConfiguracion()">
+    <app-titulo-hero titulo="Configurar Mercado Pago" [subtitulo]="nombreEmpresaSeleccionada()" icono="heroBanknotes" />
+    @if (cargandoConfiguracion()) { <p class="gestion-mp-empresas__estado">Consultando estado seguro…</p> } @else if (configuracion()) {
+      <app-formulario-mercado-pago [configuracion]="configuracion()" (enviado)="guardar($event)" />
+    }
+    @if (error()) { <p class="gestion-mp-empresas__error" role="alert">{{ error() }}</p> }
+    <app-boton popupAcciones apariencia="texto" [deshabilitado]="guardando()" (accion)="cerrarConfiguracion()">Cancelar</app-boton>
+    <app-boton popupAcciones tipo="submit" form="formulario-mercado-pago" [deshabilitado]="cargandoConfiguracion() || !configuracion()" [cargando]="guardando()">Guardar credenciales</app-boton>
+  </app-popup>
+</section>

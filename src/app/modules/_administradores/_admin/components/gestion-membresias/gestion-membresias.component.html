@@ -1,0 +1,59 @@
+<section class="membresias" aria-label="Membresías">
+  @if (dashboard(); as d) {
+    <div class="membresias__kpis">
+      <button type="button" class="membresias__kpi" (click)="verSituacion('VIGENTE')"><span>Pases activos</span><strong>{{ d.activas }}</strong><small>Ver cuáles</small></button>
+      <button type="button" class="membresias__kpi" [class.membresias__kpi--alerta]="d.proximasAVencer" (click)="verSituacion('VIGENTE')"><span>Vencen en 7 días</span><strong>{{ d.proximasAVencer }}</strong><small>Sin renovar</small></button>
+      <button type="button" class="membresias__kpi" [class.membresias__kpi--alerta]="d.pendientesDePago" (click)="verSituacion('PENDIENTE_PAGO')"><span>Pendientes de pago</span><strong>{{ d.pendientesDePago }}</strong><small>Ver cuáles</small></button>
+      <button type="button" class="membresias__kpi" (click)="verSituacion('VENCIDA')"><span>Vencidos (30 días)</span><strong>{{ d.vencidasUltimos30Dias }}</strong><small>Sin renovar</small></button>
+      <article class="membresias__kpi"><span>Este mes</span><strong>{{ d.nuevasMes }} nuevas</strong><small>{{ d.renovacionesMes }} renovaciones · {{ d.bajasMes }} bajas · {{ d.congeladas }} congeladas</small></article>
+      <article class="membresias__kpi"><span>Cobrado en pases</span><strong>{{ moneda(d.ingresosMes) }}</strong><small>Este mes · {{ moneda(d.ingresosAnio) }} en el año</small></article>
+    </div>
+    @if (barrasIngresos().length || barrasContratados().length) {
+      <div class="membresias__graficos">
+        <section class="membresias__panel">
+          <h3>Ingresos por pase (año)</h3>
+          @if (barrasIngresos().length) { <app-grafico-barras [barras]="barrasIngresos()" estilo="compacto" /> }
+          @else { <p class="membresias__vacio">Todavía no hay cobros de pases este año.</p> }
+        </section>
+        <section class="membresias__panel">
+          <h3>Más contratados (12 meses)</h3>
+          <app-grafico-barras [barras]="barrasContratados()" estilo="compacto" />
+        </section>
+      </div>
+    }
+  }
+
+  <div class="membresias__filtros">
+    <label class="membresias__campo">
+      <span>Buscar</span>
+      <input type="search" placeholder="Socio, N.º de socio, DNI o pase" [value]="busqueda()" (input)="buscar($any($event.target).value)" />
+    </label>
+    <app-select etiqueta="Pase" [opciones]="opcionesPase()" [value]="paseUuid()" (valueChange)="filtrar('paseUuid', $event)" />
+    <app-select etiqueta="Situación" [opciones]="opcionesSituacion" [value]="situacion()" (valueChange)="filtrar('situacion', $event)" />
+    <app-select etiqueta="Origen" [opciones]="opcionesOrigen" [value]="origen()" (valueChange)="filtrar('origen', $event)" />
+    <app-input-fecha etiqueta="Inicio desde" [valorInicial]="desde()" (valorCambiado)="filtrar('desde', $event)" />
+    <app-input-fecha etiqueta="Inicio hasta" [valorInicial]="hasta()" [minimo]="desde()" (valorCambiado)="filtrar('hasta', $event)" />
+    <app-boton apariencia="texto" [cargando]="descargando()" (accion)="descargarExcel()">Exportar a Excel</app-boton>
+  </div>
+
+  <app-tabla-responsive
+    [columnas]="columnas"
+    [filas]="filas()"
+    idFila="uuid"
+    [acciones]="acciones"
+    [cargando]="cargando()"
+    mensajeVacio="No hay membresías con estos filtros. Se contratan desde Socios › Membresías."
+    (accionFila)="manejarAccion($event)"
+    (verFila)="socio.set({ uuid: $event.socioUuid, nombre: $event.socio })"
+  />
+  <small class="membresias__vacio">{{ total() }} membresías.</small>
+  @if (totalPaginas() > 1) {
+    <app-paginacion [paginaActual]="pagina()" [totalPaginas]="totalPaginas()" (paginaCambiada)="cambiarPagina($event)" />
+  }
+</section>
+
+<app-popup [abierto]="!!socio()" titulo="Pases del socio" [descripcion]="socio()?.nombre ?? ''" ancho="grande" textoCancelar="Cerrar" (cancelar)="cerrarLegajo()">
+  @if (socio(); as s) {
+    <app-membresias-socio [memberUuid]="s.uuid" (cambio)="refrescar()" />
+  }
+</app-popup>

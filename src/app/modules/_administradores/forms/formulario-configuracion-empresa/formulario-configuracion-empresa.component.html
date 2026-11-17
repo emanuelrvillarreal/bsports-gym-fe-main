@@ -1,0 +1,76 @@
+<form
+  id="formulario-configuracion-empresa"
+  class="formulario-configuracion-empresa"
+  appValidacionFormulario
+  [attr.aria-busy]="cargando()"
+  (submit)="$event.preventDefault(); enviarConfiguracion()"
+  novalidate
+>
+  <small
+    class="formulario-configuracion-empresa__error"
+    [class.formulario-configuracion-empresa__error--visible]="errorVisible()"
+    role="alert"
+    >{{ mensajeError() }}</small
+  >
+
+  <app-card
+    class="formulario-configuracion-empresa__card formulario-configuracion-empresa__card--contacto"
+    titulo="Contacto y comunicaciones"
+    descripcion="Datos que usa el gimnasio para mantenerse en contacto."
+    [altoImpactoVisual]="true"
+  >
+    <div class="formulario-configuracion-empresa__campos">
+      <label for="empresa-telefono">
+        <span class="formulario-configuracion-empresa__etiqueta-telefono"
+          ><span>Teléfono</span
+          ><span class="formulario-configuracion-empresa__whatsapp" aria-hidden="true"
+            ><ng-icon name="heroChatBubbleLeftRight" /><span>WhatsApp</span></span
+          ></span
+        >
+        <input
+          id="empresa-telefono"
+          type="tel"
+          autocomplete="tel"
+          [disabled]="bloqueado() || cargando()"
+          [value]="formatearTelefono(telefono())"
+          (input)="actualizarTelefono($event)"
+        />
+        <small class="formulario-configuracion-empresa__ayuda"
+          >Este teléfono se usará para enviar mensajes.</small
+        >
+      </label>
+      <label for="empresa-email-institucional"
+        ><span>Email institucional</span
+        ><input
+          id="empresa-email-institucional"
+          type="email"
+          autocomplete="email"
+          [attr.data-app-invalido]="emailInvalido(emailInstitucional()) ? 'true' : null"
+          [disabled]="bloqueado() || cargando()"
+          [value]="emailInstitucional()"
+          (input)="actualizarTexto('emailInstitucional', $event)"
+      /></label>
+      <label for="empresa-email-factura"
+        ><span>Email para factura electrónica</span
+        ><input
+          id="empresa-email-factura"
+          type="email"
+          autocomplete="email"
+          [attr.data-app-invalido]="emailInvalido(emailFacturaElectronica()) ? 'true' : null"
+          [disabled]="bloqueado() || cargando()"
+          [value]="emailFacturaElectronica()"
+          (input)="actualizarTexto('emailFacturaElectronica', $event)"
+      /></label>
+    </div>
+  </app-card>
+
+  <div class="formulario-configuracion-empresa__acciones">
+    <app-boton
+      tipo="submit"
+      [deshabilitado]="bloqueado()"
+      [cargando]="cargando()"
+      ariaLabelCarga="Guardando configuración"
+      >Guardar configuración</app-boton
+    >
+  </div>
+</form>

@@ -1,0 +1,31 @@
+<fieldset class="selector-horarios" [disabled]="deshabilitado()">
+  <legend>{{ titulo() }} <span class="selector-horarios__ayuda">Podés elegir más de uno</span></legend>
+
+  @for (grupo of grupos(); track grupo.dia) {
+    <div class="selector-horarios__dia">
+      <h4>{{ grupo.etiqueta }}</h4>
+      <ul>
+        @for (horario of grupo.horarios; track horario.uuid) {
+          <li>
+            <label
+              class="selector-horarios__opcion"
+              [class.selector-horarios__opcion--elegida]="estaSeleccionado(horario)"
+              [class.selector-horarios__opcion--llena]="estaLleno(horario)"
+            >
+              <input
+                type="checkbox"
+                [checked]="estaSeleccionado(horario)"
+                [disabled]="estaLleno(horario) && !estaSeleccionado(horario)"
+                (change)="alternar(horario, $any($event.target).checked)"
+              />
+              <span class="selector-horarios__franja">{{ franja(horario) }}</span>
+              <span class="selector-horarios__lugares">{{ textoDisponibles(horario) }}</span>
+            </label>
+          </li>
+        }
+      </ul>
+    </div>
+  } @empty {
+    <p class="selector-horarios__vacio">Esta actividad todavía no tiene horarios cargados.</p>
+  }
+</fieldset>

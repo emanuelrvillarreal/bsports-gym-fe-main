@@ -1,0 +1,230 @@
+<article
+  class="auth-card"
+  [class.auth-card--alto-rendimiento]="altoRendimiento()"
+  [class.auth-card--sin-contrasena]="metodoAcceso() === 'sin-contrasena'"
+>
+  <header class="auth-card__header">
+    <div class="auth-card__heading">
+      <div class="auth-card__heading-top">
+        <ng-content select="[auth-card-header-extra]"></ng-content>
+      </div>
+      <h1>
+        {{
+          modo() === 'recovery'
+            ? 'Recuperar contraseña'
+            : metodoAcceso() === 'sin-contrasena'
+              ? 'Entrar sin contraseña'
+              : 'Ingresá a tu cuenta'
+        }}
+      </h1>
+      <small
+        class="auth-card__error"
+        [class.auth-card__error--success]="tipoMensajeVisible() === 'success'"
+        aria-live="polite"
+        role="status"
+      >
+        {{ mensajeErrorVisible() || ' ' }}
+      </small>
+    </div>
+  </header>
+
+  @if (modo() === 'recovery') {
+    <form
+      class="auth-card__mode"
+      [formGroup]="recoveryForm"
+      appValidacionFormulario
+      (ngSubmit)="enviarCodigoRecuperacion()"
+      novalidate
+    >
+      <p class="auth-card__helper">
+        {{
+          recoveryCooldownActivo()
+            ? 'Podrás pedir un nuevo enlace dentro de ' + recoveryCooldownTexto()
+            : 'Escribí tu email y te mandamos un enlace para crear una contraseña nueva.'
+        }}
+      </p>
+
+      <label class="auth-field" for="auth-recovery-email">
+        <span>Email</span>
+        <input
+          id="auth-recovery-email"
+          type="email"
+          formControlName="email"
+          autocomplete="email"
+          placeholder="nombre@ejemplo.com"
+        />
+        @if (recoveryEmailError()) {
+          <small class="auth-field__error" role="alert">{{ recoveryEmailError() }}</small>
+        }
+      </label>
+
+      <app-boton
+        tipo="submit"
+        class="auth-card__submit auth-card__submit--secondary"
+        colorPaleta="secundario"
+        [class.auth-card__submit--error]="submitInvalido()"
+        [deshabilitado]="recoveryCooldownActivo()"
+        [cargando]="enviandoCodigo()"
+        ariaLabelCarga="Enviando enlace"
+      >
+        Enviar enlace
+      </app-boton>
+
+      <div class="auth-actions auth-actions--single">
+        <app-boton
+          tipo="button"
+          apariencia="texto"
+          class="auth-actions__ghost"
+          [deshabilitado]="enviandoCodigo()"
+          (accion)="volverALogin()"
+        >
+          Volver al login
+        </app-boton>
+      </div>
+    </form>
+  } @else if (metodoAcceso() === 'sin-contrasena') {
+    <form
+      class="auth-card__mode"
+      [formGroup]="emailLoginForm"
+      appValidacionFormulario
+      (ngSubmit)="enviarEnlaceLogin()"
+      novalidate
+    >
+      <p class="auth-card__helper">
+        {{
+          loginCooldownActivo()
+            ? 'Podrás pedir otro enlace dentro de ' + loginCooldownTexto()
+            : 'Escribí tu email y te mandamos un enlace: tocalo desde tu correo y entrás directo.'
+        }}
+      </p>
+
+      <label class="auth-field" for="auth-login-email">
+        <span>Email</span>
+        <input
+          id="auth-login-email"
+          type="email"
+          formControlName="email"
+          autocomplete="email"
+          placeholder="nombre@ejemplo.com"
+        />
+        @if (emailLoginError()) {
+          <small class="auth-field__error" role="alert">{{ emailLoginError() }}</small>
+        }
+      </label>
+
+      <app-boton
+        class="auth-card__submit"
+        tipo="submit"
+        [class.auth-card__submit--error]="submitInvalido()"
+        [deshabilitado]="loginCooldownActivo()"
+        [cargando]="enviandoEnlace()"
+        ariaLabelCarga="Enviando enlace"
+      >
+        Enviar enlace de acceso
+      </app-boton>
+
+      @if (companyPath().trim()) {
+        <p class="auth-link">
+          ¿No tenés cuenta?
+          <a [routerLink]="['/', companyPath(), 'registro']">Crear cuenta</a>
+        </p>
+      }
+      @if (!companyPath().trim() && crmRegisterUrl) {
+        <p class="auth-link">
+          ¿No tenés cuenta?
+          <a [href]="crmRegisterUrl">Registrá tu gimnasio</a>
+        </p>
+      }
+    </form>
+  } @else {
+    <form
+      class="auth-card__mode"
+      [formGroup]="loginForm"
+      appValidacionFormulario
+      (ngSubmit)="ingresar()"
+      novalidate
+    >
+      <label class="auth-field" for="auth-password-email">
+        <span>Email</span>
+        <input
+          id="auth-password-email"
+          type="text"
+          formControlName="username"
+          autocomplete="username"
+          placeholder="nombre@ejemplo.com"
+        />
+        @if (usernameError()) {
+          <small class="auth-field__error" role="alert">{{ usernameError() }}</small>
+        }
+      </label>
+
+      <app-input-password
+        class="auth-password-input"
+        etiqueta="Contraseña"
+        formControlName="password"
+        autocomplete="current-password"
+        [requerido]="true"
+      />
+
+      <app-boton
+        class="auth-card__submit"
+        tipo="submit"
+        [class.auth-card__submit--error]="submitInvalido()"
+        [cargando]="enviandoLogin()"
+        ariaLabelCarga="Ingresando"
+      >
+        Ingresar
+      </app-boton>
+
+      <div class="auth-link auth-link--olvide">
+        <app-boton tipo="button" apariencia="texto" (accion)="irARecuperacion()">
+          Olvidé mi contraseña
+        </app-boton>
+      </div>
+
+      @if (companyPath().trim()) {
+        <p class="auth-link">
+          ¿No tenés cuenta?
+          <a [routerLink]="['/', companyPath(), 'registro']">Crear cuenta</a>
+        </p>
+      }
+      @if (!companyPath().trim() && crmRegisterUrl) {
+        <p class="auth-link">
+          ¿No tenés cuenta?
+          <a [href]="crmRegisterUrl">Registrá tu gimnasio</a>
+        </p>
+      }
+    </form>
+  }
+</article>
+
+@if (modo() !== 'recovery' && linkLoginDisponible()) {
+  <app-boton
+    class="auth-method-switch"
+    tipo="button"
+    apariencia="texto"
+    role="switch"
+    aria-label="Acceso sin contraseña"
+    [aria-checked]="metodoAcceso() === 'sin-contrasena'"
+    [deshabilitado]="enviandoEnlace() || enviandoLogin()"
+    (accion)="alternarMetodoAcceso()"
+  >
+    {{
+      metodoAcceso() === 'sin-contrasena'
+        ? 'Volver a entrar con contraseña'
+        : 'Entrar sin contraseña, con un enlace por email'
+    }}
+  </app-boton>
+}
+
+@defer (when mostrarToastConexion()) {
+  <app-toast-alert
+    posicion="centrada"
+    icono="heroExclamationTriangle"
+    titulo="Reintentá más tarde"
+    subtitulo="Error de conexión"
+    [fondoPeligro]="true"
+    [duracionMs]="4000"
+    (cerrada)="cerrarToastConexion()"
+  />
+}

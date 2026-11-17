@@ -1,0 +1,21 @@
+:host {
+  display: contents;
+}
+
+.checkout-factura {
+  display: grid;
+  min-height: 9rem;
+  place-items: center;
+  gap: 1rem;
+  color: var(--app-text);
+  text-align: center;
+
+  app-load-spinner-blue {
+    width: 3rem;
+  }
+
+  &__error {
+    margin: 0;
+    color: var(--app-danger);
+  }
+}

@@ -1,0 +1,30 @@
+<app-card
+  data-driver-onboarding-config="performance-panel"
+  titulo="Rendimiento visual"
+  descripcion="Controla si la aplicacion debe mantener activos los efectos visuales."
+  icono="heroCog6Tooth"
+  [altoRendimiento]="altoRendimiento()"
+>
+  <app-boton
+    tipo="button"
+    apariencia="texto"
+    class="performance-panel__toggle"
+    [class.performance-panel__toggle--activa]="efectosVisualesActivos()"
+    role="switch"
+    [aria-checked]="efectosVisualesActivos()"
+    (accion)="alternarDesactivado()"
+  >
+    <span
+      class="performance-panel__toggle-ui"
+      [class.performance-panel__toggle-ui--activa]="efectosVisualesActivos()"
+      aria-hidden="true"
+    ></span>
+    <span class="performance-panel__toggle-copy">
+      <strong>Efectos visuales activos</strong>
+      <small
+        >Si esta desactivado, se reducen titulos, graficos y animaciones para priorizar
+        fluidez.</small
+      >
+    </span>
+  </app-boton>
+</app-card>

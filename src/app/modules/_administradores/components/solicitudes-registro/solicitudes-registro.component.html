@@ -1,0 +1,145 @@
+<div class="solicitudes-registro">
+  <app-card>
+    <app-formulario-filtro-solicitudes [cargando]="cargando()" (enviado)="buscar($event)" />
+
+    @if (error() && !solicitudRechazo() && !solicitudAprobacion()) {
+      <p class="solicitudes-registro__error" role="alert">{{ error() }}</p>
+    }
+
+    <app-tabla-responsive
+      [columnas]="columnas"
+      [filas]="solicitudes()"
+      [cargando]="cargando()"
+      idFila="memberUuid"
+      [acciones]="accionesSolicitudes"
+      [tbody_rows]="7"
+      mensajeVacio="No hay solicitudes pendientes."
+      (accionFila)="manejarAccionSolicitud($event)"
+    />
+
+    @if (!cargando()) {
+      <app-paginacion
+        [paginaActual]="paginaActual()"
+        [totalPaginas]="totalPaginas()"
+        [deshabilitado]="cargando()"
+        (paginaCambiada)="cambiarPagina($event)"
+      />
+    }
+  </app-card>
+
+  <app-popup
+    [abierto]="!!solicitudAprobacion()"
+    titulo="Aprobar solicitud"
+    [descripcion]="
+      solicitudAprobacion()
+        ? 'Solicitud de ' + solicitudAprobacion()!.nombre + ' ' + solicitudAprobacion()!.apellido
+        : ''
+    "
+    [mostrarEncabezado]="false"
+    ancho="grande"
+    [cancelarDeshabilitado]="!!procesandoUuid()"
+    (cancelar)="cancelarAprobacion()"
+  >
+    @if (solicitudAprobacion()) {
+      <app-titulo-hero
+        icono="descuentos"
+        titulo="Aprobar solicitud"
+        [subtitulo]="
+          'Solicitud de ' + solicitudAprobacion()!.nombre + ' ' + solicitudAprobacion()!.apellido
+        "
+      />
+
+      <p class="solicitudes-registro__ayuda">
+        Podés aprobar sin descuentos o agregar uno o más antes de confirmar.
+      </p>
+
+      @if (cargandoCatalogoDescuentos()) {
+        <p class="solicitudes-registro__estado">Cargando catálogo de descuentos…</p>
+      } @else if (catalogoDescuentos().length && mostrarFormularioDescuento()) {
+        <section class="solicitudes-registro__agregar-descuento" aria-label="Agregar descuento">
+          <app-formulario-asignacion-descuento
+            [descuentos]="descuentosDisponibles()"
+            (enviado)="agregarDescuentoAprobacion($event)"
+          />
+          <app-boton
+            tipo="submit"
+            form="formulario-asignacion-descuento"
+            [deshabilitado]="!descuentosDisponibles().length || !!procesandoUuid()"
+          >
+            Agregar descuento
+          </app-boton>
+        </section>
+      } @else if (catalogoDescuentosCargado() && !catalogoDescuentos().length) {
+        <p class="solicitudes-registro__estado">No hay descuentos disponibles en el catálogo.</p>
+      }
+
+      @if (filasDescuentosAprobacion().length) {
+        <section class="solicitudes-registro__descuentos-seleccionados">
+          <h3>Descuentos a aplicar</h3>
+          <app-tabla-responsive
+            [columnas]="columnasDescuentosAprobacion"
+            [filas]="filasDescuentosAprobacion()"
+            idFila="descuentoUuid"
+            [acciones]="accionesDescuentosAprobacion"
+            [tbody_rows]="4"
+            (accionFila)="manejarAccionDescuentoAprobacion($event)"
+          />
+        </section>
+      }
+
+      @if (errorAprobacion()) {
+        <p class="solicitudes-registro__error" role="alert">{{ errorAprobacion() }}</p>
+      }
+    }
+
+    <app-boton
+      popupAcciones
+      [cargando]="!!procesandoUuid()"
+      ariaLabelCarga="Aprobando solicitud"
+      (accion)="confirmarAprobacion()"
+    >
+      Aprobar solicitud
+    </app-boton>
+  </app-popup>
+
+  <app-popup
+    [abierto]="!!solicitudRechazo()"
+    titulo="Rechazar solicitud"
+    [descripcion]="
+      solicitudRechazo()
+        ? 'Solicitud de ' + solicitudRechazo()!.nombre + ' ' + solicitudRechazo()!.apellido
+        : ''
+    "
+    [mostrarEncabezado]="false"
+    ancho="pequeno"
+    [cancelarDeshabilitado]="!!procesandoUuid()"
+    (cancelar)="cancelarRechazo()"
+  >
+    @if (solicitudRechazo()) {
+      <app-titulo-hero
+        icono="descuentos"
+        titulo="Rechazar solicitud"
+        [subtitulo]="
+          'Solicitud de ' + solicitudRechazo()!.nombre + ' ' + solicitudRechazo()!.apellido
+        "
+      />
+      <app-formulario-rechazo-solicitud (enviado)="confirmarRechazo($event)" />
+
+      @if (error()) {
+        <p class="solicitudes-registro__error" role="alert">{{ error() }}</p>
+      }
+    }
+
+    <app-boton
+      popupAcciones
+      tipo="submit"
+      form="formulario-rechazo-solicitud"
+      colorFondo="var(--semantic-danger)"
+      colorInteraccion="var(--semantic-danger)"
+      [cargando]="!!procesandoUuid()"
+      ariaLabelCarga="Rechazando solicitud"
+    >
+      Confirmar rechazo
+    </app-boton>
+  </app-popup>
+</div>

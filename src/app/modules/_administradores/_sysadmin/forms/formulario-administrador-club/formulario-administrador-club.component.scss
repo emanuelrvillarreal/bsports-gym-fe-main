@@ -1,0 +1,58 @@
+:host {
+  display: block;
+}
+
+.formulario-administrador-club {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+  align-items: end;
+
+  &__error {
+    grid-column: 1 / -1;
+    display: block;
+    min-height: 1.1rem;
+    color: var(--semantic-danger);
+    visibility: hidden;
+
+    &--visible {
+      visibility: visible;
+    }
+  }
+
+  label {
+    display: grid;
+    gap: 0.35rem;
+    color: var(--app-text-soft);
+    font-size: 0.85rem;
+    font-weight: 650;
+  }
+
+  input {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 2.5rem;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid var(--app-surface-border);
+    border-radius: 0.6rem;
+    background: var(--app-surface);
+    color: var(--app-text);
+    font: inherit;
+
+    &:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--app-accent) 36%, transparent);
+      outline-offset: 2px;
+    }
+  }
+
+  app-input-fecha,
+  app-input-password {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 42rem) {
+  .formulario-administrador-club {
+    grid-template-columns: 1fr;
+  }
+}

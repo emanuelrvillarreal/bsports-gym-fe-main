@@ -1,0 +1,29 @@
+# Ejemplo: dos versiones del mismo proyecto en el mismo servidor
+# Distinto branch, port y path para cada versión
+
+st7:
+  convenios-fe:
+    branch: main
+    port: 9051
+    path: convenios
+    domain: stg.blueopendata.com
+
+    stack: angular
+    environment: production
+    composer_file: plantillas/angular-21-node-22/docker-compose.yml
+    nginx_config: plantillas/angular-21-node-22/nginx.host-reverse-proxy.conf
+
+  convenios-fe-beta:
+    branch: develop
+    port: 9052
+    path: convenios-beta
+    domain: stg.blueopendata.com
+
+    stack: angular
+    environment: st7
+    composer_file: plantillas/angular-21-node-22/docker-compose.yml
+    nginx_config: plantillas/angular-21-node-22/nginx.host-reverse-proxy.conf
+
+# Resultado:
+#   Producción: https://stg.blueopendata.com/convenios/
+#   Beta:       https://stg.blueopendata.com/convenios-beta/

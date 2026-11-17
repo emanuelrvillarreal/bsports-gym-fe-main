@@ -1,0 +1,70 @@
+<label class="input-fecha" [style.--input-fecha-primario]="colorPrimario()">
+  @if (etiqueta()) {
+    <span class="input-fecha__etiqueta">{{ etiqueta() }}</span>
+  }
+
+  <span #controlCalendario class="input-fecha__control">
+    <span class="input-fecha__segmentos" [class.input-fecha__segmentos--fecha-hora]="modo() === 'fecha-hora'" [class.input-fecha__segmentos--con-calendario]="modo() !== 'mes'">
+      @if (modo() !== 'mes') {
+        <input #campoFecha #segmento [id]="id() || null" class="input-fecha__segmento input-fecha__segmento--dia" type="text" inputmode="numeric" autocomplete="off" maxlength="2" placeholder="dd" [value]="dia" [attr.aria-label]="etiqueta() ? etiqueta() + ': día' : 'Día'" [disabled]="deshabilitado" [required]="requerido()" (input)="cambiarSegmento('dia', $event)" (focus)="seleccionarSegmento($event)" (click)="seleccionarSegmento($event)" (keydown)="manejarTeclaSegmento($event)" (blur)="marcarTocado()" />
+        <span aria-hidden="true">/</span>
+      }
+      <input #campoFecha #segmento [id]="modo() === 'mes' ? id() || null : null" class="input-fecha__segmento input-fecha__segmento--mes" type="text" inputmode="numeric" autocomplete="off" maxlength="2" placeholder="mm" [value]="mes" [attr.aria-label]="etiqueta() ? etiqueta() + ': mes' : 'Mes'" [disabled]="deshabilitado" [required]="modo() === 'mes' && requerido()" (input)="cambiarSegmento('mes', $event)" (focus)="seleccionarSegmento($event)" (click)="seleccionarSegmento($event)" (keydown)="manejarTeclaSegmento($event)" (blur)="marcarTocado()" />
+      <span aria-hidden="true">/</span>
+      <input #segmento class="input-fecha__segmento input-fecha__segmento--anio" type="text" inputmode="numeric" autocomplete="off" maxlength="4" placeholder="aaaa" [value]="anio" aria-label="Año" [disabled]="deshabilitado" (input)="cambiarSegmento('anio', $event)" (focus)="seleccionarSegmento($event)" (click)="seleccionarSegmento($event)" (keydown)="manejarTeclaSegmento($event)" (blur)="marcarTocado()" />
+      @if (modo() === 'fecha-hora') {
+        <span class="input-fecha__separador-hora" aria-hidden="true">·</span>
+        <input #segmento class="input-fecha__segmento input-fecha__segmento--hora" type="text" inputmode="numeric" autocomplete="off" maxlength="2" placeholder="hh" [value]="hora" aria-label="Hora" [disabled]="deshabilitado" (input)="cambiarSegmento('hora', $event)" (focus)="seleccionarSegmento($event)" (click)="seleccionarSegmento($event)" (keydown)="manejarTeclaSegmento($event)" (blur)="marcarTocado()" />
+        <span aria-hidden="true">:</span>
+        <input #segmento class="input-fecha__segmento input-fecha__segmento--minuto" type="text" inputmode="numeric" autocomplete="off" maxlength="2" placeholder="mm" [value]="minuto" aria-label="Minutos" [disabled]="deshabilitado" (input)="cambiarSegmento('minuto', $event)" (focus)="seleccionarSegmento($event)" (click)="seleccionarSegmento($event)" (keydown)="manejarTeclaSegmento($event)" (blur)="marcarTocado()" />
+      }
+    </span>
+    @if (modo() !== 'mes') {
+    @if (!usarCalendarioCustom()) {
+      <input
+        #campoCalendarioNativo
+        class="input-fecha__calendario-nativo"
+        type="date"
+        tabindex="-1"
+        aria-hidden="true"
+        [value]="modo() === 'fecha-hora' ? valor.slice(0, 10) : valor"
+        [min]="minimo().slice(0, 10) || null"
+        [max]="maximo().slice(0, 10) || null"
+        (change)="seleccionarFechaNativa($event)"
+      />
+    }
+    <button
+      type="button"
+      class="input-fecha__alternador"
+      [disabled]="deshabilitado"
+      [attr.aria-label]="modo() === 'fecha' ? 'Abrir selector de fecha' : modo() === 'mes' ? 'Abrir selector de mes y año' : 'Abrir selector de fecha y hora'"
+      (click)="abrirPicker()"
+    >
+      <ng-icon name="heroCalendarDays" aria-hidden="true" />
+    </button>
+    }
+    @if (calendarioAbierto()) {
+      <section
+        class="input-fecha__calendario"
+        [style.top.px]="posicionOverlayCalendario().arriba"
+        [style.left.px]="posicionOverlayCalendario().izquierda"
+        role="dialog"
+        aria-label="Seleccionar fecha disponible"
+      >
+        <header>
+          <button type="button" aria-label="Mes anterior" (click)="cambiarMes(-1)"><ng-icon name="heroChevronLeft" /></button>
+          <strong>{{ nombreMesVisible() }}</strong>
+          <button type="button" aria-label="Mes siguiente" (click)="cambiarMes(1)"><ng-icon name="heroChevronRight" /></button>
+        </header>
+        <div class="input-fecha__semana" aria-hidden="true">
+          @for (dia of ['D', 'L', 'M', 'X', 'J', 'V', 'S']; track dia) { <span>{{ dia }}</span> }
+        </div>
+        <div class="input-fecha__dias">
+          @for (dia of diasDelCalendario(); track dia.toISOString()) {
+            <button type="button" [disabled]="!esFechaSeleccionable(dia)" [class.input-fecha__dia--otro-mes]="!esMesVisible(dia)" [class.input-fecha__dia--seleccionado]="esDiaSeleccionado(dia)" (click)="seleccionarDia(dia)">{{ dia.getDate() }}</button>
+          }
+        </div>
+      </section>
+    }
+  </span>
+</label>

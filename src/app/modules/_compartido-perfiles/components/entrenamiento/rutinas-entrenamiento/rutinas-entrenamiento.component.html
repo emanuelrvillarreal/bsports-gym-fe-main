@@ -1,0 +1,217 @@
+<section class="rutinas" aria-label="Rutinas">
+  <div class="rutinas__filtros">
+    <label class="rutinas__campo">
+      <span>Buscar</span>
+      <input type="search" placeholder="Nombre o disciplina" [value]="busqueda()" (input)="buscar($any($event.target).value)" />
+    </label>
+    <app-select etiqueta="Estado" [opciones]="opcionesEstado" [value]="estado()" (valueChange)="filtrarEstado($event)" />
+    <app-boton (accion)="nuevaRutina()">Nueva rutina</app-boton>
+  </div>
+
+  <app-tabla-responsive
+    [columnas]="columnas"
+    [filas]="filas()"
+    idFila="uuid"
+    [acciones]="acciones"
+    [cargando]="cargando()"
+    mensajeVacio="No hay rutinas con estos filtros. Creá una con “Nueva rutina”."
+    (accionFila)="manejarAccion($event)"
+    (verFila)="abrirDetalle($event.uuid)"
+  />
+  @if (totalPaginas() > 1) {
+    <app-paginacion [paginaActual]="pagina()" [totalPaginas]="totalPaginas()" (paginaCambiada)="cambiarPagina($event)" />
+  }
+</section>
+
+<app-editor-rutina
+  [abierto]="editorAbierto()"
+  [modo]="modoEditor()"
+  [rutina]="modoEditor() === 'crear' ? null : detalle()"
+  (guardada)="rutinaGuardada($event)"
+  (cerrar)="cerrarEditor()"
+/>
+
+<app-popup
+  [abierto]="detalleAbierto()"
+  [titulo]="detalle()?.nombre ?? 'Rutina'"
+  [descripcion]="detalle() ? estadoTexto(detalle()!.estado) + (detalle()!.profesor ? ' · ' + detalle()!.profesor : '') : ''"
+  ancho="extraGrande"
+  textoCancelar="Cerrar"
+  (cancelar)="cerrarDetalle()"
+>
+  @if (cargandoDetalle()) {
+    <p class="rutinas__vacio">Cargando rutina…</p>
+  } @else if (detalle(); as r) {
+    <div class="rutinas__detalle">
+      <div class="rutinas__barra">
+        <div class="rutinas__vistas" role="tablist" aria-label="Detalle de la rutina">
+          <button type="button" role="tab" [attr.aria-selected]="vista() === 'plan'" [class.rutinas__vista--activa]="vista() === 'plan'" (click)="vista.set('plan')">Plan</button>
+          <button type="button" role="tab" [attr.aria-selected]="vista() === 'socios'" [class.rutinas__vista--activa]="vista() === 'socios'" (click)="vista.set('socios')">Socios ({{ activas().length }})</button>
+          <button type="button" role="tab" [attr.aria-selected]="vista() === 'historial'" [class.rutinas__vista--activa]="vista() === 'historial'" (click)="vista.set('historial')">Historial</button>
+        </div>
+        @if (r.editable) {
+          <div class="rutinas__acciones">
+            <app-boton apariencia="texto" [deshabilitado]="procesando()" (accion)="abrirEditor('editar')">Editar</app-boton>
+            <app-boton apariencia="texto" [deshabilitado]="procesando()" (accion)="abrirEditor('reemplazar')">Reemplazar</app-boton>
+            <app-boton apariencia="texto" [deshabilitado]="procesando()" (accion)="archivar()">Archivar</app-boton>
+          </div>
+        }
+      </div>
+
+      @if (vista() === 'plan') {
+        <dl class="rutinas__ficha">
+          @if (r.disciplina) { <div><dt>Disciplina</dt><dd>{{ r.disciplina }}</dd></div> }
+          @if (r.actividad) { <div><dt>Actividad</dt><dd>{{ r.actividad }}</dd></div> }
+          @if (r.fechaInicio) { <div><dt>Inicio</dt><dd>{{ fecha(r.fechaInicio) }}</dd></div> }
+          @if (r.fechaFin) { <div><dt>Finalización</dt><dd>{{ fecha(r.fechaFin) }}</dd></div> }
+          @if (r.reemplazaANombre) { <div><dt>Reemplaza a</dt><dd>{{ r.reemplazaANombre }}</dd></div> }
+        </dl>
+        @if (r.objetivo) { <p class="rutinas__texto"><strong>Objetivo:</strong> {{ r.objetivo }}</p> }
+        @if (r.observaciones) { <p class="rutinas__texto"><strong>Observaciones:</strong> {{ r.observaciones }}</p> }
+        @for (dia of r.dias; track dia.uuid) {
+          <section class="rutinas__dia" [attr.aria-label]="dia.nombre">
+            <h4>{{ dia.nombre }}</h4>
+            <ol>
+              @for (item of dia.items; track item.uuid) {
+                <li>
+                  <div>
+                    <strong>{{ item.ejercicio.nombre }}</strong>
+                    @if (item.ejercicio.grupoMuscular) { <small>{{ item.ejercicio.grupoMuscular }}</small> }
+                  </div>
+                  <span class="rutinas__prescripcion">{{ prescripcion(item) || '—' }}</span>
+                  @if (item.observaciones) { <em>{{ item.observaciones }}</em> }
+                  @if (item.ejercicio.videoUrl) {
+                    <app-reproductor-video class="rutinas__video" [url]="item.ejercicio.videoUrl" [titulo]="item.ejercicio.nombre" />
+                  }
+                </li>
+              }
+            </ol>
+          </section>
+        }
+      }
+
+      @if (vista() === 'socios') {
+        @if (r.editable) {
+          <div><app-boton (accion)="abrirAsignar()">Asignar a socios</app-boton></div>
+        }
+        @if (!r.asignaciones.length) {
+          <p class="rutinas__vacio">Todavía no se asignó a ningún socio.</p>
+        }
+        @for (grupo of [{ titulo: 'Con la rutina activa', lista: activas() }, { titulo: 'Historial', lista: finalizadas() }]; track grupo.titulo) {
+          @if (grupo.lista.length) {
+            <section class="rutinas__grupo">
+              <h4>{{ grupo.titulo }}</h4>
+              @for (a of grupo.lista; track a.uuid) {
+                <article class="rutinas__asignacion">
+                  <header>
+                    <div>
+                      <strong>{{ a.socio }}</strong>
+                      <small>
+                        Desde {{ fecha(a.fechaInicio ?? a.fechaAsignacion) }}{{ a.fechaFin ? ' hasta ' + fecha(a.fechaFin) : '' }}
+                        @if (a.fechaFinalizacion) { · finalizada el {{ fecha(a.fechaFinalizacion) }} }
+                        · {{ a.sesiones }} {{ a.sesiones === 1 ? 'sesión' : 'sesiones' }}
+                      </small>
+                    </div>
+                    @if (a.estado === 'ACTIVA') {
+                      <div class="rutinas__acciones">
+                        <app-boton apariencia="texto" [deshabilitado]="procesando()" (accion)="abrirSesion(a)">Registrar sesión</app-boton>
+                        <app-boton apariencia="texto" [deshabilitado]="procesando()" (accion)="finalizar(a)">Finalizar</app-boton>
+                      </div>
+                    }
+                  </header>
+                  @if (a.seguimientos.length) {
+                    <ul class="rutinas__sesiones" role="list">
+                      @for (s of a.seguimientos.slice(0, 5); track s.uuid) {
+                        <li>
+                          <time>{{ fecha(s.fecha) }}</time>
+                          <span>{{ s.itemUuids.length }} ejercicios{{ s.esfuerzo ? ' · esfuerzo ' + s.esfuerzo + '/10' : '' }}</span>
+                          @if (s.observaciones) { <em>{{ s.observaciones }}</em> }
+                        </li>
+                      }
+                    </ul>
+                  }
+                </article>
+              }
+            </section>
+          }
+        }
+      }
+
+      @if (vista() === 'historial') {
+        <ol class="rutinas__historial">
+          @for (h of r.historial; track $index) {
+            <li>
+              <time>{{ fecha(h.fecha) }}</time>
+              <strong>{{ accion(h.accion) }}</strong>
+              <span>{{ h.detalle }}{{ h.usuario ? ' · ' + h.usuario : '' }}</span>
+            </li>
+          }
+        </ol>
+      }
+    </div>
+  }
+</app-popup>
+
+<app-popup [abierto]="asignarAbierto()" titulo="Asignar rutina" descripcion="Elegí uno o varios socios." ancho="grande" [cancelarDeshabilitado]="procesando()" (cancelar)="asignarAbierto.set(false)">
+  <div class="rutinas__asignar">
+    <div class="rutinas__filtros">
+      <label class="rutinas__campo">
+        <span>Buscar socio</span>
+        <input type="search" placeholder="Nombre, apellido o DNI" [value]="busquedaAlumno()" (input)="busquedaAlumno.set($any($event.target).value)" />
+      </label>
+      <app-input-fecha etiqueta="Desde" [valorInicial]="asignarDesde()" (valorCambiado)="asignarDesde.set($event)" />
+      <app-input-fecha etiqueta="Hasta" [valorInicial]="asignarHasta()" [minimo]="asignarDesde()" (valorCambiado)="asignarHasta.set($event)" />
+    </div>
+    @if (alumnosDisponibles().length) {
+      <ul class="rutinas__alumnos" role="list">
+        @for (alumno of alumnosDisponibles(); track alumno.memberUuid) {
+          <li>
+            <label>
+              <input type="checkbox" [checked]="elegidos().has(alumno.memberUuid)" (change)="alternarAlumno(alumno.memberUuid)" />
+              <span><strong>{{ alumno.apellido }}, {{ alumno.nombre }}</strong><small>{{ alumno.actividades }}</small></span>
+            </label>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="rutinas__vacio">No hay más socios para asignar.</p>
+    }
+    <div class="rutinas__pie">
+      <app-boton [deshabilitado]="!elegidos().size" [cargando]="procesando()" (accion)="confirmarAsignacion()">
+        Asignar a {{ elegidos().size }} {{ elegidos().size === 1 ? 'socio' : 'socios' }}
+      </app-boton>
+    </div>
+  </div>
+</app-popup>
+
+<app-popup [abierto]="!!sesionDe()" titulo="Registrar sesión" [descripcion]="sesionDe()?.socio ?? ''" ancho="grande" [cancelarDeshabilitado]="procesando()" (cancelar)="sesionDe.set(null)">
+  <form class="rutinas__sesion" (submit)="$event.preventDefault(); guardarSesion()">
+    <div class="rutinas__filtros">
+      <app-input-fecha etiqueta="Fecha *" [valorInicial]="sesionFecha()" (valorCambiado)="sesionFecha.set($event)" />
+      <app-select etiqueta="Esfuerzo percibido" [opciones]="opcionesEsfuerzo" [value]="sesionEsfuerzo()" (valueChange)="sesionEsfuerzo.set($event)" />
+    </div>
+    <p class="rutinas__ayuda">Marcá los ejercicios que hizo.</p>
+    @for (dia of diasSesion(); track dia.uuid) {
+      <fieldset class="rutinas__dia-sesion">
+        <legend>
+          {{ dia.nombre }}
+          <button type="button" class="rutinas__todos" (click)="marcarDia(uuidsDe(dia))">Marcar o desmarcar todo</button>
+        </legend>
+        @for (item of dia.items; track item.uuid) {
+          <label>
+            <input type="checkbox" [checked]="sesionItems().has(item.uuid)" (change)="alternarItem(item.uuid)" />
+            <span>{{ item.ejercicio.nombre }} <small>{{ prescripcion(item) }}</small></span>
+          </label>
+        }
+      </fieldset>
+    }
+    <label class="rutinas__campo">
+      <span>Observaciones</span>
+      <textarea rows="3" placeholder="Cómo le fue, molestias, cargas usadas…" [value]="sesionObservaciones()" (input)="sesionObservaciones.set($any($event.target).value)"></textarea>
+    </label>
+    @if (errorSesion()) { <p class="rutinas__error" role="alert">{{ errorSesion() }}</p> }
+    <div class="rutinas__pie">
+      <app-boton tipo="submit" [cargando]="procesando()">Guardar sesión</app-boton>
+    </div>
+  </form>
+</app-popup>

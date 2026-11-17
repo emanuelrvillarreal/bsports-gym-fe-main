@@ -1,0 +1,100 @@
+<form
+  class="formulario-registro-foto"
+  appValidacionFormulario
+  (submit)="confirmar(); $event.preventDefault()"
+  novalidate
+>
+  <small
+    class="formulario-registro-foto__error-formulario"
+    [class.formulario-registro-foto__error-formulario--visible]="!!mensajeErrorVisible()"
+    role="alert"
+  >
+    {{ mensajeErrorVisible() || ' ' }}
+  </small>
+
+  <div class="formulario-registro-foto__photo">
+    <label
+      class="formulario-registro-foto__dropzone"
+      [attr.data-app-invalido]="!fotoSeleccionada() ? 'true' : null"
+      [class.formulario-registro-foto__dropzone--arrastre]="arrastreFotoActivo()"
+      for="fotoPerfilInput"
+      (dragover)="activarArrastreFoto($event)"
+      (dragleave)="desactivarArrastreFoto($event)"
+      (drop)="soltarFoto($event)"
+    >
+      <input
+        #fotoInput
+        id="fotoPerfilInput"
+        class="formulario-registro-foto__file"
+        data-app-form-control
+        type="file"
+        accept="image/jpeg,image/jpg,image/png"
+        (change)="seleccionarFoto($event)"
+      />
+
+      @if (previewActual()) {
+        <img
+          class="formulario-registro-foto__preview"
+          [class.formulario-registro-foto__preview--logo]="esLogoClub()"
+          [src]="previewActual()"
+          [alt]="'Vista previa: ' + tituloImagen()"
+        />
+      } @else {
+        <span class="formulario-registro-foto__placeholder">
+          <ng-icon name="heroCamera" />
+          <em>{{ textoCarga() }}</em>
+        </span>
+      }
+    </label>
+
+    <div class="formulario-registro-foto__photo-info">
+      <p>
+        <strong>{{ tituloImagen() }}</strong>
+        {{ textoAyuda() }}
+      </p>
+      <p>{{ textoProporcion() }}</p>
+
+      @if (nombreArchivo()) {
+        <p class="formulario-registro-foto__file-name">{{ nombreArchivo() }}</p>
+      }
+    </div>
+  </div>
+
+  <div class="formulario-registro-foto__actions">
+    <app-boton
+      class="formulario-registro-foto__submit"
+      [class.formulario-registro-foto__submit--error]="submitInvalido()"
+      tipo="submit"
+      [cargando]="cargando() || validandoFoto()"
+      [ariaLabelCarga]="validandoFoto() ? 'Validando foto' : 'Guardando foto'"
+    >
+      {{ textoBotonConfirmar() }}
+    </app-boton>
+
+    @if (mostrarBotonRestablecer()) {
+      <app-boton
+        class="formulario-registro-foto__reset"
+        tipo="button"
+        apariencia="texto"
+        [deshabilitado]="cargando() || validandoFoto() || (!fotoSeleccionada() && !previewActual())"
+        (accion)="restablecer()"
+      >
+        <ng-icon name="heroArrowPath" />
+        <span>{{ textoBotonRestablecer() }}</span>
+      </app-boton>
+    }
+
+    @if (mostrarBotonEliminar()) {
+      <app-boton
+        class="formulario-registro-foto__delete"
+        tipo="button"
+        colorFondo="var(--semantic-danger)"
+        colorInteraccion="var(--semantic-danger)"
+        [deshabilitado]="cargando() || validandoFoto()"
+        (accion)="eliminar.emit()"
+      >
+        {{ textoBotonEliminar() }}
+      </app-boton>
+    }
+  </div>
+</form>

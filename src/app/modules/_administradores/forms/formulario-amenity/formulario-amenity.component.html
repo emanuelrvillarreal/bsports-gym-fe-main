@@ -1,0 +1,81 @@
+<form id="formulario-amenity" class="formulario-amenity fs-form" appValidacionFormulario (submit)="$event.preventDefault(); enviar()" novalidate>
+  <small class="formulario-amenity__error" [class.formulario-amenity__error--visible]="errorVisible()" role="alert">{{ mensajeError() }}</small>
+
+  <!-- 1. Datos -->
+  <section class="fs-seccion" aria-labelledby="fam-titulo-datos">
+    <header class="fs-seccion__cabecera">
+      <span class="fs-seccion__numero" aria-hidden="true">1</span>
+      <div>
+        <h3 id="fam-titulo-datos">¿Qué instalación es?</h3>
+        <p>El nombre con el que la van a ver los socios al reservar.</p>
+      </div>
+    </header>
+    <div class="fs-seccion__cuerpo">
+      <label for="amenity-nombre">
+        <span>Nombre *</span>
+        <input id="amenity-nombre" required placeholder="Ej: Cancha de pádel 1, Quincho, Pileta" [attr.data-app-invalido]="!nombre().trim() ? 'true' : null" [value]="nombre()" (input)="actualizarNombre($event)" />
+      </label>
+    </div>
+  </section>
+
+  <!-- 2. Disponibilidad -->
+  <section class="fs-seccion" aria-labelledby="fam-titulo-disponibilidad">
+    <header class="fs-seccion__cabecera">
+      <span class="fs-seccion__numero" aria-hidden="true">2</span>
+      <div>
+        <h3 id="fam-titulo-disponibilidad">¿Cuándo se puede reservar?</h3>
+        <p>Los días y el horario en que la instalación está disponible.</p>
+      </div>
+    </header>
+    <div class="fs-seccion__cuerpo">
+      <fieldset class="formulario-amenity__opciones fs-opciones" [attr.data-app-invalido]="!diasSeleccionados().length ? 'true' : null">
+        <legend>Días disponibles *</legend>
+        <div class="fs-opciones__lista">
+          @for (dia of dias; track dia) {
+            <label class="fs-chip" [class.fs-chip--activo]="diasSeleccionados().includes(dia)">
+              <input type="checkbox" [checked]="diasSeleccionados().includes(dia)" (change)="alternarDia(dia, $any($event.target).checked)" />
+              <span>{{ dia }}</span>
+            </label>
+          }
+        </div>
+      </fieldset>
+      <div class="fs-grid">
+        <app-input-hora inputId="amenity-hora-inicio" etiqueta="Desde *" [valor]="horaInicio()" [requerido]="true" [invalido]="!horaInicio() || (!!horaFin() && horaFin() <= horaInicio())" [attr.data-app-invalido]="!horaInicio() || (!!horaFin() && horaFin() <= horaInicio()) ? 'true' : null" (valorCambiado)="horaInicio.set($event)" />
+        <app-input-hora inputId="amenity-hora-fin" etiqueta="Hasta *" [valor]="horaFin()" [requerido]="true" [invalido]="!horaFin() || (!!horaInicio() && horaFin() <= horaInicio())" [attr.data-app-invalido]="!horaFin() || (!!horaInicio() && horaFin() <= horaInicio()) ? 'true' : null" (valorCambiado)="horaFin.set($event)" />
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Tarifa -->
+  <section class="fs-seccion" aria-labelledby="fam-titulo-tarifa">
+    <header class="fs-seccion__cabecera">
+      <span class="fs-seccion__numero" aria-hidden="true">3</span>
+      <div>
+        <h3 id="fam-titulo-tarifa">¿Cuánto cuesta?</h3>
+        <p>El valor por hora y la seña que se pide al reservar.</p>
+      </div>
+    </header>
+    <div class="fs-seccion__cuerpo">
+      <label class="fs-interruptor formulario-amenity__gratuidad" for="amenity-gratuito">
+        <input id="amenity-gratuito" type="checkbox" role="switch" [checked]="esAmenityGratuito()" (change)="cambiarGratuidad($event)" />
+        <span class="fs-interruptor__control" aria-hidden="true"></span>
+        <span class="fs-interruptor__texto">Instalación gratuita</span>
+      </label>
+      <div class="fs-grid">
+        <label for="amenity-monto-hora">
+          <span>Monto por hora *</span>
+          <input id="amenity-monto-hora" type="text" inputmode="decimal" autocomplete="off" required placeholder="$ 0" [disabled]="esAmenityGratuito()" [attr.data-app-invalido]="montoHora() === '' || normalizarMontoInvalido() ? 'true' : null" [value]="montoHora()" (input)="actualizarMonto($event)" (blur)="formatearMonto()" />
+        </label>
+        @if (!esAmenityGratuito()) {
+          <label for="amenity-porcentaje-sena">
+            <span>Seña (% del total) *</span>
+            <span class="formulario-amenity__campo-con-sufijo">
+              <input id="amenity-porcentaje-sena" type="number" required min="1" max="100" step="1" [attr.data-app-invalido]="porcentajeSenaInvalido() ? 'true' : null" [value]="porcentajeSena()" (input)="actualizarSena($event)" />
+              <span aria-hidden="true">%</span>
+            </span>
+          </label>
+        }
+      </div>
+    </div>
+  </section>
+</form>

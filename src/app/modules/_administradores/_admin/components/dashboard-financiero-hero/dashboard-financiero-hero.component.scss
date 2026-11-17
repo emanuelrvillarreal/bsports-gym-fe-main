@@ -1,0 +1,124 @@
+:host {
+  display: block;
+}
+
+.dashboard-financiero-hero {
+  --dashboard-hero-gradiente: #fff;
+
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-color: var(--app-surface);
+  background-image:
+    linear-gradient(
+      110deg,
+      color-mix(in srgb, var(--app-accent) 14%, transparent),
+      transparent 65%
+    ),
+    linear-gradient(color-mix(in srgb, var(--app-text-soft) 12%, transparent) 1px, transparent 1px),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--app-text-soft) 12%, transparent) 1px,
+      transparent 1px
+    );
+  background-size:
+    auto,
+    1.5rem 1.5rem,
+    1.5rem 1.5rem;
+  border: 1px solid var(--app-surface-border);
+  border-radius: 0.875rem;
+  padding: 1rem;
+
+  &::after {
+    position: absolute;
+    z-index: 0;
+    inset: 0 0 0 auto;
+    width: 20%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--dashboard-hero-gradiente) 72%, transparent) 72%,
+      color-mix(in srgb, var(--dashboard-hero-gradiente) 86%, transparent)
+    );
+    content: '';
+    pointer-events: none;
+  }
+
+  app-titulo-hero {
+    position: relative;
+    z-index: 1;
+  }
+
+  &__saldo {
+    width: min(100%, 34rem);
+    display: grid;
+    gap: 0.2rem;
+    margin-top: 1rem;
+    padding: 1rem;
+    background: color-mix(in srgb, var(--app-surface) 84%, transparent);
+    border: 1px solid color-mix(in srgb, var(--app-surface-border) 78%, transparent);
+    border-radius: 0.75rem;
+    box-shadow: 0 0.75rem 1.5rem color-mix(in srgb, var(--app-bg) 25%, transparent);
+
+    span,
+    p {
+      color: var(--app-text-soft);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: normal;
+      margin: 0;
+      text-transform: none;
+    }
+
+    strong {
+      color: var(--semantic-success);
+      font-size: clamp(2rem, 1.45rem + 2vw, 3rem);
+      line-height: 1;
+    }
+  }
+
+  &__filtros {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem;
+    background: color-mix(in srgb, var(--app-surface) 90%, var(--app-bg));
+    border: 1px solid var(--app-surface-border);
+    border-radius: 0.75rem;
+
+    app-boton {
+      width: 100%;
+    }
+  }
+
+  &__selectores {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  @media (min-width: 36rem) {
+    &__selectores {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  // Cuando los selectores se apilan, el panel de filtros debe conservar el
+  // mismo ancho de lectura que la tarjeta de saldo proyectada en el hero.
+  @media (max-width: 35.999rem) {
+    &__filtros {
+      width: min(100%, 34rem);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    padding: 1.5rem;
+
+    &__filtros {
+      align-content: space-between;
+    }
+  }
+}
+
+:host-context(.theme-mode-dark) .dashboard-financiero-hero,
+:host-context(.dark-mode-on) .dashboard-financiero-hero {
+  --dashboard-hero-gradiente: #000;
+}

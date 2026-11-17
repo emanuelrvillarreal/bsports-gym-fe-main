@@ -1,0 +1,189 @@
+:host { display: grid; gap: 1rem; }
+.filtros {
+  display: grid;
+  grid-template-columns: minmax(19rem, 1.4fr) minmax(11rem, .8fr) minmax(11rem, .8fr);
+  align-items: end;
+  gap: .75rem;
+  margin-bottom: 1rem;
+  label { display: grid; gap: .3rem; }
+  input {
+    box-sizing: border-box;
+    min-height: 2.75rem;
+    border: 1px solid var(--app-surface-border);
+    border-radius: .5rem;
+    background: var(--app-surface);
+    color: var(--app-text);
+    padding: .65rem;
+  }
+  &__busqueda {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: .5rem;
+  }
+}
+
+:host-context(.theme-mode-dark) {
+  .filtros > * input { background: #000; }
+  ::ng-deep .filtros > app-select .app-select__control .app-boton { background: #000; }
+}
+.acciones-cuota {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .35rem;
+
+  ::ng-deep .tabla-responsive__action-btn {
+    --app-boton-radio: 999px;
+    --app-boton-fondo-texto-interaccion: transparent;
+    --app-boton-focus: none;
+  }
+
+  // Botón con texto: deja claro desde la tabla dónde se cobra cada cuota.
+  // Compacto para convivir con los botones redondos de la fila sin ensancharla.
+  &__cobrar {
+    --app-boton-min-height: 2rem;
+  }
+
+  &__cobrar ::ng-deep button {
+    gap: .25rem;
+    min-height: 2rem;
+    height: 2rem;
+    padding: 0 .6rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    white-space: nowrap;
+
+    ng-icon {
+      font-size: .95rem;
+    }
+  }
+
+  &__pago {
+    width: 2.75rem;
+    min-width: 2.75rem;
+    height: 2.75rem;
+    min-height: 2.75rem;
+    padding: 0;
+    transition: opacity 180ms ease, transform 180ms ease, filter 180ms ease;
+
+    &--pagada {
+      opacity: .68;
+    }
+
+    span {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+}
+.mensaje--error { color: var(--app-danger, #b42318); }
+
+:host ::ng-deep .tabla-responsive__texto--monto-reemplazado {
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+}
+
+.detalle {
+  display: grid;
+  gap: .75rem;
+  div { display: grid; grid-template-columns: minmax(7rem, 1fr) 2fr; gap: .5rem; }
+  dt { font-weight: 700; }
+  dd { margin: 0; }
+
+  &__importe {
+    display: inline-flex;
+    align-items: baseline;
+    gap: .45rem;
+
+    del { color: var(--app-text-soft); font-size: .85em; }
+  }
+
+  &__estado {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    min-height: 1.45rem;
+    padding: .18rem .5rem;
+    color: var(--semantic-success);
+    background: color-mix(in srgb, var(--semantic-success) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--semantic-success) 34%, transparent);
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 800;
+
+    &::before {
+      width: .3rem;
+      height: .3rem;
+      content: '';
+      background: currentColor;
+      border-radius: 999px;
+    }
+
+    &--pendiente {
+      color: var(--app-warning);
+      background: color-mix(in srgb, var(--app-warning) 14%, transparent);
+      border-color: color-mix(in srgb, var(--app-warning) 34%, transparent);
+    }
+
+    &--vencida {
+      color: var(--semantic-danger);
+      background: color-mix(in srgb, var(--semantic-danger) 14%, transparent);
+      border-color: color-mix(in srgb, var(--semantic-danger) 34%, transparent);
+    }
+
+    &--inactivo {
+      color: var(--app-text-soft);
+      background: color-mix(in srgb, var(--app-text-soft) 14%, transparent);
+      border-color: color-mix(in srgb, var(--app-text-soft) 34%, transparent);
+    }
+  }
+}
+
+@media (max-width: 48rem) {
+  .filtros { grid-template-columns: 1fr; }
+}
+
+.anulacion-opciones {
+  display: grid;
+  gap: .6rem;
+
+  p { margin: 0; font-weight: 600; }
+
+  &__opcion {
+    display: grid;
+    gap: .2rem;
+    padding: .8rem 1rem;
+    border: 1px solid var(--app-surface-border);
+    border-radius: .75rem;
+    background: var(--app-surface);
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    span { color: var(--app-text-soft); font-size: .85rem; }
+
+    &:hover, &:focus-visible { border-color: var(--app-accent); }
+  }
+}
+
+.anulacion-elegida {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem;
+  margin: 0 0 .75rem;
+  color: var(--app-text-soft);
+
+  &__cambiar {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--app-accent);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+}

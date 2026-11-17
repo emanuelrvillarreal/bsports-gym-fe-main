@@ -1,0 +1,7 @@
+<section class="gestion-cuota-social" aria-label="Gestión de cuota social">
+  @if (error()) { <p class="gestion-cuota-social__error" role="alert">{{ error() }}</p> }
+  <app-card class="gestion-cuota-social__listado" [compacto]="true">
+    <app-tabla-responsive [columnas]="columnas" [filas]="rangos()" idFila="cuotaSocialRangoUuid" [acciones]="acciones" [filtrosCabecera]="filtrosCabecera()" [cargando]="cargando()" [tbody_rows]="7" [tr_input]="true" [tr_input_cargando]="guardando()" [tr_input_conmutador]="false" [tr_input_boton_agregar]="true" tr_input_boton_agregar_texto="Nueva categoría" [tr_input_hold_control]="true" tr_input_hold_label="HOLD" [tr_input_cerrar_en_restablecer]="true" tr_input_texto_restablecer="Cancelar" [tr_input_visible]="formularioVisible()" [tr_input_visible_version]="versionVisibilidadFormulario()" [tr_input_fila_editando_id]="rangoEditandoUuid()" [tr_input_valores]="valoresFormulario()" [tr_input_valores_version]="versionValoresFormulario()" mensajeVacio="No hay categorías de cuota social para mostrar." (accionFila)="manejarAccion($event)" (filtroCabeceraCambiado)="cambiarHabilitacion($event)" (trInputSubmit)="guardar($event)" (trInputReset)="limpiarFormularioDesdeTabla()" (trInputHoldChange)="actualizarHold($event)" />
+    <app-paginacion [paginaActual]="paginaActual()" [totalPaginas]="totalPaginas()" [deshabilitado]="cargando() || guardando() || actualizandoHabilitacion()" (paginaCambiada)="cambiarPagina($event)" />
+  </app-card>
+</section>

@@ -1,0 +1,108 @@
+<section class="grupo-familiar">
+  <app-card titulo="Grupo familiar" descripcion="Integrantes vinculados a tu titularidad.">
+    @if (error() && !formularioVisible()) {
+      <p class="grupo-familiar__error" role="alert">{{ error() }}</p>
+    }
+
+    <app-tabla-responsive
+      [columnas]="columnas"
+      [filas]="integrantes()"
+      [cargando]="cargando()"
+      idFila="memberUuid"
+      [acciones]="acciones"
+      [tr_input]="true"
+      [tr_input_conmutador]="false"
+      [tr_input_boton_agregar]="true"
+      tr_input_boton_agregar_modo="emitir"
+      tr_input_boton_agregar_texto="Agregar familiar"
+      mensajeVacio="No hay familiares vinculados."
+      (accionFila)="manejarAccion($event)"
+      (trInputNuevo)="abrirFormulario()"
+    />
+  </app-card>
+
+  <app-popup
+    [abierto]="formularioVisible()"
+    titulo="Agregar familiar"
+    [mostrarEncabezado]="false"
+    ancho="grande"
+    [cancelarDeshabilitado]="enviando()"
+    (cancelar)="cerrarFormulario()"
+  >
+    @if (formularioVisible()) {
+      <app-titulo-hero
+        [titulo]="modoFormulario() === 'edicion' ? 'Editar familiar' : 'Agregar familiar'"
+        subtitulo="Completá los datos para solicitar la vinculación al grupo familiar."
+      />
+      <app-formulario-grupo-familiar
+        [enviando]="enviando()"
+        [modo]="modoFormulario()"
+        [familiar]="familiarEdicion()"
+        (enviado)="guardar($event)"
+      />
+    }
+
+    <app-boton
+      popupAcciones
+      tipo="submit"
+      form="formulario-grupo-familiar"
+      [cargando]="enviando()"
+      [ariaLabelCarga]="modoFormulario() === 'edicion' ? 'Guardando cambios' : 'Creando solicitud'"
+    >
+      {{ modoFormulario() === 'edicion' ? 'Guardar cambios' : 'Crear solicitud' }}
+    </app-boton>
+  </app-popup>
+
+  <app-popup
+    [abierto]="!!credencialSeleccionada()"
+    titulo="Credencial del familiar"
+    [mostrarEncabezado]="false"
+    ancho="grande"
+    textoCancelar="Cerrar"
+    aparienciaCancelar="solido"
+    (cancelar)="cerrarCredencial()"
+  >
+    @if (credencialSeleccionada(); as familiar) {
+      <app-titulo-hero
+        titulo="Credencial del familiar"
+        [subtitulo]="familiar.nombre + ' ' + familiar.apellido"
+      />
+      <div class="grupo-familiar__credencial">
+        <app-carnet
+          [foto]="familiar.imageUrl || ''"
+          [nombre]="familiar.nombre"
+          [apellido]="familiar.apellido"
+          [logo]="logoEmpresa()"
+          [campos]="camposCredencial(familiar)"
+          [qrContenido]="familiar.userUuid"
+          [qrImagen]="familiar.qr"
+          [altoRendimiento]="altoRendimiento()"
+        />
+      </div>
+    }
+  </app-popup>
+  <app-popup
+    class="grupo-familiar__popup-certificados"
+    [abierto]="!!familiarCertificados()"
+    titulo="Certificados médicos"
+    [mostrarEncabezado]="false"
+    ancho="grande"
+    textoCancelar="Cerrar"
+    aparienciaCancelar="solido"
+    (cancelar)="cerrarCertificados()"
+  >
+    @if (familiarCertificados(); as familiar) {
+      <div class="grupo-familiar__certificados">
+        <app-titulo-hero
+          titulo="Certificados médicos"
+          [subtitulo]="familiar.nombre + ' ' + familiar.apellido"
+        />
+        <app-certificados-medicos-portal
+          [memberUuid]="familiar.memberUuid"
+          [certificados]="familiar.certificados ?? null"
+          (actualizado)="actualizarCertificados()"
+        />
+      </div>
+    }
+  </app-popup>
+</section>

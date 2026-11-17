@@ -1,0 +1,111 @@
+<section class="amenities-portal" aria-label="Instalaciones disponibles">
+  @if (error()) {
+    <app-card titulo="No pudimos cargar los amenities">
+      <div class="amenities-portal__estado">
+        <p role="alert">{{ error() }}</p>
+        <app-boton tipo="button" (accion)="cargar()">Reintentar</app-boton>
+      </div>
+    </app-card>
+  } @else {
+    <app-card titulo="Instalaciones disponibles" descripcion="Espacios habilitados para reservar en el gimnasio.">
+      <app-tabla-responsive
+        [columnas]="columnas"
+        [filas]="amenities()"
+        idFila="amenityUuid"
+        [cargando]="cargando()"
+        [acciones]="accionesAmenities"
+        [mostrarAcciones]="mostrarReservas"
+        [tbody_rows]="5"
+        max_altura="calc(100dvh - 18rem)"
+        (accionFila)="manejarAccionAmenity($event)"
+        mensajeVacio="Todavía no hay instalaciones habilitadas para reservar."
+      />
+    </app-card>
+  }
+
+  @if (mostrarReservas) {
+    <app-card titulo="Mis reservas" descripcion="Reservas de amenities asociadas a tu cuenta.">
+      <app-boton
+        cardHeaderActions
+        tipo="button"
+        colorPaleta="primario"
+        [cargando]="cargandoReservas()"
+        ariaLabelCarga="Actualizando mis reservas"
+        (accion)="cargarReservas()"
+      >
+        <ng-icon name="heroArrowPath" aria-hidden="true" />
+        Actualizar
+      </app-boton>
+      @if (errorReservas()) {
+        <div class="amenities-portal__estado">
+          <p role="alert">{{ errorReservas() }}</p>
+          <app-boton tipo="button" (accion)="cargarReservas()">Reintentar</app-boton>
+        </div>
+      } @else {
+        <app-tabla-responsive
+          [columnas]="columnasReservas"
+          [filas]="reservas()"
+          idFila="reservaUuid"
+          [cargando]="cargandoReservas()"
+          [acciones]="accionesReservas"
+          [mostrarAcciones]="mostrarReservas"
+          (accionFila)="manejarAccionReserva($event)"
+          [tbody_rows]="4"
+          mensajeVacio="Todavía no tenés reservas de amenities."
+        />
+        @if (totalPaginasReservas() > 1) {
+          <app-paginacion
+            [paginaActual]="paginaReservas()"
+            [totalPaginas]="totalPaginasReservas()"
+            [deshabilitado]="cargandoReservas()"
+            (paginaCambiada)="cambiarPaginaReservas($event)"
+          />
+        }
+      }
+    </app-card>
+  }
+</section>
+
+<app-popup [abierto]="amenityAReservar() !== null" titulo="Reservar amenity" [mostrarEncabezado]="false" [cancelarDeshabilitado]="procesandoReserva()" (cancelar)="cerrarReserva()">
+  @if (amenityAReservar(); as amenity) {
+    <app-titulo-hero [titulo]="'Reservar ' + amenity.nombre" subtitulo="Elegí la fecha, el horario y la forma de pago." icono="heroCalendarDays" />
+    <app-formulario-reserva-amenity [amenity]="amenity" (enviado)="confirmarReserva($event)" />
+  }
+  <app-boton popupAcciones tipo="submit" form="formulario-reserva-amenity" [cargando]="procesandoReserva()">Continuar al pago</app-boton>
+</app-popup>
+
+<app-popup
+  [abierto]="pagoQr() !== null"
+  titulo="Código QR de pago"
+  [mostrarEncabezado]="false"
+  (cancelar)="cerrarPagoQr()"
+>
+  @if (pagoQr(); as pagoQr) {
+    <app-titulo-hero
+      [titulo]="'Pagar ' + pagoQr.reserva.amenity"
+      subtitulo="Escaneá el código desde Mercado Pago para continuar con el pago."
+      icono="heroBanknotes"
+    />
+    @if (pagoQr.tipoPago !== null) {
+      <app-select
+        etiqueta="Monto a pagar"
+        [opciones]="opcionesTipoPagoQr(pagoQr)"
+        [value]="pagoQr.tipoPago"
+        (valueChange)="cambiarTipoPagoQr($event)"
+      />
+    }
+    <div class="amenities-portal__qr" aria-live="polite">
+      @if (cargandoQr()) {
+        <div class="amenities-portal__qr-visual">
+          <app-load-spinner-blue ariaLabel="Generando código QR" />
+        </div>
+      } @else if (checkoutQr(); as checkout) {
+        <div class="amenities-portal__qr-visual">
+          <img [src]="fuenteQr(checkout.qr)" alt="Código QR para pagar la reserva en Mercado Pago" />
+        </div>
+        <strong>{{ checkout.monto.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' }) }}</strong>
+      }
+    </div>
+  }
+  <app-boton popupAcciones (accion)="cerrarPagoQr()">Cerrar</app-boton>
+</app-popup>

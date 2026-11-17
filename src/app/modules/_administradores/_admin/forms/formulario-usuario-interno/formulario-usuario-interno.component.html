@@ -1,0 +1,92 @@
+<form
+  id="formulario-usuario-interno"
+  class="formulario-usuario-interno"
+  appValidacionFormulario
+  (submit)="$event.preventDefault(); enviar()"
+  novalidate
+>
+  <small
+    class="formulario-usuario-interno__error"
+    [class.formulario-usuario-interno__error--visible]="errorVisible()"
+    role="alert"
+    >{{ mensajeError() }}</small
+  >
+
+  <label for="usuario-interno-nombre">
+    <span>Nombre *</span>
+    <input
+      id="usuario-interno-nombre"
+      required
+      [attr.data-app-invalido]="!nombre().trim() ? 'true' : null"
+      [value]="nombre()"
+      (input)="actualizarTexto('nombre', $event)"
+    />
+  </label>
+  <label for="usuario-interno-apellido">
+    <span>Apellido *</span>
+    <input
+      id="usuario-interno-apellido"
+      required
+      [attr.data-app-invalido]="!apellido().trim() ? 'true' : null"
+      [value]="apellido()"
+      (input)="actualizarTexto('apellido', $event)"
+    />
+  </label>
+  <label for="usuario-interno-email">
+    <span>Email *</span>
+    <input
+      id="usuario-interno-email"
+      type="email"
+      required
+      [attr.data-app-invalido]="!emailEsValido() ? 'true' : null"
+      [value]="email()"
+      (input)="actualizarTexto('email', $event)"
+    />
+  </label>
+  @if (modo() === 'crear') {
+    <app-input-password
+      id="usuario-interno-password"
+      etiqueta="Contraseña *"
+      autocomplete="new-password"
+      [attr.data-app-invalido]="!password() ? 'true' : null"
+      (valorCambiado)="password.set($event)"
+    />
+  }
+  <label for="usuario-interno-dni">
+    <span>DNI *</span>
+    <input
+      id="usuario-interno-dni"
+      inputmode="numeric"
+      required
+      maxlength="14"
+      [attr.data-app-invalido]="!dniEsValido() ? 'true' : null"
+      [value]="dni()"
+      (input)="actualizarTexto('dni', $event)"
+    />
+  </label>
+  <label for="usuario-interno-telefono">
+    <span>Teléfono</span>
+    <input
+      id="usuario-interno-telefono"
+      type="tel"
+      inputmode="tel"
+      maxlength="23"
+      [value]="telefono()"
+      (input)="actualizarTexto('telefono', $event)"
+    />
+  </label>
+  @if (modo() === 'crear') {
+    <app-input-fecha
+      id="usuario-interno-fecha-nacimiento"
+      etiqueta="Fecha de nacimiento"
+      (valorCambiado)="fechaNacimiento.set($event)"
+    />
+    @if (mostrarFechaAlta()) {
+      <app-input-fecha
+        id="usuario-interno-fecha-alta"
+        etiqueta="Fecha de alta"
+        (valorCambiado)="fechaAlta.set($event)"
+      />
+    }
+  }
+</form>

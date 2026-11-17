@@ -1,0 +1,37 @@
+@use '../../../ui/formulario-secciones/formulario-secciones' as fs;
+
+:host {
+  display: block;
+}
+
+@include fs.estilos;
+
+.formulario-descuento {
+  &__error {
+    display: block;
+    min-height: 1.1rem;
+    color: var(--semantic-danger, #ef4444);
+    font-weight: 600;
+    visibility: hidden;
+  }
+
+  &__error--visible {
+    visibility: visible;
+  }
+
+  &__entrada-con-prefijo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    input {
+      flex: 1;
+      min-width: 0;
+    }
+
+    > span {
+      color: var(--app-text-soft);
+      font-weight: 700;
+    }
+  }
+}

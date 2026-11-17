@@ -1,0 +1,81 @@
+:host {
+  display: block;
+}
+
+.formulario-certificado {
+  display: grid;
+  gap: clamp(0.4rem, 1.8vw, 0.6rem);
+  justify-items: start;
+
+  p {
+    margin: 0;
+  }
+
+  &__dropzone {
+    position: relative;
+    display: grid;
+    width: 100%;
+    min-height: clamp(7.5rem, 34vw, 9rem);
+    place-items: center;
+    gap: clamp(0.2rem, 1vw, 0.35rem);
+    padding: clamp(0.75rem, 4vw, 1rem);
+    color: var(--app-text-soft);
+    background: color-mix(in srgb, var(--app-surface) 88%, transparent);
+    border: 1px dashed var(--app-surface-border);
+    border-radius: 0.7rem;
+    cursor: pointer;
+    text-align: center;
+
+    ng-icon {
+      width: clamp(1.7rem, 8vw, 2rem);
+      height: clamp(1.7rem, 8vw, 2rem);
+      color: var(--app-accent);
+      font-size: 1.5rem;
+    }
+
+    strong {
+      color: var(--app-text);
+    }
+
+    span {
+      font-size: clamp(0.75rem, 3.5vw, 0.85rem);
+    }
+
+    &:focus-within {
+      border: 2px solid var(--app-accent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--app-accent) 24%, transparent);
+    }
+  }
+
+  &__dropzone--arrastre {
+    background: color-mix(in srgb, var(--app-accent-soft) 60%, var(--app-surface));
+    border-color: var(--app-accent);
+  }
+
+  &__input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  &__archivo {
+    font-size: clamp(0.82rem, 3.8vw, 0.95rem);
+  }
+
+  &__error {
+    color: var(--semantic-danger);
+  }
+}
+
+@media (max-width: 36rem) {
+  .formulario-certificado app-boton {
+    width: 100%;
+    margin-top: 0.5rem;
+    justify-self: stretch;
+  }
+}

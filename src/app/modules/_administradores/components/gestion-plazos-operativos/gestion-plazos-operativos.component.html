@@ -1,0 +1,32 @@
+<section class="gestion-plazos-operativos" aria-labelledby="gestion-plazos-operativos-titulo">
+  <h2 id="gestion-plazos-operativos-titulo">Periodicidad y plazos</h2>
+  @if (cargando()) {
+    <app-card titulo="Plazos operativos">
+      <div
+        class="gestion-plazos-operativos__carga"
+        role="status"
+        aria-label="Cargando periodicidad y plazos"
+        aria-busy="true"
+      >
+        <app-load-spinner-blue />
+      </div>
+    </app-card>
+  } @else if (perfil()) {
+    @if (error()) {
+      <p class="gestion-plazos-operativos__error" role="alert">{{ error() }}</p>
+    }
+    <app-formulario-plazos-operativos
+      [perfil]="perfil()"
+      [bloqueado]="bloqueado()"
+      [cargando]="guardando()"
+      (enviado)="guardarPlazos($event)"
+    />
+  } @else {
+    <div class="gestion-plazos-operativos__estado-error" role="alert">
+      <p>{{ error() || 'No se encontró el perfil del gimnasio.' }}</p>
+      <app-boton tipo="button" [deshabilitado]="bloqueado()" (accion)="reintentar()"
+        >Reintentar</app-boton
+      >
+    </div>
+  }
+</section>

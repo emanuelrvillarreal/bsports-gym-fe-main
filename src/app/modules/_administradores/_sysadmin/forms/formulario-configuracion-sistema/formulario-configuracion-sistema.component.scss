@@ -1,0 +1,40 @@
+:host {
+  display: block;
+}
+
+.formulario-configuracion-sistema {
+  display: grid;
+  gap: 1rem;
+
+  &__error {
+    display: block;
+    min-height: 1.1rem;
+    color: var(--app-danger);
+    visibility: hidden;
+
+    &--visible {
+      visibility: visible;
+    }
+  }
+
+  label:not(.formulario-configuracion-sistema__checkbox) {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  input[type='text'],
+  textarea {
+    width: 100%;
+    padding: 0.75rem;
+    color: var(--app-text);
+    background: var(--app-bg);
+    border: 1px solid var(--app-surface-border);
+    border-radius: 0.65rem;
+  }
+
+  &__checkbox {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+}

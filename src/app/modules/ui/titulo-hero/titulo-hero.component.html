@@ -1,0 +1,36 @@
+<header
+  class="titulo-hero"
+  [class.titulo-hero--alto-rendimiento]="altoRendimiento()"
+  [style.--titulo-hero-color]="color() || 'var(--app-accent)'"
+>
+  <div class="titulo-hero__contenido">
+    <div class="titulo-hero__fila">
+      @if (logoUrl()) {
+        <span
+          class="titulo-hero__icono titulo-hero__icono--logo"
+          [class.titulo-hero__icono--logo-circular]="logoCircular()"
+          aria-hidden="true"
+        >
+          <img [ngSrc]="logoUrl()" alt="" width="48" height="48" />
+        </span>
+      } @else if (nombreIcono(); as iconoResuelto) {
+        <span class="titulo-hero__icono" aria-hidden="true">
+          <ng-icon [name]="iconoResuelto" />
+        </span>
+      }
+      <h1 class="titulo-hero__titulo">{{ titulo() }}</h1>
+    </div>
+
+    @if (subtitulo()) {
+      <p class="titulo-hero__subtitulo">{{ subtitulo() }}</p>
+    }
+
+    <div class="titulo-hero__contenido-extra">
+      <ng-content select="[tituloHeroContenido]" />
+    </div>
+  </div>
+
+  <div class="titulo-hero__acciones">
+    <ng-content select="[tituloHeroAcciones]" />
+  </div>
+</header>

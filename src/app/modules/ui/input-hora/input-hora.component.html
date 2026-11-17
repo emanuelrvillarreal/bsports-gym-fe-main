@@ -1,0 +1,70 @@
+<label class="input-hora" [style.--input-hora-icono]="colorIcono()">
+  @if (etiqueta()) {
+    <span class="input-hora__etiqueta">{{ etiqueta() }}</span>
+  }
+
+  <span class="input-hora__control">
+    <span class="input-hora__segmentos">
+      <input
+        #segmentoHora
+        [id]="inputId() || null"
+        class="input-hora__segmento"
+        type="text"
+        inputmode="numeric"
+        autocomplete="off"
+        maxlength="2"
+        placeholder="hh"
+        [value]="hora"
+        [required]="requerido()"
+        [disabled]="deshabilitado()"
+        [attr.aria-label]="etiqueta() ? etiqueta() + ': hora' : ariaLabel() + ': hora'"
+        [attr.aria-invalid]="invalido() ? 'true' : null"
+        (input)="cambiarSegmento('hora', $event)"
+        (focus)="seleccionarSegmento($event)"
+        (click)="seleccionarSegmento($event)"
+        (keydown)="manejarTeclaSegmento($event)"
+      />
+      <span aria-hidden="true">:</span>
+      <input
+        #segmentoHora
+        class="input-hora__segmento"
+        type="text"
+        inputmode="numeric"
+        autocomplete="off"
+        maxlength="2"
+        placeholder="mm"
+        [value]="minuto"
+        [required]="requerido()"
+        [disabled]="deshabilitado()"
+        [attr.aria-label]="etiqueta() ? etiqueta() + ': minutos' : ariaLabel() + ': minutos'"
+        [attr.aria-invalid]="invalido() ? 'true' : null"
+        (input)="cambiarSegmento('minuto', $event)"
+        (focus)="seleccionarSegmento($event)"
+        (click)="seleccionarSegmento($event)"
+        (keydown)="manejarTeclaSegmento($event)"
+      />
+    </span>
+    <input
+      #campoHoraNativo
+      class="input-hora__selector-nativo"
+      type="time"
+      lang="es-AR"
+      tabindex="-1"
+      aria-hidden="true"
+      [value]="valor()"
+      [attr.min]="minimo() || null"
+      [attr.max]="maximo() || null"
+      [disabled]="deshabilitado()"
+      (change)="seleccionarHoraNativa($event)"
+    />
+    <button
+      type="button"
+      class="input-hora__alternador"
+      [disabled]="deshabilitado()"
+      [attr.aria-label]="'Abrir selector de ' + (etiqueta() || 'hora')"
+      (click)="abrirSelector()"
+    >
+      <ng-icon name="heroClock" aria-hidden="true" />
+    </button>
+  </span>
+</label>

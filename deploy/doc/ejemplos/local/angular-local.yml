@@ -1,0 +1,15 @@
+# Ejemplo: Angular SPA en local
+# El path sí aplica en local porque afecta el base-href del build.
+# branch, domain y nginx_config se ignoran.
+
+local:
+  mi-frontend:
+    port: 4200
+    path: mi-app
+    stack: angular
+
+    env:
+      RESTART_POLICY: "no"
+
+    environment: local
+    composer_file: plantillas/angular-21-node-22/docker-compose.yml

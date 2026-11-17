@@ -1,0 +1,37 @@
+<form class="formulario-certificado" (submit)="enviar(); $event.preventDefault()" novalidate>
+  <label
+    class="formulario-certificado__dropzone"
+    [class.formulario-certificado__dropzone--arrastre]="arrastreActivo()"
+    for="certificado-archivo"
+    (dragover)="activarArrastre($event)"
+    (dragleave)="desactivarArrastre($event)"
+    (drop)="soltarArchivo($event)"
+  >
+    <input
+      #archivoInput
+      id="certificado-archivo"
+      class="formulario-certificado__input"
+      type="file"
+      accept="image/png,image/jpeg,application/pdf,.png,.jpg,.jpeg,.pdf"
+      [disabled]="enviando()"
+      (change)="seleccionarArchivo($event)"
+    />
+    <ng-icon name="heroDocumentArrowUp" aria-hidden="true" />
+    <strong>Click o arrastrá el certificado</strong>
+    <span>PNG, JPG, JPEG o PDF · hasta 2 MB</span>
+  </label>
+
+  @if (archivo(); as archivoSeleccionado) {
+    <p class="formulario-certificado__archivo">
+      Archivo seleccionado: {{ archivoSeleccionado.name }}
+    </p>
+  }
+
+  @if (mensajeError()) {
+    <p class="formulario-certificado__error" role="alert">{{ mensajeError() }}</p>
+  }
+
+  <app-boton tipo="submit" [cargando]="enviando()" ariaLabelCarga="Subiendo certificado"
+    >Subir certificado</app-boton
+  >
+</form>

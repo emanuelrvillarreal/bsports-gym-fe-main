@@ -1,0 +1,27 @@
+:host {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.gestion-mi-perfil {
+  &__carga {
+    display: grid;
+    min-height: clamp(16rem, calc(100dvh - 18rem), 34rem);
+    place-items: center;
+
+    app-load-spinner-blue {
+      width: min(100%, 13rem);
+    }
+  }
+
+  &__error {
+    display: grid;
+    justify-items: start;
+    gap: 0.75rem;
+    color: var(--semantic-danger);
+
+    p {
+      margin: 0;
+    }
+  }
+}

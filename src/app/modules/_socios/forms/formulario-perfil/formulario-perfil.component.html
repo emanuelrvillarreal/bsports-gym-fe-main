@@ -1,0 +1,77 @@
+<form
+  class="formulario-perfil"
+  appValidacionFormulario
+  (submit)="enviar(); $event.preventDefault()"
+  novalidate
+>
+  <small
+    class="formulario-perfil__error"
+    [class.formulario-perfil__error--visible]="errorVisible()"
+    role="alert"
+    >{{ mensajeError() || ' ' }}</small
+  >
+
+  <label for="perfil-nombre">
+    <span>Nombre *</span>
+    <input
+      id="perfil-nombre"
+      required
+      autocomplete="given-name"
+      [attr.data-app-invalido]="!nombre().trim() ? 'true' : null"
+      [value]="nombre()"
+      (input)="actualizar('nombre', $event)"
+    />
+  </label>
+
+  <label for="perfil-apellido">
+    <span>Apellido *</span>
+    <input
+      id="perfil-apellido"
+      required
+      autocomplete="family-name"
+      [attr.data-app-invalido]="!apellido().trim() ? 'true' : null"
+      [value]="apellido()"
+      (input)="actualizar('apellido', $event)"
+    />
+  </label>
+
+  <label for="perfil-telefono">
+    <span>Teléfono</span>
+    <input
+      id="perfil-telefono"
+      type="tel"
+      autocomplete="tel"
+      [value]="telefono()"
+      (input)="actualizar('telefono', $event)"
+    />
+  </label>
+
+  <label for="perfil-fecha-nacimiento">
+    <span>Fecha de nacimiento</span>
+    <input
+      id="perfil-fecha-nacimiento"
+      type="date"
+      [value]="fechaNacimiento()"
+      (input)="actualizar('fechaNacimiento', $event)"
+    />
+  </label>
+
+  <label for="perfil-email">
+    <span>Email</span>
+    <input id="perfil-email" type="email" [value]="email()" disabled />
+  </label>
+
+  <label for="perfil-dni">
+    <span>DNI</span>
+    <input id="perfil-dni" [value]="dni()" disabled />
+  </label>
+
+  <label for="perfil-numero-socio">
+    <span>Número de socio</span>
+    <input id="perfil-numero-socio" [value]="numeroSocio()" disabled />
+  </label>
+
+  <app-boton tipo="submit" [cargando]="enviando()" ariaLabelCarga="Guardando cambios">
+    Guardar cambios
+  </app-boton>
+</form>

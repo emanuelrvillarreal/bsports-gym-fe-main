@@ -1,0 +1,32 @@
+:host {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.formulario-filtro-solicitudes {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: end;
+
+  label {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  input {
+    width: 100%;
+    padding: 0.7rem;
+    color: var(--app-text);
+    background: var(--app-bg);
+    border: 1px solid var(--app-surface-border);
+    border-radius: 0.65rem;
+  }
+}
+
+@media (max-width: 40rem) {
+  .formulario-filtro-solicitudes {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+}

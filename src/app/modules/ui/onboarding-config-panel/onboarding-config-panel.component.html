@@ -1,0 +1,87 @@
+<app-card
+  data-driver-onboarding-config="onboarding-panel"
+  [titulo]="copy().title"
+  [descripcion]="copy().description"
+  icono="heroSparkles"
+  [altoRendimiento]="altoRendimiento()"
+>
+  <div class="onboarding-panel">
+    <div class="onboarding-panel__summary">
+      <div class="onboarding-panel__copy">
+        <div>
+          <strong>Activar todos los onboardings</strong>
+          <small>
+            {{
+              onboardingPendienteTodo()
+                ? 'Los recorridos volveran a mostrarse al reingresar.'
+                : 'Todos los recorridos quedaron marcados como completados.'
+            }}
+          </small>
+        </div>
+      </div>
+      <app-boton
+        tipo="button"
+        apariencia="texto"
+        class="onboarding-panel__expand"
+        [class.onboarding-panel__expand--abierto]="panelAbierto()"
+        [aria-expanded]="panelAbierto()"
+        [aria-label]="panelAbierto() ? 'Colapsar onboardings' : 'Desplegar onboardings'"
+        (accion)="alternarPanel()"
+      >
+        <span aria-hidden="true">&gt;</span>
+      </app-boton>
+    </div>
+
+    <app-boton
+      tipo="button"
+      apariencia="texto"
+      class="onboarding-panel__toggle onboarding-panel__toggle--master"
+      [class.onboarding-panel__toggle--activa]="onboardingPendienteTodo()"
+      role="switch"
+      [aria-checked]="onboardingPendienteTodo()"
+      (accion)="alternarOnboardingRol(!onboardingPendienteTodo())"
+    >
+      <span
+        class="onboarding-panel__toggle-ui"
+        [class.onboarding-panel__toggle-ui--activa]="onboardingPendienteTodo()"
+        aria-hidden="true"
+      ></span>
+      <span class="onboarding-panel__toggle-copy">
+        <strong>{{ onboardingPendienteTodo() ? 'Activo' : 'Desactivado' }}</strong>
+      </span>
+    </app-boton>
+
+    @if (panelAbierto()) {
+      <div class="onboarding-panel__list">
+        @for (item of onboardingPages(); track item.routePath) {
+          <app-boton
+            tipo="button"
+            apariencia="texto"
+            class="onboarding-panel__toggle"
+            [class.onboarding-panel__toggle--activa]="item.pending"
+            role="switch"
+            [aria-checked]="item.pending"
+            (accion)="alternarOnboarding(item.routePath, !item.pending)"
+          >
+            <span
+              class="onboarding-panel__toggle-ui"
+              [class.onboarding-panel__toggle-ui--activa]="item.pending"
+              aria-hidden="true"
+            ></span>
+            <span class="onboarding-panel__toggle-copy">
+              <strong>{{ item.label }}</strong>
+              <small>{{ item.description }}</small>
+              <small class="onboarding-panel__toggle-meta">
+                {{
+                  item.pending
+                    ? 'Pendiente de mostrarse al reingresar.'
+                    : 'Marcado como completado.'
+                }}
+              </small>
+            </span>
+          </app-boton>
+        }
+      </div>
+    }
+  </div>
+</app-card>

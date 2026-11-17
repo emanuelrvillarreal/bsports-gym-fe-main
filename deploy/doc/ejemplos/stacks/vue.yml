@@ -1,0 +1,14 @@
+# Ejemplo: stack vue (Vue 3 SPA con Vite)
+
+st7:
+  mi-vue-app:
+    branch: main
+    port: 9055
+    path: mi-vue
+    domain: stg.blueopendata.com
+
+    stack: vue
+
+    environment: production
+    composer_file: plantillas/vue-3-node-20/docker-compose.yml
+    nginx_config: plantillas/vue-3-node-20/nginx.host-reverse-proxy.conf

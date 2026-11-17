@@ -1,0 +1,22 @@
+<app-popup
+  [abierto]="!!factura()"
+  titulo="Factura pendiente"
+  ancho="grande"
+  textoCancelar="Recordar más tarde"
+  (cancelar)="descartar()"
+>
+  @if (factura(); as facturaPendiente) {
+    <section class="aviso-factura-pendiente">
+      <p class="aviso-factura-pendiente__mensaje" role="alert">
+        Recordá que esta factura está pendiente de pago. Tenés 5 días para regularizar la
+        deuda. Pasado ese plazo, el sistema quedará totalmente bloqueado.
+      </p>
+      <app-factura-resumen [factura]="facturaPendiente" />
+    </section>
+  }
+  @if (factura(); as facturaPendiente) {
+    <app-boton popupAcciones (accion)="facturaPago.set(facturaPendiente)">Pagar</app-boton>
+  }
+</app-popup>
+
+<app-checkout-factura [factura]="facturaPago()" (cerrar)="facturaPago.set(null)" />

@@ -1,0 +1,64 @@
+<section class="gestion-categorias">
+  @if (error()) {
+    <p class="gestion-categorias__error" role="alert">{{ error() }}</p>
+  }
+
+  <app-card class="gestion-categorias__listado" [compacto]="true">
+    <app-tabla-responsive
+      [columnas]="columnas"
+      [filas]="categorias()"
+      idFila="categoriaUuid"
+      [acciones]="acciones"
+      [cargando]="cargando()"
+      [tbody_rows]="7"
+      [tr_input]="true"
+      [tr_input_conmutador]="false"
+      [tr_input_boton_agregar]="true"
+      tr_input_boton_agregar_modo="emitir"
+      tr_input_boton_agregar_texto="Nueva categoría"
+      mensajeVacio="No hay categorías para mostrar."
+      (accionFila)="manejarAccion($event)"
+      (trInputNuevo)="abrirNueva()"
+    />
+
+    <app-paginacion
+      [paginaActual]="paginaActual()"
+      [totalPaginas]="totalPaginas()"
+      [deshabilitado]="cargando() || guardando()"
+      (paginaCambiada)="cambiarPagina($event)"
+    />
+  </app-card>
+</section>
+
+<app-popup
+  [abierto]="popupAbierto()"
+  [titulo]="categoriaEditandoUuid() ? 'Editar categoría' : 'Nueva categoría'"
+  descripcion="Por ejemplo &quot;Infantil&quot; de 6 a 12 años. Después la elegís al crear o editar una actividad."
+  [cancelarDeshabilitado]="guardando()"
+  (cancelar)="cerrarPopup()"
+>
+  <form id="form-categoria" class="form-categoria" (submit)="$event.preventDefault(); guardarPopup()">
+    <label class="form-categoria__campo form-categoria__ancho">
+      <span>Nombre *</span>
+      <input type="text" maxlength="100" autocomplete="off" [value]="nombre()" (input)="nombre.set(valor($event))" />
+    </label>
+    <label class="form-categoria__campo form-categoria__ancho">
+      <span>Descripción <small>(opcional)</small></span>
+      <input type="text" maxlength="255" autocomplete="off" [value]="descripcion()" (input)="descripcion.set(valor($event))" />
+    </label>
+    <label class="form-categoria__campo">
+      <span>Edad desde <small>(opcional)</small></span>
+      <input type="number" inputmode="numeric" min="0" [value]="edadMinima()" (input)="edadMinima.set(valor($event))" />
+    </label>
+    <label class="form-categoria__campo">
+      <span>Edad hasta <small>(opcional)</small></span>
+      <input type="number" inputmode="numeric" min="0" [value]="edadMaxima()" (input)="edadMaxima.set(valor($event))" />
+    </label>
+    @if (errorPopup()) {
+      <p class="form-categoria__error form-categoria__ancho" role="alert">{{ errorPopup() }}</p>
+    }
+  </form>
+  <app-boton popupAcciones [cargando]="guardando()" (accion)="guardarPopup()">
+    {{ categoriaEditandoUuid() ? 'Guardar cambios' : 'Crear categoría' }}
+  </app-boton>
+</app-popup>

@@ -1,0 +1,71 @@
+<div
+  class="app-select"
+  [class.app-select--abierto]="abierto"
+  [class.app-select--deshabilitado]="estaDeshabilitado"
+  [class.app-select--alto-rendimiento]="altoRendimiento()"
+>
+  @if (etiqueta()) {
+    <span class="app-select__etiqueta">{{ etiqueta() }}</span>
+  }
+
+  <app-boton
+    #control
+    data-app-form-control
+    class="app-select__control"
+    tipo="button"
+    apariencia="texto"
+    [deshabilitado]="estaDeshabilitado"
+    [aria-expanded]="abierto"
+    aria-haspopup="listbox"
+    (accion)="alternar()"
+    (blur)="marcarTocado()"
+    (keydown)="manejarTecladoControl($event)"
+  >
+    <span class="app-select__contenido">
+      <span>{{ textoSeleccionado }}</span>
+      <span class="app-select__flecha" aria-hidden="true"></span>
+    </span>
+  </app-boton>
+
+  <div
+    #panel
+    class="app-select__panel"
+    [class.app-select__panel--visible]="abierto"
+    role="listbox"
+    [attr.aria-hidden]="!abierto"
+    [attr.aria-label]="etiqueta() || placeholder()"
+    (keydown)="manejarTecladoPanel($event)"
+  >
+    @for (opcion of opciones(); track opcion.value) {
+      <app-boton
+        #opcionBoton
+        class="app-select__opcion"
+        tipo="button"
+        apariencia="texto"
+        role="option"
+        [deshabilitado]="!!opcion.disabled"
+        [class.app-select__opcion--activa]="
+          opcion.value === valorActual || $index === indiceEnfocado
+        "
+        [aria-selected]="opcion.value === valorActual"
+        (accion)="seleccionar(opcion)"
+      >
+        @if (opcion.badge || opcion.detalle) {
+          <span class="app-select__opcion-rica">
+            <span class="app-select__opcion-texto">
+              <span class="app-select__opcion-titulo">{{ opcion.titulo ?? opcion.label }}</span>
+              @if (opcion.detalle) {
+                <span class="app-select__opcion-detalle">{{ opcion.detalle }}</span>
+              }
+            </span>
+            @if (opcion.badge) {
+              <span class="app-select__opcion-badge">{{ opcion.badge }}</span>
+            }
+          </span>
+        } @else {
+          {{ opcion.label }}
+        }
+      </app-boton>
+    }
+  </div>
+</div>

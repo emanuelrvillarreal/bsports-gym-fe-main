@@ -1,0 +1,14 @@
+# Ejemplo: stack spring (BD externa)
+
+st7:
+  mi-api:
+    branch: main
+    port: 9050
+    path: mi-api
+    domain: stg.blueopendata.com
+
+    stack: spring
+
+    composer_file: plantillas/spring-3.9-java-17/docker-compose.yml
+    nginx_config: plantillas/spring-3.9-java-17/nginx.spring-boot-api.conf
+    application_properties: src/main/resources/application.st7.properties

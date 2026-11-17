@@ -1,0 +1,117 @@
+:host {
+  display: contents;
+}
+
+.cobro-evento {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.25rem;
+  color: var(--app-text);
+
+  &__evento,
+  &__resultado {
+    display: grid;
+    gap: 0.35rem;
+    padding: 0.9rem;
+    background: var(--app-surface-strong);
+    border: 1px solid var(--app-surface-border);
+    border-radius: 0.75rem;
+  }
+
+  &__evento span,
+  &__resultado span {
+    color: var(--app-text-soft);
+  }
+
+  &__formulario {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem 1rem;
+    align-items: end;
+  }
+
+  &__campo-cantidad {
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  label {
+    font-weight: 700;
+  }
+
+  input,
+  textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.68rem 0.75rem;
+    color: var(--app-text);
+    background: var(--app-surface);
+    border: 1px solid var(--app-surface-border);
+    border-radius: 0.6rem;
+    font: inherit;
+  }
+
+  &__observaciones,
+  &__nombre,
+  &__resumen-error {
+    grid-column: 1 / -1;
+  }
+
+  &__resumen-error {
+    min-height: 1.25rem;
+    color: var(--semantic-danger);
+    font-weight: 600;
+    visibility: hidden;
+
+    &--visible {
+      visibility: visible;
+    }
+  }
+
+  &__total {
+    display: flex;
+    justify-content: flex-end;
+    align-items: baseline;
+    gap: 0.65rem;
+    margin: 0;
+    color: var(--app-text-soft);
+
+    strong {
+      color: var(--app-accent);
+      font-size: 1.45rem;
+    }
+  }
+
+  &__resultado app-boton {
+    justify-self: start;
+    margin-top: 0.5rem;
+  }
+
+  &__error {
+    margin: 0;
+    padding: 0.75rem;
+    color: var(--semantic-danger);
+    background: color-mix(in srgb, var(--semantic-danger) 10%, transparent);
+    border-radius: 0.55rem;
+  }
+}
+
+:host-context(.theme-mode-dark) .cobro-evento input,
+:host-context(.theme-mode-dark) .cobro-evento textarea {
+  background: #000;
+}
+
+@media (max-width: 38rem) {
+  .cobro-evento__formulario {
+    grid-template-columns: 1fr;
+  }
+
+  .cobro-evento__observaciones {
+    grid-column: auto;
+  }
+
+  .cobro-evento__nombre,
+  .cobro-evento__resumen-error {
+    grid-column: auto;
+  }
+}

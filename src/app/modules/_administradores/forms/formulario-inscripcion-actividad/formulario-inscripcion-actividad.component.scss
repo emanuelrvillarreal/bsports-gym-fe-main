@@ -1,0 +1,20 @@
+:host {
+  display: block;
+}
+.formulario-inscripcion-actividad {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: 0.8rem;
+  align-items: end;
+  margin: 0;
+  &__error {
+    grid-column: 1 / -1;
+    display: block;
+    min-height: 1.1rem;
+    color: var(--semantic-danger, #ef4444);
+    visibility: hidden;
+  }
+  &__error--visible {
+    visibility: visible;
+  }
+}

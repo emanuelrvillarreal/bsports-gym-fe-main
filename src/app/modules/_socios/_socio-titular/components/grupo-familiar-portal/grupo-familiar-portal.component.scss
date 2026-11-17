@@ -1,0 +1,32 @@
+:host {
+  display: block;
+}
+
+.grupo-familiar {
+  display: grid;
+  gap: 1rem;
+
+  &__error {
+    color: var(--semantic-danger);
+  }
+
+  &__carga {
+    display: grid;
+    min-height: 12rem;
+    place-items: center;
+  }
+
+  &__credencial {
+    display: grid;
+    place-items: center;
+    padding: 0.5rem 0;
+  }
+
+  &__certificados {
+    min-height: 0;
+  }
+
+  &__popup-certificados {
+    --popup-acciones-position: static;
+  }
+}

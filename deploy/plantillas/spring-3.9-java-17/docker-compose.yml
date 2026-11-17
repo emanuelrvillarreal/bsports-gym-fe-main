@@ -1,0 +1,28 @@
+name: ${CONTAINER_NAME}
+
+services:
+  app:
+    image: ${CONTAINER_NAME}:latest
+    build:
+      context: ../../..
+      dockerfile: deploy/plantillas/spring-3.9-java-17/Dockerfile
+    container_name: ${CONTAINER_NAME}
+    restart: ${RESTART_POLICY:-unless-stopped}
+    ports:
+      - "${EXTERNAL_PORT}:${INTERNAL_PORT}"
+    env_file:
+      - path: ../.env
+        required: false
+      - path: ../../runtime.env
+        required: false
+    volumes:
+      - type: bind
+        source: ${APPLICATION_PROPERTIES_FILE}
+        target: /config/application.properties
+        read_only: true
+      - ${LOGS_VOLUME:-/var/log}/${CONTAINER_NAME}:/app/logs
+    environment:
+      TZ: America/Argentina/Buenos_Aires
+      JAVA_TOOL_OPTIONS: -Duser.timezone=America/Argentina/Buenos_Aires
+      SERVER_PORT: ${INTERNAL_PORT}
+      SPRING_CONFIG_LOCATION: optional:file:/config/application.properties

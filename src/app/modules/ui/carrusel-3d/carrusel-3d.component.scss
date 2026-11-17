@@ -1,0 +1,283 @@
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.carrusel-3d {
+  --carrusel-3d-height: 26rem;
+  --carrusel-3d-radius: 24rem;
+  --carrusel-3d-slide-width: 18rem;
+  --carrusel-3d-perspective: 1600px;
+  --carrusel-3d-slide-height: calc(var(--carrusel-3d-height) - 4.25rem);
+  --carrusel-3d-slide-margin: 0.6rem;
+
+  width: min(98%, 100%);
+  display: grid;
+  gap: 0.75rem;
+  margin-inline: auto;
+
+  &__vacio {
+    margin: 0;
+    color: var(--app-text-soft);
+    text-align: center;
+  }
+
+  &__viewport {
+    position: relative;
+    height: var(--carrusel-3d-height);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border-radius: 1.5rem;
+    border: 1px solid color-mix(in srgb, var(--app-surface-border) 70%, transparent);
+    background:
+      radial-gradient(
+        circle at 50% 50%,
+        color-mix(in srgb, var(--app-accent) 10%, transparent),
+        transparent 62%
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--app-surface) 86%, transparent),
+        color-mix(in srgb, var(--app-surface-strong) 82%, transparent)
+      );
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 4%),
+      0 18px 44px rgb(0 0 0 / 18%);
+    padding: 1rem 0 2.4rem;
+  }
+
+  &__scene {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    perspective: var(--carrusel-3d-perspective);
+    perspective-origin: 50% 45%;
+    touch-action: pan-y;
+    user-select: none;
+    cursor: grab;
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  &__ring {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    transition: transform 700ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  &__slide {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: min(var(--carrusel-3d-slide-width), calc(100% - 2rem));
+    height: min(var(--carrusel-3d-slide-height), calc(100% - 2.5rem));
+    display: grid;
+    place-items: center;
+    padding: var(--carrusel-3d-slide-margin);
+    box-sizing: border-box;
+    transform-style: preserve-3d;
+    transform-origin: center center;
+    translate: -50% -50%;
+    cursor: pointer;
+    transition:
+      opacity 260ms ease,
+      filter 260ms ease;
+
+    > * {
+      display: block;
+      width: 100%;
+      max-height: 100%;
+      backface-visibility: hidden;
+    }
+
+    &--frontal {
+      opacity: 1;
+      filter: none;
+    }
+
+    &--cercano {
+      opacity: 0.82;
+      filter: saturate(0.88) brightness(0.94);
+    }
+
+    &--lejano {
+      opacity: 0.42;
+      filter: saturate(0.58) brightness(0.8);
+    }
+
+    &--activa {
+      z-index: 3;
+    }
+  }
+
+  &__control {
+    --app-boton-min-height: 2.7rem;
+    --app-boton-padding: 0;
+    --app-boton-radio: 50%;
+    --app-boton-fondo-texto: color-mix(in srgb, var(--app-surface) 84%, transparent);
+    --app-boton-fondo-texto-interaccion: color-mix(
+      in srgb,
+      var(--app-accent) 20%,
+      var(--app-surface)
+    );
+    --app-boton-color-texto-texto: var(--app-text);
+
+    position: absolute;
+    top: 50%;
+    z-index: 4;
+    width: 2.7rem;
+    height: 2.7rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    translate: 0 -50%;
+    border: 1px solid color-mix(in srgb, var(--app-surface-border) 72%, transparent);
+    border-radius: 50%;
+    box-shadow: 0 8px 22px rgb(0 0 0 / 22%);
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+
+    &--prev {
+      left: 0.9rem;
+    }
+
+    &--next {
+      right: 0.9rem;
+    }
+  }
+
+  &__dots {
+    position: absolute;
+    left: 50%;
+    bottom: 0.42rem;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid color-mix(in srgb, var(--app-surface-border) 62%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--app-surface) 78%, transparent);
+    backdrop-filter: blur(10px);
+    translate: -50% 0;
+  }
+
+  &__dot {
+    --app-boton-min-height: 0.72rem;
+    --app-boton-padding: 0;
+    --app-boton-radio: 50%;
+    --app-boton-fondo-texto: color-mix(in srgb, var(--app-surface-border) 72%, transparent);
+    --app-boton-fondo-texto-interaccion: color-mix(
+      in srgb,
+      var(--app-accent) 62%,
+      var(--app-surface-border)
+    );
+
+    width: 0.72rem;
+    height: 0.72rem;
+    display: block;
+    flex: 0 0 0.72rem;
+    align-self: center;
+    line-height: 0;
+
+    &--activa {
+      --app-boton-fondo-texto: var(--app-accent);
+      --app-boton-fondo-texto-interaccion: var(--app-accent);
+    }
+  }
+
+  &__mobile {
+    display: none;
+  }
+
+  &__lite {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(16rem, 24rem);
+    gap: 0.8rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 0.35rem;
+  }
+
+  &__lite-slide {
+    width: 100%;
+    min-width: 0;
+  }
+
+  &--alto-rendimiento {
+    .carrusel-3d__lite {
+      display: grid;
+    }
+  }
+}
+
+@media (max-width: 48rem) {
+  .carrusel-3d--mobile-fallback {
+    .carrusel-3d__viewport,
+    .carrusel-3d__dots {
+      display: none;
+    }
+
+    .carrusel-3d__mobile {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(16rem, 86%);
+      gap: 0.8rem;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      padding-bottom: 0.35rem;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .carrusel-3d__mobile-slide {
+      scroll-snap-align: center;
+      opacity: 0.86;
+      transition:
+        transform 180ms ease,
+        opacity 180ms ease;
+
+      &--activa {
+        opacity: 1;
+      }
+    }
+  }
+
+  .carrusel-3d--mobile-3d {
+    .carrusel-3d__viewport {
+      height: max(24rem, var(--carrusel-3d-height));
+      padding-bottom: 2.2rem;
+    }
+
+    .carrusel-3d__control {
+      width: 2.35rem;
+      height: 2.35rem;
+    }
+
+    .carrusel-3d__slide {
+      width: min(var(--carrusel-3d-slide-width), calc(100% - 1.2rem));
+    }
+
+    .carrusel-3d__dots {
+      gap: 0.35rem;
+    }
+
+    .carrusel-3d__dot {
+      --app-boton-min-height: 0.62rem;
+
+      width: 0.62rem;
+      height: 0.62rem;
+
+      &--activa {
+        --app-boton-fondo-texto: var(--app-accent);
+      }
+    }
+  }
+}

@@ -1,0 +1,84 @@
+<section class="mis-entrenamientos">
+  @if (opcionesSocios().length) {
+    <app-select class="mis-entrenamientos__socio" etiqueta="Ver de" [opciones]="opcionesSocios()" [value]="memberUuid()" (valueChange)="elegirSocio($event)" />
+  }
+
+  @if (error()) {
+    <div class="mis-entrenamientos__error" role="alert">{{ error() }} <app-boton apariencia="texto" (accion)="cargar()">Reintentar</app-boton></div>
+  } @else if (cargando() && !rutinas().length) {
+    <p class="mis-entrenamientos__vacio">Cargando entrenamientos…</p>
+  } @else if (!rutinas().length) {
+    <p class="mis-entrenamientos__vacio">Todavía no tenés rutinas asignadas. Cuando tu profesor te asigne una, la vas a ver acá.</p>
+  }
+
+  @for (item of activas(); track item.asignacion.uuid) {
+    @let r = item.rutina;
+    @let a = item.asignacion;
+    <article class="mis-entrenamientos__rutina">
+      <header>
+        <div>
+          <h3>{{ r.nombre }}</h3>
+          <small>
+            {{ r.profesor ? 'Profesor: ' + r.profesor + ' · ' : '' }}desde el {{ fecha(a.fechaInicio ?? a.fechaAsignacion) }}{{ a.fechaFin ? ' hasta el ' + fecha(a.fechaFin) : '' }}
+          </small>
+        </div>
+        <span class="mis-entrenamientos__sesiones">{{ a.sesiones }} {{ a.sesiones === 1 ? 'sesión' : 'sesiones' }}{{ a.ultimaSesion ? ' · última ' + fecha(a.ultimaSesion) : '' }}</span>
+      </header>
+      @if (r.objetivo) { <p class="mis-entrenamientos__texto">{{ r.objetivo }}</p> }
+      @if (a.observaciones) { <p class="mis-entrenamientos__texto"><strong>Indicaciones:</strong> {{ a.observaciones }}</p> }
+
+      <div class="mis-entrenamientos__dias">
+        @for (dia of r.dias; track dia.uuid) {
+          <section class="mis-entrenamientos__dia" [attr.aria-label]="dia.nombre">
+            <h4>{{ dia.nombre }}</h4>
+            <ol>
+              @for (ejercicio of dia.items; track ejercicio.uuid) {
+                <li>
+                  <div class="mis-entrenamientos__ejercicio">
+                    <strong>{{ ejercicio.ejercicio.nombre }}</strong>
+                    <small>{{ tipo(ejercicio.ejercicio.tipo) }}{{ ejercicio.ejercicio.grupoMuscular ? ' · ' + ejercicio.ejercicio.grupoMuscular : '' }}</small>
+                  </div>
+                  <span class="mis-entrenamientos__prescripcion">{{ prescripcion(ejercicio) || 'A criterio' }}</span>
+                  @if (ejercicio.observaciones) { <em>{{ ejercicio.observaciones }}</em> }
+                  @if (ejercicio.ejercicio.indicaciones) {
+                    <details>
+                      <summary>Cómo se hace</summary>
+                      <p>{{ ejercicio.ejercicio.indicaciones }}</p>
+                    </details>
+                  }
+                  @if (ejercicio.ejercicio.videoUrl) {
+                    <app-reproductor-video [url]="ejercicio.ejercicio.videoUrl" [titulo]="ejercicio.ejercicio.nombre" />
+                  }
+                </li>
+              }
+            </ol>
+          </section>
+        }
+      </div>
+    </article>
+  }
+
+  @if (anteriores().length) {
+    <section class="mis-entrenamientos__historial" aria-label="Rutinas anteriores">
+      <h3>Rutinas anteriores</h3>
+      @for (item of anteriores(); track item.asignacion.uuid) {
+        <article>
+          <button type="button" [attr.aria-expanded]="abierta() === item.asignacion.uuid" (click)="alternar(item.asignacion.uuid)">
+            <strong>{{ item.rutina.nombre }}</strong>
+            <small>
+              {{ fecha(item.asignacion.fechaInicio ?? item.asignacion.fechaAsignacion) }} al {{ fecha(item.asignacion.fechaFinalizacion ?? item.asignacion.fechaFin) }}
+              · {{ item.asignacion.sesiones }} {{ item.asignacion.sesiones === 1 ? 'sesión' : 'sesiones' }}
+            </small>
+          </button>
+          @if (abierta() === item.asignacion.uuid) {
+            <ul>
+              @for (dia of item.rutina.dias; track dia.uuid) {
+                <li><strong>{{ dia.nombre }}:</strong> {{ dia.items.length }} ejercicios</li>
+              }
+            </ul>
+          }
+        </article>
+      }
+    </section>
+  }
+</section>

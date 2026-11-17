@@ -1,0 +1,52 @@
+:host {
+  display: block;
+}
+
+.gestion-configuracion-empresa {
+  display: grid;
+  gap: 1.25rem;
+
+  &__encabezado {
+    display: grid;
+    gap: 0.35rem;
+
+    h2,
+    p {
+      margin: 0;
+    }
+
+    p {
+      color: var(--app-text-soft);
+    }
+  }
+
+  &__carga,
+  &__estado-error {
+    display: grid;
+    min-height: 8rem;
+    place-items: center;
+  }
+
+  &__cargas {
+    display: grid;
+    gap: 1rem;
+  }
+
+  &__estado-error {
+    gap: 0.75rem;
+    padding: 1rem;
+    color: var(--app-text);
+    background: var(--app-surface);
+    border: 1px solid var(--app-surface-border);
+    border-radius: 0.75rem;
+
+    p {
+      margin: 0;
+    }
+  }
+
+  &__error {
+    margin: 0;
+    color: var(--semantic-danger, #dc2626);
+  }
+}

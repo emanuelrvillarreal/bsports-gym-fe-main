@@ -1,0 +1,24 @@
+@if (error()) {
+  <div class="credencial-socios__error">
+    <p role="alert">{{ error() }}</p>
+    <app-boton tipo="button" (accion)="cargar()">Reintentar</app-boton>
+  </div>
+} @else if (cargando() || datosCarnet()) {
+  <div class="credencial-socios__carnet">
+    <app-carnet
+      [foto]="fotoCarnet()"
+      [nombre]="datosCarnet()?.nombre ?? ''"
+      [apellido]="datosCarnet()?.apellido ?? ''"
+      [logo]="logoEmpresa()"
+      [campos]="datosCarnet()?.campos ?? []"
+      [qrContenido]="datosCarnet()?.qrContenido ?? ''"
+      [qrImagen]="datosCarnet()?.qrImagen ?? ''"
+      [altoRendimiento]="altoRendimiento()"
+      [cargando]="cargando()"
+    />
+  </div>
+} @else {
+  <div class="credencial-socios__vacia" role="status">
+    <p>No hay datos disponibles para generar la credencial de socio.</p>
+  </div>
+}

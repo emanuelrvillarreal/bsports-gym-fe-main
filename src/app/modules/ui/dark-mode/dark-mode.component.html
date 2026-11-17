@@ -1,0 +1,20 @@
+<app-boton
+  class="dark-mode-switch"
+  tipo="button"
+  apariencia="texto"
+  role="switch"
+  [aria-checked]="modoResuelto() === 'dark'"
+  [aria-label]="'Cambiar modo de color. Actual: ' + etiquetaModo()"
+  [attr.title]="'Modo actual: ' + etiquetaModo()"
+  [class.dark-mode-switch--light]="modoResuelto() === 'light'"
+  [class.dark-mode-switch--alto-rendimiento]="altoRendimiento()"
+  (accion)="alternarModo()"
+>
+  <span class="dark-mode-switch__track">
+    <ng-icon class="dark-mode-switch__icon dark-mode-switch__icon--moon" name="heroMoon" />
+    <ng-icon class="dark-mode-switch__icon dark-mode-switch__icon--sun" name="heroSun" />
+    <span class="dark-mode-switch__thumb">
+      <ng-icon [name]="modoResuelto() === 'dark' ? 'heroMoon' : 'heroSun'" />
+    </span>
+  </span>
+</app-boton>

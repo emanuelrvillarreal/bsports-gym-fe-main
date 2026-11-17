@@ -1,0 +1,135 @@
+:host { display: block; }
+
+.formulario-notificacion-mora {
+  --canal-activo: var(--color-primario);
+
+  display: grid;
+  gap: 1rem;
+
+  &--email { --canal-activo: var(--color-secundario); }
+
+  label { display: grid; gap: .35rem; color: var(--app-text); }
+
+  input,
+  textarea {
+    box-sizing: border-box;
+    width: 100%;
+    border: 1px solid var(--app-surface-border);
+    border-radius: .5rem;
+    background: var(--app-surface);
+    color: var(--app-text);
+    padding: .7rem;
+
+    &:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--app-accent) 36%, transparent);
+      outline-offset: 2px;
+    }
+  }
+
+  textarea { resize: vertical; }
+
+  small { color: var(--app-text-soft); }
+
+  &__error {
+    min-height: 1.2rem;
+    color: var(--semantic-danger);
+    visibility: hidden;
+
+    &--visible { visibility: visible; }
+  }
+
+  &__canales {
+    padding: .9rem 1rem;
+    margin: 0;
+    border: 1px solid color-mix(in srgb, var(--canal-activo) 30%, var(--app-surface-border));
+    border-radius: .65rem;
+    background: color-mix(in srgb, var(--canal-activo) 7%, var(--app-surface));
+
+    legend { padding-inline: .25rem; color: var(--app-text-soft); }
+  }
+
+  &__canal {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: .75rem;
+    cursor: pointer;
+
+    input {
+      grid-column: 2;
+      grid-row: 1;
+      width: 3rem;
+      height: 1.6rem;
+      min-height: 0;
+      padding: 0;
+      margin: 0;
+      appearance: none;
+      cursor: pointer;
+      background: var(--color-secundario);
+      border-color: var(--color-secundario);
+      border-radius: 99px;
+
+      &::after {
+        display: block;
+        width: 1.1rem;
+        height: 1.1rem;
+        margin: .17rem;
+        content: '';
+        background: var(--app-text-soft);
+        border-radius: 50%;
+        transform: translateX(1.36rem);
+        transition: transform .2s ease, background .2s ease;
+      }
+
+      &:checked {
+        background: var(--color-primario);
+        border-color: var(--color-primario);
+
+        &::after { background: #fff; transform: translateX(0); }
+      }
+    }
+
+    &-opcion {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .4rem;
+      color: var(--app-text-soft);
+      font-weight: 700;
+
+      ng-icon { font-size: 1.15rem; }
+
+      &--whatsapp { grid-column: 1; grid-row: 1; }
+      &--email { grid-column: 3; grid-row: 1; }
+    }
+
+    input:checked ~ &-opcion--whatsapp {
+      color: var(--app-text);
+
+      ng-icon { color: var(--color-primario); }
+    }
+
+    input:not(:checked) ~ &-opcion--email {
+      color: var(--app-text);
+
+      ng-icon { color: var(--color-secundario); }
+    }
+  }
+
+  &__leyenda {
+    padding: .75rem .9rem;
+    margin: 0;
+    color: var(--app-text-soft);
+    background: color-mix(in srgb, var(--canal-activo) 7%, var(--app-surface));
+    border-inline-start: .25rem solid var(--canal-activo);
+    border-radius: .35rem;
+    line-height: 1.45;
+  }
+
+  &__contador { justify-self: end; font-variant-numeric: tabular-nums; }
+}
+
+:host-context(.theme-mode-dark) {
+  .formulario-notificacion-mora input:not([role='switch']),
+  .formulario-notificacion-mora textarea { background: #000; }
+}

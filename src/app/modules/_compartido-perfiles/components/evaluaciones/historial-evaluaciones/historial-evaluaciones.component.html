@@ -1,0 +1,74 @@
+<div class="historial-ev">
+  <p class="historial-ev__aviso" role="note">{{ aviso }}</p>
+
+  @if (!evaluaciones().length) {
+    <p class="historial-ev__vacio">Todavía no hay evaluaciones registradas.</p>
+  } @else {
+    @if (ultima(); as u) {
+      <section class="historial-ev__ultima" aria-label="Última evaluación">
+        <h4>Última evaluación · {{ fecha(u.fecha) }}</h4>
+        <dl>
+          @for (m of todas; track m.clave) {
+            @if (valor(u, m.clave) !== null) {
+              <div><dt>{{ m.etiqueta }}</dt><dd>{{ medida(valor(u, m.clave), m.unidad) }}</dd></div>
+            }
+          }
+          @if (u.proximaEvaluacion) {
+            <div><dt>Próxima evaluación</dt><dd>{{ fecha(u.proximaEvaluacion) }}</dd></div>
+          }
+        </dl>
+      </section>
+    }
+
+    @if (metricas().length) {
+      <section class="historial-ev__evolucion" aria-label="Evolución">
+        <div class="historial-ev__chips" role="group" aria-label="Indicador">
+          @for (m of metricas(); track m.clave) {
+            <button type="button" class="historial-ev__chip" [class.historial-ev__chip--activo]="metrica().clave === m.clave" [attr.aria-pressed]="metrica().clave === m.clave" (click)="metricaElegida.set(m.clave)">
+              {{ m.etiqueta }}
+            </button>
+          }
+        </div>
+        @if (cambio()) {
+          <p class="historial-ev__cambio">{{ metrica().etiqueta }}: {{ cambio() }}</p>
+        }
+        <app-grafico-barras class="historial-ev__grafico" [barras]="barras()" estilo="compacto" orientacion="vertical" />
+      </section>
+    }
+
+    <section class="historial-ev__lista" aria-label="Evaluaciones">
+      <h4>Historial ({{ evaluaciones().length }})</h4>
+      @for (e of evaluaciones(); track e.uuid) {
+        <article class="historial-ev__item">
+          <header>
+            <button type="button" class="historial-ev__abrir" [attr.aria-expanded]="abierta() === e.uuid" (click)="alternar(e.uuid)">
+              <strong>{{ fecha(e.fecha) }}</strong>
+              <span>
+                {{ e.pesoKg ? medida(e.pesoKg, 'kg') : '' }}{{ e.imc ? ' · IMC ' + medida(e.imc) : '' }}{{ e.grasaCorporalPct ? ' · grasa ' + medida(e.grasaCorporalPct, '%') : '' }}
+              </span>
+              <small>{{ e.profesional || e.registradaPor }}</small>
+            </button>
+            @if (e.editable) {
+              <div class="historial-ev__acciones">
+                <app-boton apariencia="texto" (accion)="editar.emit(e)">Corregir</app-boton>
+                <app-boton apariencia="texto" (accion)="eliminar.emit(e)">Eliminar</app-boton>
+              </div>
+            }
+          </header>
+          @if (abierta() === e.uuid) {
+            <dl>
+              @for (m of todas; track m.clave) {
+                @if (valor(e, m.clave) !== null) {
+                  <div><dt>{{ m.etiqueta }}</dt><dd>{{ medida(valor(e, m.clave), m.unidad) }}</dd></div>
+                }
+              }
+            </dl>
+            @if (e.observaciones) { <p><strong>Observaciones:</strong> {{ e.observaciones }}</p> }
+            @if (e.recomendaciones) { <p><strong>Recomendaciones:</strong> {{ e.recomendaciones }}</p> }
+            @if (e.proximaEvaluacion) { <p><strong>Próxima evaluación:</strong> {{ fecha(e.proximaEvaluacion) }}</p> }
+          }
+        </article>
+      }
+    </section>
+  }
+</div>

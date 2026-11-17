@@ -1,0 +1,86 @@
+@let m = membresia();
+<article [class]="'tarjeta tarjeta--' + tono()" [attr.aria-label]="'Pase ' + m.pase.nombre">
+  <header class="tarjeta__cabecera">
+    <div>
+      <h4>{{ m.pase.nombre }}</h4>
+      <p class="tarjeta__resumen">{{ resumen() }}</p>
+    </div>
+    <span class="tarjeta__estado">{{ textoSituacion(m.situacion) }}</span>
+  </header>
+
+  <dl class="tarjeta__datos">
+    @if (mostrarSocio()) { <div><dt>Socio</dt><dd>{{ m.socio.nombre }}</dd></div> }
+    <div>
+      <dt>Vigencia</dt>
+      <dd>{{ fecha(m.fechaInicio) }} al {{ fecha(m.fechaFin) }}</dd>
+      @if (extendida()) { <small>Extendido por congelamiento (era {{ fecha(m.fechaFinOriginal) }})</small> }
+    </div>
+    <div>
+      <dt>Cobro</dt>
+      <dd>{{ m.cobro ? moneda(m.cobro.montoFinal) : moneda(m.precio) }} · {{ textoCobro(m.cobro?.estado) }}</dd>
+      @if (m.cobro?.fechaPago) { <small>Pagado el {{ fecha(m.cobro!.fechaPago!) }}</small> }
+      @else if (m.cobro?.estado === 'PENDIENTE' || m.cobro?.estado === 'VENCIDA') { <small>Vence {{ fecha(m.cobro!.vencimiento!) }}</small> }
+    </div>
+    <div>
+      <dt>Ingresos</dt>
+      @if (m.ingresosPermitidos) {
+        <dd>{{ m.ingresosUsados }} de {{ m.ingresosPermitidos }}</dd>
+        <span class="tarjeta__barra" role="meter" [attr.aria-valuenow]="m.ingresosUsados" aria-valuemin="0" [attr.aria-valuemax]="m.ingresosPermitidos" aria-label="Ingresos usados">
+          <span [style.width.%]="porcentajeIngresos()"></span>
+        </span>
+      } @else {
+        <dd>{{ m.ingresosUsados }} · ilimitados</dd>
+      }
+    </div>
+    @if (!compacta()) { <div><dt>Origen</dt><dd>{{ textoOrigen(m.origen) }}{{ m.renovacionAutomatica ? ' · renovación automática' : '' }}</dd></div> }
+    @if (m.integrantes.length) {
+      <div class="tarjeta__ancho"><dt>Integrantes</dt><dd>{{ integrantesTexto() }}</dd></div>
+    }
+    @if (m.motivoBaja) {
+      <div class="tarjeta__ancho"><dt>{{ m.estado === 'BAJA' ? 'Baja' : 'Reemplazo' }}</dt><dd>{{ m.motivoBaja }} · {{ fecha(m.fechaBaja!) }}</dd></div>
+    }
+    @if (m.pase.restricciones && !compacta()) {
+      <div class="tarjeta__ancho"><dt>Condiciones</dt><dd>{{ m.pase.restricciones }}</dd></div>
+    }
+  </dl>
+
+  @if (m.congelamientos.length && !compacta()) {
+    <section class="tarjeta__seccion" aria-label="Congelamientos">
+      <h5>Congelamientos</h5>
+      <ul>
+        @for (c of m.congelamientos; track c.uuid) {
+          <li>
+            <span>{{ fecha(c.desde) }} al {{ fecha(c.hasta) }} · {{ c.dias }} días · {{ c.motivo }}</span>
+            <small>{{ c.extiendeVencimiento ? 'Corrió el vencimiento' : 'No corre el vencimiento' }}{{ c.autorizadoPor ? ' · autorizó ' + c.autorizadoPor : '' }}</small>
+            @if (m.puedeCongelar) {
+              <app-boton apariencia="texto" (accion)="anularCongelamiento.emit(c)">Anular</app-boton>
+            }
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
+  @if (m.ultimosAccesos.length && !compacta()) {
+    <section class="tarjeta__seccion" aria-label="Últimos ingresos">
+      <h5>Últimos ingresos</h5>
+      <ul>
+        @for (a of m.ultimosAccesos; track $index) {
+          <li [class.tarjeta__rechazo]="!a.permitido">
+            <span>{{ a.fecha }}{{ m.integrantes.length ? ' · ' + a.socio : '' }}</span>
+            <small>{{ a.permitido ? 'Ingresó' : 'Rechazado: ' + a.motivo }}</small>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
+  @if (hayAcciones()) {
+    <footer class="tarjeta__acciones">
+      @if (m.puedeRenovar) { <app-boton apariencia="texto" (accion)="accion.emit('renovar')">Renovar</app-boton> }
+      @if (m.puedeCambiarPlan) { <app-boton apariencia="texto" (accion)="accion.emit('cambiar-plan')">Cambiar de plan</app-boton> }
+      @if (m.puedeCongelar) { <app-boton apariencia="texto" (accion)="accion.emit('congelar')">Congelar</app-boton> }
+      @if (m.puedeDarDeBaja) { <app-boton apariencia="texto" (accion)="accion.emit('baja')">Dar de baja</app-boton> }
+    </footer>
+  }
+</article>

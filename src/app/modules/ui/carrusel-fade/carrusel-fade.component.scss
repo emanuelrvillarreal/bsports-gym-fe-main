@@ -1,0 +1,236 @@
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.carrusel-fade {
+  --carrusel-fade-height: 20rem;
+  --carrusel-fade-duration: 320ms;
+  --carrusel-fade-focus: 3px solid color-mix(in srgb, var(--app-accent) 42%, white);
+
+  width: 100%;
+
+  &__vacio {
+    margin: 0;
+    color: var(--app-text-soft);
+    text-align: center;
+  }
+
+  &__viewport {
+    position: relative;
+    height: var(--carrusel-fade-height);
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--app-surface-border) 74%, transparent);
+    border-radius: 1.5rem;
+    background:
+      radial-gradient(
+        circle at 50% 20%,
+        color-mix(in srgb, var(--app-accent) 9%, transparent),
+        transparent 60%
+      ),
+      var(--app-surface);
+
+    &--cargando {
+      display: grid;
+      place-items: center;
+
+      app-load-spinner-blue {
+        width: min(72%, 20rem);
+      }
+    }
+
+    &--altura-automatica {
+      height: auto;
+      min-height: var(--carrusel-fade-height);
+    }
+  }
+
+  &__slide {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 3.1rem 3.8rem 3.55rem;
+    box-sizing: border-box;
+
+    > * {
+      display: block;
+      width: 100%;
+      max-height: 100%;
+    }
+
+    &--activa {
+      z-index: 1;
+      cursor: pointer;
+      animation: carrusel-fade-entrada var(--carrusel-fade-duration) ease-out both;
+    }
+
+    &--saliente {
+      z-index: 0;
+      pointer-events: none;
+      animation: carrusel-fade-salida var(--carrusel-fade-duration) ease-in both;
+    }
+  }
+
+  &--altura-automatica {
+    .carrusel-fade__slide--activa {
+      position: relative;
+      inset: auto;
+      min-height: var(--carrusel-fade-height);
+    }
+  }
+
+  &__titulo {
+    position: absolute;
+    top: 0.9rem;
+    left: 1.1rem;
+    z-index: 3;
+    margin: 0;
+    color: var(--app-text);
+    font-size: 0.85rem;
+    font-weight: 900;
+    letter-spacing: normal;
+    text-shadow: 0 1px 2px rgb(0 0 0 / 72%);
+    text-transform: none;
+  }
+
+  &__control {
+    --app-boton-min-height: 2.7rem;
+    --app-boton-padding: 0;
+    --app-boton-radio: 50%;
+    --app-boton-fondo-texto: color-mix(in srgb, var(--app-surface) 88%, transparent);
+    --app-boton-fondo-texto-interaccion: color-mix(
+      in srgb,
+      var(--app-accent) 20%,
+      var(--app-surface)
+    );
+    --app-boton-color-texto-texto: var(--app-text);
+
+    position: absolute;
+    top: 50%;
+    z-index: 3;
+    width: 2.7rem;
+    height: 2.7rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    translate: 0 -50%;
+    border: 1px solid color-mix(in srgb, var(--app-surface-border) 72%, transparent);
+    border-radius: 50%;
+    box-shadow: 0 0.6rem 1.4rem rgb(0 0 0 / 18%);
+
+    &--prev {
+      left: 0.75rem;
+    }
+    &--next {
+      right: 0.75rem;
+    }
+
+    &:focus-visible {
+      outline: var(--carrusel-fade-focus);
+      outline-offset: 2px;
+    }
+  }
+
+  &__dots {
+    position: absolute;
+    bottom: 0.95rem;
+    left: 50%;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid color-mix(in srgb, var(--app-surface-border) 70%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--app-surface) 90%, transparent);
+    translate: -50% 0;
+  }
+
+  &__dot {
+    --app-boton-min-height: 0.72rem;
+    --app-boton-padding: 0;
+    --app-boton-radio: 50%;
+    --app-boton-fondo-texto: color-mix(in srgb, var(--app-surface-border) 80%, transparent);
+    --app-boton-fondo-texto-interaccion: color-mix(
+      in srgb,
+      var(--app-accent) 62%,
+      var(--app-surface-border)
+    );
+
+    width: 0.72rem;
+    height: 0.72rem;
+    display: block;
+    flex: 0 0 0.72rem;
+    align-self: center;
+    line-height: 0;
+
+    &--activa {
+      --app-boton-fondo-texto: var(--app-accent);
+      --app-boton-fondo-texto-interaccion: var(--app-accent);
+    }
+    &:focus-visible {
+      outline: var(--carrusel-fade-focus);
+      outline-offset: 2px;
+    }
+  }
+}
+
+@keyframes carrusel-fade-entrada {
+  from {
+    opacity: 0;
+    transform: translate3d(2.5rem, 0, 0) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes carrusel-fade-salida {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(-2.5rem, 0, 0) scale(0.98);
+  }
+}
+
+@media (max-width: 42rem) {
+  .carrusel-fade {
+    &__slide {
+      padding-inline: 3.15rem;
+    }
+    &__control {
+      width: 2.35rem;
+      height: 2.35rem;
+    }
+  }
+}
+
+@media (max-width: 36rem) {
+  .carrusel-fade--navegacion-movil-deslizamiento {
+    .carrusel-fade__viewport {
+      touch-action: pan-y;
+    }
+
+    // En teléfono no hay flechas laterales: se recupera ese espacio para centrar el contenido.
+    .carrusel-fade__slide {
+      padding-inline: 1.25rem;
+    }
+
+    .carrusel-fade__control {
+      display: none;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .carrusel-fade__slide {
+    animation-duration: 0.01ms;
+  }
+}

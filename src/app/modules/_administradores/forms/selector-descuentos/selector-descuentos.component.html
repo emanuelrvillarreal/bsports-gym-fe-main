@@ -1,0 +1,26 @@
+<fieldset class="selector-descuentos">
+  <legend>{{ titulo() }}</legend>
+  <p>{{ descripcion() }}</p>
+
+  @if (cargando()) {
+    <small role="status" aria-live="polite">Cargando catálogo de descuentos…</small>
+  } @else if (!descuentos().length) {
+    <small>No hay descuentos disponibles en el catálogo.</small>
+  } @else {
+    <div class="selector-descuentos__grilla">
+      <app-select etiqueta="Descuento" placeholder="Seleccionar descuento" [opciones]="opciones()" [value]="descuentoUuid()" [deshabilitado]="!opciones().length" (valueChange)="descuentoUuid.set($event)" />
+      <app-input-fecha id="selector-descuento-desde" etiqueta="Vigente desde" [valorInicial]="fechaDesde()" (valorCambiado)="fechaDesde.set($event)" />
+      <app-input-fecha id="selector-descuento-hasta" etiqueta="Vigente hasta (opcional)" [minimo]="fechaDesde()" [valorInicial]="fechaHasta()" (valorCambiado)="fechaHasta.set($event)" />
+      <app-boton tipo="button" colorPaleta="secundario" (accion)="agregar()">Agregar descuento</app-boton>
+    </div>
+  }
+
+  @if (error()) { <small class="selector-descuentos__error" role="alert">{{ error() }}</small> }
+  @if (seleccionados().length) {
+    <ul class="selector-descuentos__seleccionados">
+      @for (descuento of seleccionados(); track descuento.descuentoUuid) {
+        <li><span>{{ descripcionDescuento(descuento) }}</span><app-boton class="selector-descuentos__quitar" tipo="button" apariencia="texto" [soloIcono]="true" [attr.aria-label]="'Quitar ' + descripcionDescuento(descuento)" (accion)="descuentoQuitado.emit(descuento.descuentoUuid)"><ng-icon name="heroTrash" aria-hidden="true" /></app-boton></li>
+      }
+    </ul>
+  }
+</fieldset>

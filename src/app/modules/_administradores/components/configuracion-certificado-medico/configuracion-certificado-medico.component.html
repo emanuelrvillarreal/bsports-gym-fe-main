@@ -1,0 +1,71 @@
+<app-card
+  titulo="¿Cuánto dura el certificado médico?"
+  descripcion="Elegí cómo vence el certificado en tu gimnasio. Aplica a los certificados que se carguen desde ahora."
+>
+  @if (cargando()) {
+    <p role="status">Cargando…</p>
+  } @else if (perfil()) {
+    <form class="config-cert fs-form" (submit)="$event.preventDefault(); guardar()" novalidate>
+      <div class="config-cert__tarjetas" role="radiogroup" aria-label="Cómo vence el certificado">
+        @for (opcion of opcionesModo; track opcion.valor) {
+          <label class="fs-tarjeta" [class.fs-tarjeta--activa]="modo() === opcion.valor">
+            <input
+              type="radio"
+              name="certificado-modo"
+              [value]="opcion.valor"
+              [checked]="modo() === opcion.valor"
+              [disabled]="guardando()"
+              (change)="seleccionarModo(opcion.valor)"
+            />
+            <span class="fs-tarjeta__titulo">{{ opcion.titulo }}</span>
+            <span class="fs-tarjeta__detalle">{{ opcion.detalle }}</span>
+          </label>
+        }
+      </div>
+
+      <div class="fs-detalle">
+        @if (modo() === 'FECHA_FIJA') {
+          <div class="fs-grid">
+            <app-select etiqueta="Día" [opciones]="opcionesDia" [value]="dia()" [deshabilitado]="guardando()" (valueChange)="dia.set($event); guardado.set(false)" />
+            <app-select etiqueta="Mes" [opciones]="opcionesMes" [value]="mes()" [deshabilitado]="guardando()" (valueChange)="mes.set($event); guardado.set(false)" />
+          </div>
+        } @else {
+          <label for="certificado-meses">
+            <span>Duración en meses</span>
+            <input
+              id="certificado-meses"
+              type="number"
+              inputmode="numeric"
+              min="1"
+              max="120"
+              step="1"
+              [attr.data-app-invalido]="mesesInvalido() ? 'true' : null"
+              [disabled]="guardando()"
+              [value]="meses()"
+              (input)="actualizarMeses($event)"
+            />
+          </label>
+        }
+        <small class="fs-nota">{{ resumenModo() }}</small>
+        @if (ejemplo()) {
+          <small class="config-cert__ejemplo">{{ ejemplo() }}</small>
+        }
+      </div>
+
+      @if (error()) {
+        <p class="config-cert__error" role="alert">{{ error() }}</p>
+      }
+      @if (guardado()) {
+        <p class="config-cert__ok" role="status">Listo, la configuración se guardó.</p>
+      }
+
+      <div class="config-cert__acciones">
+        <app-boton tipo="submit" [cargando]="guardando()" ariaLabelCarga="Guardando configuración del certificado">
+          Guardar configuración
+        </app-boton>
+      </div>
+    </form>
+  } @else {
+    <p class="config-cert__error" role="alert">{{ error() || 'No se encontró el perfil del gimnasio.' }}</p>
+  }
+</app-card>

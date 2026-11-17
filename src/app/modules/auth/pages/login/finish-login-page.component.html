@@ -1,0 +1,13 @@
+<main class="finish-login" aria-live="polite">
+  <section class="finish-login__card" aria-labelledby="finish-login-title">
+    @if (procesando()) {
+      <app-load-spinner aria-hidden="true" />
+      <h1 id="finish-login-title">Iniciando sesión</h1>
+      <p>Estamos verificando tu enlace.</p>
+    } @else {
+      <h1 id="finish-login-title">No pudimos iniciar sesión</h1>
+      <p role="alert">{{ error() }}</p>
+      <a class="finish-login__link" href="/login">Volver al inicio de sesión</a>
+    }
+  </section>
+</main>

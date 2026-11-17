@@ -1,0 +1,25 @@
+# Ejemplo: stack nginx-1.27 (sitio estático)
+# Los archivos deben estar en public/ del repo.
+
+# Con subruta
+st7:
+  mi-landing:
+    branch: main
+    port: 9070
+    path: landing
+
+    stack: nginx-1.27
+    composer_file: plantillas/nginx-1.27/docker-compose.yml
+    nginx_config: plantillas/nginx-1.27/nginx.host-reverse-proxy.conf
+
+---
+
+# En raíz del dominio (sin path)
+s4:
+  mi-home:
+    branch: main
+    port: 6038
+
+    stack: nginx-1.27
+    composer_file: plantillas/nginx-1.27/docker-compose.yml
+    nginx_config: plantillas/nginx-1.27/nginx.host-reverse-proxy-root.conf

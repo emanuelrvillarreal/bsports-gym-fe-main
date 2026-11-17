@@ -1,0 +1,168 @@
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+}
+
+.app-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  padding: 1rem;
+  border: 1px solid color-mix(in srgb, var(--app-surface-border) 78%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--app-surface) 86%, transparent);
+}
+
+.app-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.app-card__header-main {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+  align-content: center;
+}
+
+.app-card__header-side {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex: 0 0 auto;
+}
+
+.app-card__titulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  color: var(--app-card-header-color, var(--app-text));
+  font-size: 0.9rem;
+  text-transform: none;
+}
+
+.app-card__titulo ng-icon {
+  font-size: 1rem;
+}
+
+.app-card__descripcion {
+  margin: 0;
+  color: var(--app-card-subtitle-color, var(--app-text-soft));
+  opacity: var(--app-card-subtitle-opacity, 0.6);
+  font-size: 0.85rem;
+  text-transform: none;
+  white-space: pre-line;
+}
+
+.app-card__toggle {
+  width: 2rem;
+  height: 2rem;
+  min-height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  color: var(--app-text-soft);
+  background: color-mix(in srgb, var(--app-surface-strong) 74%, transparent);
+  border: 1px solid color-mix(in srgb, var(--app-surface-border) 78%, transparent);
+  border-radius: 999px;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease;
+
+  ng-icon {
+    font-size: 1rem;
+    transition: transform 220ms ease;
+  }
+
+  &:hover {
+    color: var(--app-accent);
+    border-color: color-mix(in srgb, var(--app-accent) 42%, var(--app-surface-border));
+    background: color-mix(in srgb, var(--app-accent-soft) 38%, var(--app-surface));
+  }
+
+  &:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--app-accent) 26%, white);
+    outline-offset: 2px;
+  }
+}
+
+.app-card__contenido-shell {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+}
+
+.app-card__contenido {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: 1fr;
+  transition:
+    grid-template-rows 260ms ease,
+    opacity 220ms ease;
+}
+
+.app-card__contenido-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+:host(.app-card-host--compacto) .app-card {
+  padding: 0.8rem;
+}
+
+:host(.app-card-host--alto-rendimiento) .app-card {
+  box-shadow: none;
+}
+
+:host(.app-card-host--alto-rendimiento) .app-card__toggle,
+:host(.app-card-host--alto-rendimiento) .app-card__toggle ng-icon,
+:host(.app-card-host--alto-rendimiento) .app-card__contenido {
+  transition: none;
+}
+
+:host(.app-card-host--alto-rendimiento) .app-card__toggle:hover {
+  background: color-mix(in srgb, var(--app-surface-strong) 74%, transparent);
+  border-color: color-mix(in srgb, var(--app-surface-border) 78%, transparent);
+  color: var(--app-text-soft);
+}
+
+:host(.app-card-host--alto-impacto-visual) .app-card {
+  box-shadow: 0 12px 24px rgb(0 0 0 / 24%);
+}
+
+:host(.app-card-host--colapsada) .app-card__contenido {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+
+:host(.app-card-host--colapsada) .app-card__header {
+  margin-bottom: 0;
+}
+
+:host(.app-card-host--colapsada) .app-card__toggle ng-icon {
+  transform: translateY(0.02rem);
+}
+
+@media (max-width: 720px) {
+  .app-card__header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+
+  .app-card__header-side {
+    width: auto;
+    justify-content: flex-end;
+  }
+}

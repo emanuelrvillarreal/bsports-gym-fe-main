@@ -1,0 +1,114 @@
+<section
+  class="grafico-barras"
+  [ngClass]="['grafico-barras--' + estilo(), 'grafico-barras--' + orientacion()]"
+  [class.grafico-barras--arrastrando]="arrastrandoGrafico()"
+  [class.grafico-barras--alto-rendimiento]="altoRendimiento()"
+  (pointerdown)="iniciarArrastreScroll($event)"
+  (pointermove)="moverArrastreScroll($event)"
+  (pointerup)="finalizarArrastreScroll($event)"
+  (pointercancel)="finalizarArrastreScroll($event)"
+  (pointerleave)="finalizarArrastreScroll($event)"
+>
+  @if (!barras().length) {
+    <p class="grafico-barras__vacio">No hay datos para mostrar.</p>
+  } @else if (esVs()) {
+    <div class="grafico-barras__vs">
+      <div class="grafico-barras__vs-escala" aria-label="Escala en miles">
+        @for (marca of escalaValoresInversa(); track marca) {
+          <span>{{ formatearEscalaK(marca) }}</span>
+        }
+      </div>
+
+      <div
+        class="grafico-barras__vs-grupos"
+        [class.grafico-barras__vs-grupos--arrastrando]="arrastrandoGrafico()"
+        (pointerdown)="iniciarArrastreScroll($event)"
+        (pointermove)="moverArrastreScroll($event)"
+        (pointerup)="finalizarArrastreScroll($event)"
+        (pointercancel)="finalizarArrastreScroll($event)"
+        (pointerleave)="finalizarArrastreScroll($event)"
+      >
+        @for (duelo of duelos(); track obtenerTrackDuelo($index)) {
+          <article class="grafico-barras__vs-grupo">
+            <div class="grafico-barras__vs-barras">
+              <div class="grafico-barras__vs-columna">
+                <div class="grafico-barras__vs-pista">
+                  <span
+                    class="grafico-barras__relleno"
+                    [ngClass]="obtenerClaseEstado(duelo.izquierda)"
+                    [ngStyle]="estiloRelleno(duelo.izquierda)"
+                  ></span>
+                </div>
+                <span class="grafico-barras__vs-valor">{{
+                  obtenerEtiquetaValorVs(duelo.izquierda)
+                }}</span>
+                <span class="grafico-barras__vs-nombre">
+                  {{ duelo.izquierda.nombre }}
+                  @if (estaEnTope(duelo.izquierda)) {
+                    <ng-icon name="heroBolt" aria-label="En tope" />
+                  }
+                </span>
+              </div>
+
+              @if (duelo.derecha) {
+                <div class="grafico-barras__vs-columna">
+                  <div class="grafico-barras__vs-pista">
+                    <span
+                      class="grafico-barras__relleno"
+                      [ngClass]="obtenerClaseEstado(duelo.derecha)"
+                      [ngStyle]="estiloRelleno(duelo.derecha)"
+                    ></span>
+                  </div>
+                  <span class="grafico-barras__vs-valor">{{
+                    obtenerEtiquetaValorVs(duelo.derecha)
+                  }}</span>
+                  <span class="grafico-barras__vs-nombre">
+                    {{ duelo.derecha.nombre }}
+                    @if (estaEnTope(duelo.derecha)) {
+                      <ng-icon name="heroBolt" aria-label="En tope" />
+                    }
+                  </span>
+                </div>
+              }
+            </div>
+            @if (duelo.izquierda.grupoNombre; as grupoNombre) {
+              <span class="grafico-barras__vs-grupo-nombre">{{ grupoNombre }}</span>
+            }
+          </article>
+        }
+      </div>
+    </div>
+  } @else {
+    <div class="grafico-barras__lista">
+      @for (barra of barras(); track obtenerTrack($index, barra)) {
+        <article class="grafico-barras__item">
+          <header class="grafico-barras__meta">
+            <span class="grafico-barras__nombre">
+              {{ barra.nombre }}
+              @if (estaEnTope(barra)) {
+                <ng-icon name="heroBolt" aria-label="En tope" />
+              }
+            </span>
+            <span class="grafico-barras__valor">{{ obtenerEtiquetaValor(barra) }}</span>
+          </header>
+
+          <div class="grafico-barras__pista">
+            <span
+              class="grafico-barras__relleno"
+              [ngClass]="obtenerClaseEstado(barra)"
+              [ngStyle]="estiloRelleno(barra)"
+            ></span>
+          </div>
+        </article>
+      }
+    </div>
+
+    @if (mostrarEscalaLateral()) {
+      <footer class="grafico-barras__escala-horizontal" aria-hidden="true">
+        @for (marca of escalaValores(); track marca) {
+          <span>{{ formatearEscalaK(marca) }}</span>
+        }
+      </footer>
+    }
+  }
+</section>

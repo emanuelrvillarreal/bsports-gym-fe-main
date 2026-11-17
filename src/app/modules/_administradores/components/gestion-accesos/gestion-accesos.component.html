@@ -1,0 +1,253 @@
+<section class="gestion-accesos">
+  <div class="gestion-accesos__resumen">
+    <app-card class="gestion-accesos__hero" [altoImpactoVisual]="true">
+      <p>Personas en el gimnasio</p>
+      <strong aria-live="polite">{{ personasAnimadas().toString().padStart(2, '0') }}</strong>
+      <div class="gestion-accesos__presentes-resumen">
+        @if (errorPresentes()) {
+          <p class="gestion-accesos__error" role="alert">{{ errorPresentes() }}</p>
+        }
+        @if (cargandoPresentes() || ultimosTresIngresos().length) {
+          <app-carrusel-fade
+            [items]="ultimosTresIngresos()"
+            [cargando]="cargandoPresentes()"
+            ariaLabel="Últimos tres ingresos al club"
+            titulo="Últimos 3 ingresos"
+            altura="21rem"
+            [mostrarControles]="true"
+          >
+            <ng-template appCarruselFadeItem let-persona>
+              <article
+                class="gestion-accesos__ingreso"
+                [attr.aria-label]="'Ingreso de ' + persona.nombre + ' ' + persona.apellido"
+              >
+                @if (persona.imageUrl) {
+                  <span
+                    class="gestion-accesos__ingreso-avatar gestion-accesos__ingreso-avatar--foto"
+                  >
+                    <img [src]="persona.imageUrl" alt="" />
+                  </span>
+                } @else {
+                  <span
+                    class="gestion-accesos__ingreso-avatar"
+                    [style.color]="colorTextoInsignia()"
+                    aria-hidden="true"
+                    >{{ obtenerIniciales(persona) }}</span
+                  >
+                }
+                <div class="gestion-accesos__ingreso-contenido">
+                  <strong>{{ persona.nombre }} {{ persona.apellido }}</strong>
+                  <span>DNI {{ formatearDni(persona.dni) }}</span>
+                  <small>{{ persona.ultimoAccesoAt || 'Ingreso sin horario informado' }}</small>
+                </div>
+              </article>
+            </ng-template>
+          </app-carrusel-fade>
+        } @else {
+          <div
+            class="gestion-accesos__estado-vacio"
+            [style.--gestion-accesos-estado-vacio-contraste]="colorBordeEstadoVacio()"
+          >
+            <span>Sin ingresos</span>
+          </div>
+        }
+      </div>
+    </app-card>
+
+    <aside class="gestion-accesos__feed" aria-label="Feed en vivo de accesos">
+      <header>
+        <span aria-hidden="true"></span>
+        <h2>Feed live</h2>
+      </header>
+      <div class="gestion-accesos__feed-contenido">
+        @if (cargandoHistorial()) {
+          <div class="gestion-accesos__feed-carga">
+            <app-load-spinner-blue ariaLabel="Cargando movimientos" />
+          </div>
+        } @else if (!feedLive().length) {
+          <p class="gestion-accesos__estado">Todavía no hay movimientos en este rango.</p>
+        } @else {
+          <ol>
+            @for (acceso of feedLive(); track acceso.accesoUuid ?? $index) {
+              <li [class.gestion-accesos__feed-item--egreso]="acceso.tipo === 'EGRESO'">
+                <span class="gestion-accesos__feed-movimiento">{{
+                  acceso.tipo === 'INGRESO' ? 'IN' : 'OUT'
+                }}</span>
+                <div>
+                  <strong>{{ acceso.nombre }} {{ acceso.apellido }}</strong
+                  ><small>{{ acceso.fecha || 'Sin fecha' }}</small>
+                </div>
+              </li>
+            }
+          </ol>
+        }
+      </div>
+    </aside>
+  </div>
+
+  <app-card
+    class="gestion-accesos__operacion"
+    titulo="Registrar acceso"
+    descripcion="Seleccioná un socio para alternar su ingreso o egreso"
+    [altoImpactoVisual]="true"
+  >
+    @if (errorRegistro()) {
+      <p class="gestion-accesos__error" role="alert">{{ errorRegistro() }}</p>
+    }
+    <section class="gestion-accesos__selector-socio" aria-labelledby="selector-socio-titulo">
+      <form class="gestion-accesos__buscador" (submit)="buscarSocios($event)">
+        <input
+          type="search"
+          placeholder="Nombre, apellido o DNI"
+          [value]="busquedaSocios()"
+          (input)="actualizarBusquedaSocios($event)"
+        />
+        <app-boton tipo="submit" [cargando]="cargandoListadoSocios()">Buscar</app-boton>
+        <app-select
+          etiqueta="Ver"
+          [opciones]="opcionesModoListado"
+          [value]="modoListadoSocios()"
+          (valueChange)="cambiarModoListado($event)"
+        />
+        <app-boton
+          tipo="button"
+          class="gestion-accesos__lector-qr-boton"
+          [colorFondo]="gradienteLectorQr"
+          [cargando]="lectorQrInicializando() || registrando()"
+          [deshabilitado]="lectorQrAbierto()"
+          [soloIcono]="true"
+          aria-label="Escanear carnet QR"
+          aria-haspopup="dialog"
+          [aria-expanded]="lectorQrAbierto()"
+          (accion)="abrirLectorQr()"
+        >
+          <ng-icon name="heroQrCode" aria-hidden="true" [style.color]="colorTextoBotonQr()" />
+        </app-boton>
+      </form>
+      @if (modoListadoSocios() === 'todos' && errorSocios()) {
+        <p class="gestion-accesos__error" role="alert">{{ errorSocios() }}</p>
+      }
+      <app-tabla-responsive
+        [columnas]="columnasSocios"
+        [filas]="filasSocios()"
+        idFila="memberUuid"
+        [acciones]="accionesSocios"
+        [cargando]="cargandoListadoSocios()"
+        [tbody_rows]="5"
+        [mensajeVacio]="
+          modoListadoSocios() === 'todos'
+            ? 'No hay socios para esta búsqueda.'
+            : 'No hay personas dentro del gimnasio.'
+        "
+        (accionFila)="seleccionarSocio($event)"
+      />
+      @if (modoListadoSocios() === 'todos') {
+        <app-paginacion
+          [paginaActual]="paginaSocios()"
+          [totalPaginas]="totalPaginasSocios()"
+          [deshabilitado]="cargandoSocios()"
+          (paginaCambiada)="cambiarPaginaSocios($event)"
+        />
+      }
+    </section>
+  </app-card>
+
+  <app-card
+    class="gestion-accesos__historial"
+    titulo="Historial de accesos"
+    descripcion="Consultá ingresos y egresos por rango de fechas"
+  >
+    <form class="gestion-accesos__filtros" (submit)="$event.preventDefault(); cargarHistorial()">
+      <app-input-fecha
+        etiqueta="Desde"
+        modo="fecha"
+        [ngModel]="desde()"
+        (ngModelChange)="desde.set($event)"
+        [ngModelOptions]="{ standalone: true }"
+      />
+      <app-input-fecha
+        etiqueta="Hasta"
+        modo="fecha"
+        [ngModel]="hasta()"
+        (ngModelChange)="hasta.set($event)"
+        [ngModelOptions]="{ standalone: true }"
+      />
+      <app-boton tipo="submit" [cargando]="cargandoHistorial()">Consultar</app-boton>
+    </form>
+    @if (errorHistorial()) {
+      <p class="gestion-accesos__error" role="alert">{{ errorHistorial() }}</p>
+    }
+    <app-tabla-responsive
+      [columnas]="columnasHistorial"
+      [filas]="historialPaginado()"
+      idFila="uid"
+      [mostrarAcciones]="false"
+      [cargando]="cargandoHistorial()"
+      [tbody_rows]="3"
+      [maxFilasVisibles]="3"
+      mensajeVacio="No hay movimientos en el rango seleccionado."
+    />
+    <app-paginacion
+      [paginaActual]="paginaHistorial()"
+      [totalPaginas]="totalPaginasHistorial()"
+      [deshabilitado]="cargandoHistorial()"
+      (paginaCambiada)="cambiarPaginaHistorial($event)"
+    />
+  </app-card>
+</section>
+
+<app-popup
+  [abierto]="lectorQrAbierto()"
+  titulo="Escanear carnet QR"
+  [mostrarEncabezado]="false"
+  ancho="grande"
+  [mostrarCancelar]="false"
+  [cancelarDeshabilitado]="registrando()"
+  (cancelar)="cerrarLectorQr()"
+>
+  <app-titulo-hero
+    icono="credencial"
+    titulo="Escanear carnet"
+    subtitulo="Leé el QR para registrar el ingreso o egreso de la persona."
+  />
+
+  <app-lector-qr
+    class="gestion-accesos__lector-qr"
+    [activo]="lectorQrActivo()"
+    [intervaloDuplicadosMs]="3000"
+    (contenidoLeido)="procesarCodigoQr($event)"
+    [mostrarIngresoManual]="false"
+    (estadoCambiado)="actualizarEstadoLectorQr($event)"
+  />
+
+  <label class="gestion-accesos__mantener-lector" aria-label="Mantener abierto el lector QR">
+    <span class="gestion-accesos__mantener-lector-titulo">Mantener abierto</span>
+    <input
+      type="checkbox"
+      [checked]="mantenerLectorQrAbierto()"
+      (change)="actualizarMantenerLectorQrAbierto($event)"
+    />
+    <span class="gestion-accesos__mantener-lector-control" aria-hidden="true">
+      <span class="gestion-accesos__mantener-lector-luz"></span>
+    </span>
+  </label>
+
+  @if (registrando()) {
+    <p class="gestion-accesos__lector-qr-estado" role="status" aria-live="polite">
+      Registrando el acceso…
+    </p>
+  }
+  @if (errorRegistro()) {
+    <p class="gestion-accesos__error" role="alert">{{ errorRegistro() }}</p>
+  }
+
+  <app-boton
+    popupAcciones
+    tipo="button"
+    apariencia="texto"
+    [deshabilitado]="registrando()"
+    (accion)="cerrarLectorQr()"
+  >
+    Cerrar
+  </app-boton>
+</app-popup>

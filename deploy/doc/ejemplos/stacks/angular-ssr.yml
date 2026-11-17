@@ -1,0 +1,15 @@
+# Ejemplo: stack angular_ssr (Angular con Server-Side Rendering)
+# Runtime Node en puerto 4000. El servidor SSR debe escuchar en 0.0.0.0 y respetar PORT.
+
+st7:
+  mi-app-ssr:
+    branch: develop
+    port: 9061
+    path: mi-app
+    domain: stg.blueopendata.com
+
+    stack: angular_ssr
+
+    environment: st7
+    composer_file: plantillas/angular-21-node-22-ssr/docker-compose.yml
+    nginx_config: plantillas/angular-21-node-22-ssr/nginx.host-reverse-proxy.conf

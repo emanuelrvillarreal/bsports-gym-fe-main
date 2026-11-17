@@ -1,0 +1,100 @@
+@let e = equipo();
+<div class="vista-equipo">
+  <dl class="vista-equipo__ficha">
+    <div><dt>Disciplina</dt><dd>{{ e.disciplina }}</dd></div>
+    @if (e.categoria) { <div><dt>Categoría</dt><dd>{{ e.categoria }}</dd></div> }
+    @if (e.temporada) { <div><dt>Temporada</dt><dd>{{ e.temporada }}</dd></div> }
+    @if (e.actividad) { <div><dt>Entrena en</dt><dd>{{ e.actividad }}</dd></div> }
+    <div><dt>Entrenadores</dt><dd>{{ entrenadores() || 'Sin asignar' }}</dd></div>
+    @if (!e.activo) { <div><dt>Estado</dt><dd>Inactivo</dd></div> }
+  </dl>
+  @if (e.descripcion) { <p class="vista-equipo__texto">{{ e.descripcion }}</p> }
+
+  <section aria-label="Plantel actual">
+    <h4>Plantel actual ({{ e.plantel.length }})</h4>
+    @if (!e.plantel.length) {
+      <p class="vista-equipo__vacio">Todavía no hay jugadores en el plantel.</p>
+    } @else {
+      <div class="vista-equipo__scroll">
+        <table class="vista-equipo__tabla">
+          <thead>
+            <tr>
+              <th scope="col">N.º</th>
+              <th scope="col">Jugador</th>
+              <th scope="col">Posición</th>
+              <th scope="col" title="Partidos con estadísticas">PJ</th>
+              <th scope="col" title="Tantos (goles, puntos…)">Tantos</th>
+              <th scope="col" title="Asistencias">Asist.</th>
+              <th scope="col" title="Amonestaciones">Amon.</th>
+              <th scope="col" title="Expulsiones">Exp.</th>
+              <th scope="col" title="Figura del partido">Fig.</th>
+              @if (editable()) { <th scope="col"><span class="visualmente-oculto">Acciones</span></th> }
+            </tr>
+          </thead>
+          <tbody>
+            @for (j of e.plantel; track j.uuid) {
+              <tr>
+                <td class="vista-equipo__dorsal">{{ j.dorsal ?? '—' }}</td>
+                <td>
+                  <strong>{{ j.apellido }}, {{ j.nombre }}</strong>
+                  @if (j.capitan) { <span class="vista-equipo__capitan" title="Capitán">C</span> }
+                  <small>Desde {{ fecha(j.fechaAlta) }}</small>
+                </td>
+                <td>{{ j.posicion || '—' }}</td>
+                <td>{{ j.partidos }}</td>
+                <td><strong>{{ j.tantos }}</strong></td>
+                <td>{{ j.asistencias }}</td>
+                <td>{{ j.amonestaciones }}</td>
+                <td>{{ j.expulsiones }}</td>
+                <td>{{ j.figuras }}</td>
+                @if (editable()) {
+                  <td class="vista-equipo__acciones">
+                    <app-boton apariencia="texto" (accion)="editarJugador.emit(j)">Editar</app-boton>
+                    <app-boton apariencia="texto" (accion)="paseJugador.emit(j)">Pase</app-boton>
+                    <app-boton apariencia="texto" (accion)="bajaJugador.emit(j)">Baja</app-boton>
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+
+  @if (e.historial.length) {
+    <section aria-label="Plantel histórico">
+      <button type="button" class="vista-equipo__plegar" [attr.aria-expanded]="verHistorial()" (click)="verHistorial.set(!verHistorial())">
+        {{ verHistorial() ? '▾' : '▸' }} Plantel histórico ({{ e.historial.length }})
+      </button>
+      @if (verHistorial()) {
+        <ul class="vista-equipo__historial" role="list">
+          @for (j of e.historial; track j.uuid) {
+            <li>
+              <strong>{{ j.apellido }}, {{ j.nombre }}</strong>
+              <span>{{ fecha(j.fechaAlta) }} → {{ fecha(j.fechaBaja) }}{{ j.motivoBaja ? ' · ' + j.motivoBaja : '' }}</span>
+              <small>{{ j.partidos }} partidos · {{ j.tantos }} tantos</small>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  }
+
+  <section aria-label="Torneos">
+    <h4>Torneos ({{ e.torneos.length }})</h4>
+    @if (!e.torneos.length) {
+      <p class="vista-equipo__vacio">No participa de ningún torneo.</p>
+    }
+    <ul class="vista-equipo__torneos" role="list">
+      @for (t of e.torneos; track t.uuid) {
+        <li>
+          <button type="button" (click)="verTorneo.emit(t.uuid)">
+            <strong>{{ t.nombre }}</strong>
+            <span>{{ estadoTorneo(t.estado) }} · {{ t.partidosJugados }}/{{ t.partidos }} partidos jugados</span>
+          </button>
+        </li>
+      }
+    </ul>
+  </section>
+</div>

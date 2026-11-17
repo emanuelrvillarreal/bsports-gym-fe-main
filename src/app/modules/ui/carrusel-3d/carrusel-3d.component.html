@@ -1,0 +1,134 @@
+<section
+  class="carrusel-3d"
+  [ngClass]="[
+    modoMovil() === 'three-d' ? 'carrusel-3d--mobile-3d' : 'carrusel-3d--mobile-fallback',
+    altoRendimiento() ? 'carrusel-3d--alto-rendimiento' : '',
+  ]"
+  [style.--carrusel-3d-height]="altura()"
+  [style.--carrusel-3d-radius]="radio()"
+  [style.--carrusel-3d-slide-width]="anchoSlide()"
+  [style.--carrusel-3d-perspective]="perspectiva()"
+  [attr.aria-label]="ariaLabel()"
+  (pointerenter)="alEntrar()"
+  (pointerleave)="alSalir()"
+>
+  @if (!tieneItems()) {
+    <p class="carrusel-3d__vacio">No hay elementos para mostrar.</p>
+  } @else if (altoRendimiento()) {
+    <div class="carrusel-3d__lite" role="list">
+      @for (slide of slidesVisibles(); track slide.index) {
+        <article
+          class="carrusel-3d__lite-slide"
+          role="listitem"
+          (click)="seleccionarItemPlano(slide.item)"
+        >
+          @if (plantillaItem(); as plantilla) {
+            <ng-container
+              [ngTemplateOutlet]="plantilla.templateRef"
+              [ngTemplateOutletContext]="{
+                $implicit: slide.item,
+                index: slide.index,
+                active: true,
+                distance: 0,
+              }"
+            />
+          }
+        </article>
+      }
+    </div>
+  } @else {
+    <div class="carrusel-3d__viewport">
+      @if (mostrarControles() && tieneMultiples()) {
+        <app-boton
+          tipo="button"
+          apariencia="texto"
+          class="carrusel-3d__control carrusel-3d__control--prev"
+          aria-label="Elemento anterior"
+          (accion)="retroceder()"
+        >
+          <ng-icon name="heroChevronLeft" />
+        </app-boton>
+      }
+
+      <div
+        class="carrusel-3d__scene"
+        (pointerdown)="iniciarArrastre($event)"
+        (pointermove)="actualizarArrastre($event)"
+      >
+        <div class="carrusel-3d__ring" [style.transform]="rotacionEscena()">
+          @for (slide of slidesVisibles(); track slide.index) {
+            <article
+              class="carrusel-3d__slide"
+              [ngClass]="[
+                obtenerClaseProfundidad(slide.distance),
+                slide.active ? 'carrusel-3d__slide--activa' : '',
+              ]"
+              [style.transform]="obtenerTransformSlide(slide.angle)"
+              (click)="manejarClickSlide(slide.index, slide.active, slide.item, $event)"
+            >
+              @if (plantillaItem(); as plantilla) {
+                <ng-container
+                  [ngTemplateOutlet]="plantilla.templateRef"
+                  [ngTemplateOutletContext]="{
+                    $implicit: slide.item,
+                    index: slide.index,
+                    active: slide.active,
+                    distance: slide.distance,
+                  }"
+                />
+              }
+            </article>
+          }
+        </div>
+      </div>
+
+      @if (mostrarControles() && tieneMultiples()) {
+        <app-boton
+          tipo="button"
+          apariencia="texto"
+          class="carrusel-3d__control carrusel-3d__control--next"
+          aria-label="Siguiente elemento"
+          (accion)="avanzar()"
+        >
+          <ng-icon name="heroChevronRight" />
+        </app-boton>
+      }
+
+      @if (tieneMultiples()) {
+        <div class="carrusel-3d__dots" aria-label="Indicadores del carrusel">
+          @for (slide of slides(); track slide.index) {
+            <app-boton
+              tipo="button"
+              apariencia="texto"
+              class="carrusel-3d__dot"
+              [class.carrusel-3d__dot--activa]="slide.active"
+              [aria-label]="'Ir al elemento ' + (slide.index + 1)"
+              (accion)="irA(slide.index)"
+            ></app-boton>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="carrusel-3d__mobile">
+      @for (slide of slidesVisibles(); track slide.index) {
+        <article
+          class="carrusel-3d__mobile-slide"
+          [class.carrusel-3d__mobile-slide--activa]="slide.active"
+        >
+          @if (plantillaItem(); as plantilla) {
+            <ng-container
+              [ngTemplateOutlet]="plantilla.templateRef"
+              [ngTemplateOutletContext]="{
+                $implicit: slide.item,
+                index: slide.index,
+                active: slide.active,
+                distance: slide.distance,
+              }"
+            />
+          }
+        </article>
+      }
+    </div>
+  }
+</section>

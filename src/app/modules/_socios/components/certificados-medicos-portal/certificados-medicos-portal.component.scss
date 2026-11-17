@@ -1,0 +1,207 @@
+:host {
+  display: block;
+}
+
+.certificados-medicos {
+  &__estado,
+  &__error {
+    margin: clamp(0.35rem, 1.6vw, 0.55rem) 0 0;
+  }
+
+  &__error,
+  &__estado--vencido {
+    color: var(--semantic-danger);
+  }
+
+  &__historial {
+    display: grid;
+    gap: clamp(0.4rem, 1.8vw, 0.65rem);
+    margin-top: clamp(0.75rem, 3vw, 1rem);
+
+    h3,
+    p {
+      margin: 0;
+    }
+  }
+
+  &__card {
+    --certificado-radio: clamp(0.75rem, 3.5vw, 1.15rem);
+
+    position: relative;
+    display: grid;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 32rem;
+    min-width: 0;
+    min-height: min(12rem, 52svh);
+    gap: clamp(0.55rem, 2.5vw, 0.85rem);
+    padding: clamp(0.75rem, 3.5vw, 1.2rem);
+    padding-right: clamp(4rem, 16vw, 4.8rem);
+    text-align: left;
+    border: 2px solid color-mix(in srgb, var(--certificado-borde) 50%, transparent);
+    border-radius: var(--certificado-radio);
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--certificado-color) 24%, var(--app-surface)) 0%,
+      color-mix(in srgb, var(--certificado-color) 7%, var(--app-surface)) 100%
+    );
+
+    &--primaria {
+      --certificado-color: var(--color-primario, var(--app-accent));
+      --certificado-borde: var(--color-secundario, var(--app-secondary));
+    }
+
+    &--secundaria {
+      --certificado-color: var(--color-secundario, var(--app-secondary));
+      --certificado-borde: var(--color-primario, var(--app-accent));
+    }
+
+    h4 {
+      margin: 0;
+      color: var(--app-text);
+      font-size: clamp(1.05rem, 4.7vw, 1.35rem);
+      display: -webkit-box;
+      overflow: hidden;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow-wrap: anywhere;
+    }
+
+    dl {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(0.4rem, 2vw, 0.65rem);
+      margin: 0;
+    }
+
+    dl div {
+      padding: clamp(0.55rem, 2.8vw, 0.75rem);
+      border: 1px solid color-mix(in srgb, var(--certificado-borde) 56%, var(--app-surface-border));
+      border-radius: clamp(0.5rem, 2.4vw, 0.7rem);
+      background: color-mix(in srgb, var(--app-surface-strong) 72%, transparent);
+    }
+
+    dt {
+      color: var(--app-text-soft);
+      font-size: clamp(0.67rem, 2.9vw, 0.75rem);
+      font-weight: 800;
+      letter-spacing: normal;
+      text-transform: none;
+    }
+
+    dd {
+      margin: 0.15rem 0 0;
+      color: var(--app-text);
+      font-weight: 800;
+    }
+
+    app-boton {
+      --app-boton-min-height: 100%;
+      --app-boton-padding: 0;
+      --app-boton-radio: 0 var(--certificado-radio) var(--certificado-radio) 0;
+      --app-boton-fondo-decorado: linear-gradient(
+        155deg,
+        color-mix(in srgb, var(--certificado-borde) 86%, white) 0%,
+        var(--certificado-borde) 100%
+      );
+      --app-boton-fondo-decorado-interaccion: linear-gradient(
+        155deg,
+        color-mix(in srgb, var(--certificado-borde) 76%, white) 0%,
+        color-mix(in srgb, var(--certificado-borde) 92%, var(--app-text)) 100%
+      );
+      --app-boton-sombra:
+        inset 0 1px 0 rgb(255 255 255 / 32%), inset 0 -0.55rem 1rem rgb(0 0 0 / 16%),
+        0 0.3rem 0.8rem rgb(0 0 0 / 13%);
+
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: clamp(3.25rem, 15vw, 4rem);
+      height: auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      ng-icon {
+        width: clamp(1.9rem, 8vw, 2.35rem);
+        height: clamp(1.9rem, 8vw, 2.35rem);
+        font-size: clamp(1.9rem, 8vw, 2.35rem);
+      }
+    }
+  }
+
+  &__card-fecha {
+    color: var(--certificado-color);
+    font-size: clamp(0.68rem, 3vw, 0.78rem);
+    font-weight: 900;
+    letter-spacing: normal;
+    text-transform: none;
+  }
+
+  &__chip-estado {
+    --certificado-estado-color: var(--semantic-warning, #f59e0b);
+
+    display: inline-flex;
+    width: fit-content;
+    min-height: 1.8rem;
+    align-items: center;
+    padding: 0.2rem 0.65rem;
+    color: var(--certificado-estado-color);
+    background: color-mix(in srgb, var(--certificado-estado-color) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--certificado-estado-color) 34%, transparent);
+    border-radius: 999px;
+    font-size: clamp(0.7rem, 3.2vw, 0.8rem);
+    font-weight: 800;
+    letter-spacing: normal;
+    text-transform: none;
+
+    &--confirmado {
+      --certificado-estado-color: var(--semantic-success, #22c55e);
+    }
+
+    &--denegado,
+    &--vencido {
+      --certificado-estado-color: var(--semantic-danger, #ef4444);
+    }
+  }
+
+  &__archivo-no-disponible {
+    color: var(--app-text-soft);
+    font-size: clamp(0.78rem, 3.5vw, 0.9rem);
+  }
+}
+
+@media (max-width: 30rem) {
+  .certificados-medicos__card dl {
+    grid-template-columns: 1fr;
+  }
+}
+
+.certificados-medicos__aviso {
+  display: grid;
+  gap: 0.2rem;
+  margin-bottom: 1rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--app-surface-border);
+  border-left-width: 4px;
+  border-radius: 0.7rem;
+  background: var(--app-surface);
+  color: var(--app-text);
+
+  &[data-tono='ok'] {
+    border-color: var(--semantic-success, #15803d);
+  }
+
+  &[data-tono='aviso'] {
+    border-color: var(--semantic-warning, #b45309);
+  }
+
+  &[data-tono='info'] {
+    border-color: var(--app-accent, #2563eb);
+  }
+
+  &[data-tono='error'] {
+    border-color: var(--semantic-danger, #dc2626);
+  }
+}

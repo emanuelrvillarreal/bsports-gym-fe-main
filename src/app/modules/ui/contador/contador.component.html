@@ -1,0 +1,12 @@
+@if (visible()) {
+  <div
+    class="contador"
+    [class]="'contador contador--' + estado()"
+    [attr.aria-label]="cantidad() + ' personas actualmente en cancha'"
+  >
+    <span class="contador__testigo" aria-hidden="true"></span>
+    <ng-icon class="contador__icono" name="heroUsers" aria-hidden="true" />
+    <strong class="contador__valor">{{ cantidad() }}</strong>
+    <span class="contador__texto">en el gimnasio</span>
+  </div>
+}

@@ -1,0 +1,263 @@
+<app-card titulo="Cuotas" descripcion="Buscá, consultá y registrá cobros de cuotas.">
+  <section class="filtros" aria-label="Filtros de cuotas">
+    <div class="filtros__busqueda">
+      <label
+        ><span>Buscar</span
+        ><input
+          placeholder="Nombre y apellido, DNI o N.º de socio"
+          [value]="busqueda()"
+          (input)="busqueda.set($any($event.target).value)"
+          (keydown.enter)="filtrar()"
+      /></label>
+      <app-boton (accion)="filtrar()">Aplicar</app-boton>
+    </div>
+    <app-select
+      etiqueta="Estado"
+      [opciones]="opcionesEstado"
+      [value]="estado()"
+      (valueChange)="cambiarEstado($event)"
+    />
+    <app-select
+      etiqueta="Tipo"
+      [opciones]="opcionesTipo"
+      [value]="tipo()"
+      (valueChange)="cambiarTipo($event)"
+    />
+  </section>
+
+  @if (error()) {
+    <p class="mensaje mensaje--error" role="alert">{{ error() }}</p>
+  }
+  <ng-template #accionesCuota let-cuota>
+    <div class="acciones-cuota">
+      <app-boton
+        apariencia="texto"
+        [soloIcono]="true"
+        class="tabla-responsive__action-btn tabla-responsive__action-btn--neutral"
+        data-action-text="Ver detalle"
+        aria-label="Ver detalle"
+        (accion)="cargarDetalle(cuota.cuotaUuid)"
+      >
+        <ng-icon name="heroEye" aria-hidden="true" />
+      </app-boton>
+      @if (cuota.estado === 'PENDIENTE' || cuota.estado === 'VENCIDA') {
+        <app-boton
+          class="acciones-cuota__cobrar"
+          aria-label="Cobrar esta cuota"
+          (accion)="abrirCobroCuota(cuota, wizardCobro)"
+        >
+          <ng-icon name="heroBanknotes" aria-hidden="true" />
+          <span>Cobrar</span>
+        </app-boton>
+      } @else if (cuota.estado === 'PAGADA') {
+        <app-boton
+          apariencia="texto"
+          class="tabla-responsive__action-btn tabla-responsive__action-btn--success acciones-cuota__pago acciones-cuota__pago--pagada"
+          data-action-text="Pago"
+          [deshabilitado]="true"
+          ariaLabel="Cuota pagada"
+        >
+          <span>Pago</span>
+        </app-boton>
+      }
+      @if (cuota.estado === 'VENCIDA' && puedeNotificarMorosos()) {
+        <app-boton
+          apariencia="texto"
+          [soloIcono]="true"
+          class="tabla-responsive__action-btn tabla-responsive__action-btn--warning"
+          data-action-text="Notificar vencimiento"
+          aria-label="Notificar vencimiento"
+          (accion)="abrirNotificacion(cuota)"
+        >
+          <ng-icon name="heroEnvelope" aria-hidden="true" />
+        </app-boton>
+      }
+      @if (cuota.estado === 'PENDIENTE' || cuota.estado === 'VENCIDA') {
+        <app-boton
+          apariencia="texto"
+          [soloIcono]="true"
+          class="tabla-responsive__action-btn tabla-responsive__action-btn--danger"
+          data-action-text="Anular cuota"
+          aria-label="Anular cuota"
+          (accion)="abrirAnulacion(cuota)"
+        >
+          <ng-icon name="heroTrash" aria-hidden="true" />
+        </app-boton>
+      }
+    </div>
+  </ng-template>
+  <app-tabla-responsive
+    [columnas]="columnas"
+    [filas]="cuotas()"
+    [plantillaAcciones]="accionesCuota"
+    [accionesCabecera]="accionesCabecera"
+    [tr_input_conmutador]="false"
+    [cargando]="cargando()"
+    [maxFilasVisibles]="5"
+    idFila="cuotaUuid"
+    (accionCabecera)="manejarAccionCabecera($event)"
+  />
+  <app-paginacion
+    [paginaActual]="pagina()"
+    [totalPaginas]="totalPaginas()"
+    [deshabilitado]="cargando()"
+    (paginaCambiada)="cambiarPagina($event)"
+  />
+</app-card>
+
+<app-popup
+  [abierto]="!!detalle()"
+  titulo="Detalle de cuota"
+  [mostrarEncabezado]="false"
+  aparienciaCancelar="solido"
+  (cancelar)="detalle.set(null)"
+>
+  @if (detalle(); as cuota) {
+    <section class="detalle">
+      <app-titulo-hero
+        icono="tesoreria"
+        titulo="Detalle de cuota"
+        subtitulo="Información de la cuota seleccionada."
+      />
+      <dl>
+        <div>
+          <dt>Persona</dt>
+          <dd>{{ cuota.personaApellido }}, {{ cuota.personaNombre }}</dd>
+        </div>
+        <div>
+          <dt>Concepto</dt>
+          <dd>{{ cuota.concepto }}</dd>
+        </div>
+        <div>
+          <dt>Monto</dt>
+          <dd class="detalle__importe">
+            @if (montoFinalDifiere(cuota)) {
+              <del>{{ formatearMonto(cuota.monto) }}</del>
+              <strong>{{ formatearMonto(cuota.montoFinal!) }}</strong>
+            } @else {
+              {{ formatearMonto(cuota.monto) }}
+            }
+          </dd>
+        </div>
+        @if (cuota.recargo) {
+          <div>
+            <dt>Recargo por pago fuera de término</dt>
+            <dd>{{ formatearMonto(cuota.recargo) }}</dd>
+          </div>
+        }
+        <div>
+          <dt>Estado</dt>
+          <dd>
+            <span
+              class="detalle__estado"
+              [class.detalle__estado--pendiente]="cuota.estado === 'PENDIENTE'"
+              [class.detalle__estado--vencida]="cuota.estado === 'VENCIDA'"
+              [class.detalle__estado--inactivo]="cuota.estado === 'ANULADA'"
+              >{{ formatearEstado(cuota.estado) }}</span
+            >
+          </dd>
+        </div>
+        <div>
+          <dt>Fecha de generación</dt>
+          <dd>{{ cuota.fechaGeneracion }}</dd>
+        </div>
+        <div>
+          <dt>Vencimiento</dt>
+          <dd>{{ cuota.vencimiento }}</dd>
+        </div>
+        <div>
+          <dt>Origen</dt>
+          <dd>{{ cuota.origen }}</dd>
+        </div>
+        @if (cuota.estado === 'ANULADA') {
+          <div>
+            <dt>Anulada por</dt>
+            <dd>{{ formatearAnuladaPor(cuota) }}</dd>
+          </div>
+          <div>
+            <dt>Motivo de anulación</dt>
+            <dd>{{ cuota.anuladaMotivo || 'Sin información' }}</dd>
+          </div>
+          <div>
+            <dt>Fecha de anulación</dt>
+            <dd>{{ cuota.anuladaAt || 'Sin información' }}</dd>
+          </div>
+        }
+      </dl>
+    </section>
+  }
+</app-popup>
+
+<app-popup
+  [abierto]="!!cuotaNotificacion()"
+  titulo="Recordatorio de cuota vencida"
+  [mostrarEncabezado]="false"
+  ancho="grande"
+  aparienciaCancelar="solido"
+  (cancelar)="cerrarNotificacion()"
+>
+  @if (cuotaNotificacion(); as cuota) {
+    <app-titulo-hero
+      icono="tesoreria"
+      titulo="Recordatorio de cuota vencida"
+      subtitulo="Revisá el mensaje antes de abrir el canal de contacto."
+    />
+    <app-formulario-notificacion-mora
+      [cuota]="{
+        titular: cuota.titular,
+        titularEmail: cuota.titularEmail,
+        titularTelefono: cuota.titularTelefono,
+        concepto: cuota.concepto,
+        monto: formatearMonto(cuota.monto),
+        vencimiento: cuota.vencimiento
+      }"
+      [empresa]="contactoEmpresa()"
+      (enviado)="abrirCanalNotificacion($event)"
+    />
+  }
+</app-popup>
+
+<app-popup-cobro-cuotas
+  #wizardCobro
+  [abierto]="popupNuevoCobroAbierto()"
+  (cerrar)="cerrarNuevoCobro()"
+  (cobrosActualizados)="actualizarDespuesDeCobro()"
+/>
+
+<app-popup
+  [abierto]="!!cuotaAnular()"
+  titulo="Anular cuota"
+  [mostrarEncabezado]="false"
+  [cancelarDeshabilitado]="procesando()"
+  (cancelar)="cerrarAnulacion()"
+>
+  @if (cuotaAnular(); as cuota) {
+    <app-titulo-hero
+      icono="tesoreria"
+      titulo="Anular cuota"
+      subtitulo="Indicá el motivo de la anulación antes de confirmar."
+    />
+    @if (cuota.tipo === 'ACTIVIDAD' && bajaActividad() === null) {
+      <div class="anulacion-opciones" role="group" aria-label="Qué hacer con la inscripción">
+        <p>Esta cuota es de una actividad. ¿Qué querés hacer?</p>
+        <button type="button" class="anulacion-opciones__opcion" (click)="bajaActividad.set(false)">
+          <strong>Solo anular la cuota</strong>
+          <span>Se cargó por error. {{ cuota.personaNombre }} sigue inscripto en la actividad.</span>
+        </button>
+        <button type="button" class="anulacion-opciones__opcion" (click)="bajaActividad.set(true)">
+          <strong>Anular la cuota y dar de baja de la actividad</strong>
+          <span>{{ cuota.personaNombre }} deja de estar inscripto y no se le generan más cuotas de esa actividad.</span>
+        </button>
+      </div>
+    } @else {
+      @if (cuota.tipo === 'ACTIVIDAD') {
+        <p class="anulacion-elegida">
+          {{ bajaActividad() ? 'Se anula la cuota y se da de baja de la actividad.' : 'Se anula solo la cuota; sigue inscripto.' }}
+          <button type="button" class="anulacion-elegida__cambiar" (click)="bajaActividad.set(null)">Cambiar</button>
+        </p>
+      }
+      <app-formulario-anulacion [enviando]="procesando()" (enviado)="anularCuota($event)" />
+    }
+  }
+</app-popup>
+

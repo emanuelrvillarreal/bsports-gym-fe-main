@@ -1,0 +1,21 @@
+<form
+  id="formulario-inscripcion-actividad"
+  class="formulario-inscripcion-actividad"
+  appValidacionFormulario
+  (submit)="$event.preventDefault(); enviar()"
+>
+  <small
+    class="formulario-inscripcion-actividad__error"
+    [class.formulario-inscripcion-actividad__error--visible]="errorVisible()"
+    role="alert"
+    >{{ mensajeError() }}</small
+  >
+  <app-select
+    [attr.data-app-invalido]="!memberUuid().trim() ? 'true' : null"
+    etiqueta="Socio activo"
+    [opciones]="opcionesSocios()"
+    [value]="memberUuid()"
+    placeholder="Seleccionar socio"
+    (valueChange)="cambiarSocio($event)"
+  />
+</form>

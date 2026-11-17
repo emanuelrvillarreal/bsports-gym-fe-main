@@ -1,0 +1,24 @@
+<form
+  id="formulario-rechazo-solicitud"
+  class="formulario-rechazo-solicitud"
+  appValidacionFormulario
+  (submit)="$event.preventDefault(); enviar()"
+>
+  <small
+    class="formulario-rechazo-solicitud__error"
+    [class.formulario-rechazo-solicitud__error--visible]="errorVisible()"
+    role="alert"
+    >{{ mensajeError() }}</small
+  >
+
+  <label>
+    <span>Motivo opcional</span>
+    <textarea
+      id="rechazo-solicitud-motivo"
+      rows="4"
+      maxlength="512"
+      [value]="motivo()"
+      (input)="actualizarMotivo($event)"
+    ></textarea>
+  </label>
+</form>

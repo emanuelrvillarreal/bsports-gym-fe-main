@@ -1,0 +1,698 @@
+:host {
+  display: block;
+  // El calendario puede ocupar menos espacio que la ventana cuando el navbar está abierto.
+  // Por eso sus cortes responsivos se calculan sobre su contenedor real.
+  container-type: inline-size;
+}
+
+.calendario {
+  --calendario-shadow: 0 24px 64px rgb(0 0 0 / 22%);
+  --calendario-accent: var(--color-terciario, var(--app-accent));
+  --calendario-estado-ok: var(--semantic-success, #22c55e);
+  display: grid;
+  gap: 1rem;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  &__copy {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  &__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--color-terciario);
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: normal;
+    text-transform: none;
+  }
+
+  h3 {
+    margin: 0;
+    color: var(--app-text);
+    font-size: clamp(1.35rem, 1rem + 1vw, 2rem);
+    text-transform: capitalize;
+  }
+
+  &__controls {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+  }
+
+  &__week-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid color-mix(in srgb, var(--app-surface-border) 72%, transparent);
+    border-radius: 1rem;
+    background: color-mix(in srgb, var(--app-surface) 88%, transparent);
+
+    strong {
+      min-width: 0;
+      color: var(--app-text);
+      font-size: 0.86rem;
+      font-weight: 800;
+      text-align: center;
+    }
+  }
+
+  &__nav,
+  &__close {
+    --app-boton-min-height: 100%;
+    --app-boton-padding: 0;
+    --app-boton-radio: 1rem;
+    --app-boton-fondo-texto-interaccion: transparent;
+    width: 2.8rem;
+    height: 2.8rem;
+    display: grid;
+    place-items: center;
+    border: 1px solid color-mix(in srgb, var(--app-surface-border) 72%, transparent);
+    border-radius: 1rem;
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--color-primario) 16%, var(--app-surface)),
+        color-mix(in srgb, var(--color-terciario) 12%, var(--app-surface))
+      );
+    color: var(--app-text);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    transition:
+      transform 160ms ease,
+      border-color 160ms ease,
+      background 160ms ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      border-color: color-mix(in srgb, var(--color-primario) 45%, var(--app-surface-border));
+    }
+
+    &:disabled {
+      opacity: 0.42;
+      cursor: not-allowed;
+      color: color-mix(in srgb, var(--app-text-soft) 72%, transparent);
+      border-color: color-mix(in srgb, var(--app-surface-border) 42%, transparent);
+      background:
+        linear-gradient(
+          135deg,
+          color-mix(in srgb, var(--app-surface) 94%, transparent),
+          color-mix(in srgb, var(--app-surface-border) 18%, var(--app-surface))
+        );
+      box-shadow: none;
+      transform: none;
+      filter: saturate(0.35);
+    }
+  }
+
+  &__nav--week {
+    --app-boton-radio: 0.85rem;
+    width: 2.35rem;
+    height: 2.35rem;
+    border-radius: 0.85rem;
+    flex: 0 0 auto;
+  }
+
+  &__weekdays,
+  &__grid {
+    display: grid;
+    grid-template-columns: var(--calendario-columnas);
+  }
+
+  &__cuerpo {
+    min-width: 0;
+
+    &--mensual {
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      padding-bottom: 0.35rem;
+      scrollbar-width: thin;
+      scrollbar-color: var(--app-surface-border) transparent;
+
+      .calendario__weekdays,
+      .calendario__grid {
+        // Evita que las siete columnas se compriman al abrir el navbar.
+        min-width: 72rem;
+      }
+    }
+  }
+
+  &__weekdays {
+    gap: 0.65rem;
+
+    span {
+      padding: 0 0.3rem;
+      color: var(--app-text-soft);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-align: left;
+      text-transform: none;
+      letter-spacing: normal;
+    }
+  }
+
+  &__grid {
+    gap: 0.65rem;
+  }
+
+  &__cargando {
+    display: grid;
+    min-height: 12rem;
+    place-items: center;
+
+    app-load-spinner-blue {
+      width: 5rem;
+    }
+  }
+
+  &__day--outside {
+    opacity: 0.48;
+
+    .calendario__day-label {
+      background: color-mix(in srgb, #9ca3af 18%, var(--app-surface-strong));
+      color: color-mix(in srgb, #e5e7eb 78%, var(--app-text));
+    }
+
+    .calendario__pill {
+      background: color-mix(in srgb, #6b7280 14%, var(--app-surface-strong));
+      border-color: color-mix(in srgb, #94a3b8 28%, var(--app-surface-border));
+
+      strong {
+        color: color-mix(in srgb, #d1d5db 70%, var(--color-secundario));
+      }
+
+      span {
+        color: color-mix(in srgb, #e5e7eb 65%, var(--app-text));
+      }
+    }
+  }
+
+  // Las superficies clickeables se dibujan en el botón nativo reutilizable. Así el
+  // área visible y el área táctil coinciden, incluso en la vista semanal.
+  &__day {
+    --app-boton-min-height: 9.75rem;
+    --app-boton-padding: 0.95rem;
+    --app-boton-radio: 1.35rem;
+    --app-boton-borde: 1px solid color-mix(in srgb, var(--app-surface-border) 70%, transparent);
+    --app-boton-color-texto-texto: var(--app-text);
+    --app-boton-fondo-texto:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--app-surface) 94%, transparent) 0%,
+        color-mix(in srgb, var(--color-terciario) 6%, var(--app-surface)) 100%
+      );
+    --app-boton-fondo-texto-interaccion:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--color-primario) 13%, var(--app-surface)) 0%,
+        color-mix(in srgb, var(--color-terciario) 10%, var(--app-surface)) 100%
+      );
+    min-height: 0;
+    display: block;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    text-align: left;
+
+    &:hover {
+      border: 0;
+      box-shadow: none;
+    }
+  }
+
+  &__day--outside {
+    --app-boton-borde: 1px solid color-mix(in srgb, #94a3b8 40%, var(--app-surface-border));
+    --app-boton-fondo-texto:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, #9ca3af 16%, var(--app-surface)) 0%,
+        color-mix(in srgb, #6b7280 18%, var(--app-surface)) 100%
+      );
+    --app-boton-fondo-texto-interaccion: var(--app-boton-fondo-texto);
+    --app-boton-color-texto-texto: color-mix(in srgb, #cbd5e1 72%, var(--app-text-soft));
+  }
+
+  &__day--today {
+    // Conserva el espacio del borde original, pero deja que se vea únicamente el gradiente.
+    --app-boton-borde: 1px solid transparent;
+    --app-boton-sombra: none;
+    position: relative;
+    isolation: isolate;
+
+    &::before {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      content: '';
+      box-sizing: border-box;
+      border-radius: 1.35rem;
+      padding: 4px;
+      --calendario-dia-angulo: 0deg;
+      background: conic-gradient(
+        from var(--calendario-dia-angulo),
+        var(--color-primario, var(--app-accent)),
+        var(--color-secundario, var(--app-accent)),
+        var(--color-primario, var(--app-accent))
+      );
+      pointer-events: none;
+      -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+      mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      animation:
+        calendario-dia-gradiente 4.5s linear infinite,
+        calendario-dia-pulso 2.2s ease-in-out infinite;
+    }
+  }
+
+  &__day--busy {
+    --app-boton-fondo-texto:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--color-primario) 18%, var(--app-surface)) 0%,
+        color-mix(in srgb, var(--color-terciario) 12%, var(--app-surface)) 100%
+      );
+    --app-boton-fondo-texto-interaccion: var(--app-boton-fondo-texto);
+  }
+
+  &__day--stacked {
+    --app-boton-borde: 1px solid color-mix(in srgb, var(--color-terciario) 46%, var(--app-surface-border));
+  }
+
+  &__day-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.8rem;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  &__day-label {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.25rem;
+    min-width: 0;
+    max-width: 100%;
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--app-surface-strong) 76%, transparent);
+    color: var(--app-text);
+    font-size: 0.8rem;
+    font-weight: 800;
+    line-height: 1.1;
+    text-transform: capitalize;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  &__day-count {
+    flex: 0 0 auto;
+    min-width: 2rem;
+    padding: 0.24rem 0.55rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--color-primario), var(--color-secundario));
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-align: center;
+  }
+
+  &__day-body {
+    display: grid;
+    gap: 0.5rem;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  &__pill {
+    display: grid;
+    gap: 0.12rem;
+    box-sizing: border-box;
+    min-width: 0;
+    max-width: 100%;
+    padding: 0.65rem 0.75rem;
+    overflow: hidden;
+    border-radius: 1rem;
+    background: color-mix(in srgb, var(--app-surface-strong) 80%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-terciario) 26%, var(--app-surface-border));
+
+    strong {
+      min-width: 0;
+      color: var(--color-secundario);
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: normal;
+      text-transform: none;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    span {
+      display: -webkit-box;
+      min-width: 0;
+      overflow: hidden;
+      color: var(--app-text);
+      font-size: 0.8rem;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+  }
+
+  &__more,
+  &__empty-slot {
+    color: var(--app-text-soft);
+    font-size: 0.85rem;
+  }
+
+  &__blank-state {
+    padding: 1.1rem 1.2rem;
+    border: 1px dashed color-mix(in srgb, var(--color-terciario) 36%, var(--app-surface-border));
+    border-radius: 1.25rem;
+    background: color-mix(in srgb, var(--app-surface) 88%, transparent);
+
+    strong {
+      display: block;
+      margin-bottom: 0.2rem;
+      color: var(--app-text);
+    }
+
+    p {
+      margin: 0;
+      color: var(--app-text-soft);
+    }
+  }
+
+  &__next-activity {
+    display: grid;
+    gap: 0.25rem;
+    margin-top: 0.9rem;
+    padding: 0.8rem 0.9rem;
+    border: 1px solid color-mix(in srgb, var(--color-terciario) 32%, var(--app-surface-border));
+    border-radius: 0.9rem;
+    background: color-mix(in srgb, var(--color-terciario) 8%, var(--app-surface));
+
+    span {
+      color: var(--color-terciario);
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: normal;
+      text-transform: none;
+    }
+
+    strong {
+      margin: 0;
+      color: var(--app-text);
+    }
+
+    p {
+      color: var(--app-text-soft);
+      font-size: 0.82rem;
+    }
+  }
+
+  &__overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 120;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background:
+      radial-gradient(circle at top, rgb(255 255 255 / 6%), transparent 34%),
+      rgb(4 8 15 / 70%);
+    backdrop-filter: blur(8px);
+  }
+
+  &__modal {
+    width: min(46rem, 100%);
+    max-height: calc(100vh - 2rem);
+    overflow: auto;
+    padding: 1.2rem;
+    border-radius: 1.5rem;
+    border: 1px solid color-mix(in srgb, var(--color-primario) 28%, var(--app-surface-border));
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--app-surface) 94%, transparent) 0%,
+        color-mix(in srgb, var(--color-terciario) 8%, var(--app-surface)) 100%
+      );
+    box-shadow: 0 28px 90px rgb(0 0 0 / 40%);
+  }
+
+  &__modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+
+    span {
+      display: block;
+      color: var(--app-text-soft);
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: none;
+      letter-spacing: normal;
+    }
+
+    h4 {
+      margin: 0.2rem 0 0;
+      font-size: 1.35rem;
+    }
+  }
+
+  &__cards {
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  &__event-card {
+    display: grid;
+    grid-template-columns: 0.35rem minmax(0, 1fr);
+    gap: 0.9rem;
+    padding: 0.95rem;
+    border-radius: 1.2rem;
+    border: 1px solid color-mix(in srgb, var(--app-surface-border) 78%, transparent);
+    background: color-mix(in srgb, var(--app-surface-strong) 76%, transparent);
+  }
+
+  &__event-accent {
+    border-radius: 999px;
+    background: linear-gradient(180deg, var(--color-primario), var(--color-secundario), var(--color-terciario));
+  }
+
+  &__event-copy {
+    display: grid;
+    gap: 0.3rem;
+
+    strong {
+      font-size: 1rem;
+      line-height: 1.25;
+    }
+
+    p {
+      margin: 0;
+      color: var(--app-text-soft);
+      font-size: 0.82rem;
+    }
+  }
+
+  &__event-time {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--color-secundario);
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: normal;
+    text-transform: none;
+  }
+
+  button:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--color-terciario) 42%, white);
+    outline-offset: 2px;
+  }
+
+  &--alto-rendimiento {
+    .calendario__nav,
+    .calendario__close,
+    .calendario__day {
+      transition: none;
+    }
+
+    .calendario__day,
+    .calendario__modal {
+      box-shadow: none;
+    }
+
+    .calendario__day:hover,
+    .calendario__nav:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
+    .calendario__day--today::before {
+      animation: none;
+    }
+
+    .calendario__overlay {
+      backdrop-filter: none;
+    }
+  }
+}
+
+@property --calendario-dia-angulo {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes calendario-dia-gradiente {
+  to { --calendario-dia-angulo: 360deg; }
+}
+
+@keyframes calendario-dia-pulso {
+  0%,
+  100% {
+    opacity: 0.72;
+    filter: drop-shadow(0 0 0 transparent);
+  }
+
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 0.45rem color-mix(in srgb, var(--color-secundario) 44%, transparent));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .calendario__day--today::before {
+    animation: none;
+  }
+}
+
+// Con el menú lateral abierto, siete días dejan de ser legibles antes de llegar
+// al breakpoint móvil. Este margen evita que las tarjetas se aplasten.
+@container (max-width: 65.625rem) {
+  .calendario {
+    &__cuerpo--mensual {
+      overflow-x: visible;
+
+      .calendario__weekdays,
+      .calendario__grid {
+        min-width: 0;
+      }
+    }
+
+    &__weekdays {
+      display: none;
+    }
+
+    &__grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.55rem;
+    }
+
+    &__day {
+      min-height: auto;
+      // El borde de "hoy" se dibuja sobre este host. El padding debe quedar
+      // en el botón interno para que el gradiente no se separe de la tarjeta.
+      padding: 0;
+    }
+
+    &__day-top {
+      gap: 0.6rem;
+    }
+
+    &__day-label {
+      padding: 0.4rem 0.72rem;
+      border-radius: 1rem;
+      font-size: 0.85rem;
+    }
+
+    &__pill {
+      padding: 0.58rem 0.68rem;
+
+      strong {
+        font-size: 0.85rem;
+      }
+
+      span {
+        font-size: 0.85rem;
+      }
+    }
+  }
+}
+
+@container (max-width: 68rem) {
+  .calendario {
+    &__grid,
+    &__weekdays {
+      gap: 0.5rem;
+    }
+
+    &__day {
+      min-height: 8.5rem;
+      padding: 0;
+    }
+  }
+}
+
+@container (max-width: 52rem) {
+  .calendario {
+    &__weekdays {
+      display: none;
+    }
+
+    &__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    &__day {
+      min-height: auto;
+    }
+  }
+}
+
+@container (max-width: 36rem) {
+  .calendario {
+    &__header {
+      align-items: stretch;
+    }
+
+    &__controls {
+      width: 100%;
+      justify-content: flex-end;
+    }
+
+    &__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    &__modal {
+      padding: 1rem;
+      border-radius: 1.15rem;
+    }
+  }
+}

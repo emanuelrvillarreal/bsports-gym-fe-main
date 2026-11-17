@@ -1,0 +1,10 @@
+:host {
+  display: block;
+}
+.tesoreria-resumen {
+  display: grid;
+  gap: 1rem;
+  &__error {
+    color: var(--semantic-danger);
+  }
+}

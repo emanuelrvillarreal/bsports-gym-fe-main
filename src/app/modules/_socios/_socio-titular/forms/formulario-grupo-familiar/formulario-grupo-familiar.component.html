@@ -1,0 +1,127 @@
+<form
+  id="formulario-grupo-familiar"
+  class="formulario-grupo-familiar"
+  appValidacionFormulario
+  (submit)="enviar(); $event.preventDefault()"
+  novalidate
+>
+  <small
+    class="formulario-grupo-familiar__error"
+    [class.formulario-grupo-familiar__error--visible]="errorVisible()"
+    role="alert"
+    >{{ mensajeError() || ' ' }}</small
+  >
+
+  <label for="grupo-familiar-nombre">
+    <span>Nombre *</span>
+    <input
+      id="grupo-familiar-nombre"
+      pattern="[A-Za-zÀ-ÖØ-öø-ÿñÑ ]+"
+      required
+      autocomplete="given-name"
+      [attr.data-app-invalido]="!nombre().trim() ? 'true' : null"
+      [value]="nombre()"
+      (input)="actualizar('nombre', $event)"
+    />
+  </label>
+
+  <label for="grupo-familiar-apellido">
+    <span>Apellido *</span>
+    <input
+      id="grupo-familiar-apellido"
+      pattern="[A-Za-zÀ-ÖØ-öø-ÿñÑ ]+"
+      required
+      autocomplete="family-name"
+      [attr.data-app-invalido]="!apellido().trim() ? 'true' : null"
+      [value]="apellido()"
+      (input)="actualizar('apellido', $event)"
+    />
+  </label>
+
+  @if (esAlta()) {
+    <app-select
+      [attr.data-app-invalido]="!parentesco() ? 'true' : null"
+      etiqueta="Parentesco *"
+      [opciones]="opcionesParentesco"
+      [value]="parentesco()"
+      (valueChange)="cambiarParentesco($event)"
+    />
+  } @else {
+    <label for="grupo-familiar-parentesco">
+      <span>Parentesco</span>
+      <input id="grupo-familiar-parentesco" readonly [value]="parentesco()" />
+    </label>
+  }
+
+  <label for="grupo-familiar-email">
+    <span>Email *</span>
+    <input
+      id="grupo-familiar-email"
+      type="email"
+      required
+      autocomplete="email"
+      [readOnly]="!esAlta()"
+      [attr.data-app-invalido]="!email().trim() || !/^\S+@\S+\.\S+$/.test(email().trim()) ? 'true' : null"
+      [value]="email()"
+      (input)="actualizar('email', $event)"
+    />
+  </label>
+
+  <label for="grupo-familiar-dni">
+    <span>DNI</span>
+    <input id="grupo-familiar-dni" [readOnly]="!esAlta()" [value]="dni()" (input)="actualizar('dni', $event)" />
+  </label>
+
+  <label for="grupo-familiar-telefono">
+    <span>Teléfono</span>
+    <input
+      id="grupo-familiar-telefono"
+      type="tel"
+      autocomplete="tel"
+      [value]="telefono()"
+      (input)="actualizar('telefono', $event)"
+    />
+  </label>
+
+  <div>
+    <app-input-fecha
+      id="grupo-familiar-fecha-nacimiento"
+      etiqueta="Fecha de nacimiento"
+      modo="fecha"
+      [valorInicial]="fechaNacimiento()"
+      (valorCambiado)="fechaNacimiento.set($event)"
+    />
+  </div>
+
+  @if (esAlta()) {
+    <section class="formulario-grupo-familiar__passwords" aria-label="Datos de acceso">
+      <p class="formulario-grupo-familiar__passwords-titulo">Datos de acceso</p>
+      <app-input-password
+        id="grupo-familiar-password"
+        etiqueta="Contraseña *"
+        autocomplete="new-password"
+        [requerido]="true"
+        (valorCambiado)="password.set($event)"
+      />
+      <div class="formulario-grupo-familiar__confirmacion-password">
+        <app-input-password
+          id="grupo-familiar-confirmar-password"
+          etiqueta="Confirmar contraseña *"
+          autocomplete="new-password"
+          [requerido]="true"
+          (valorCambiado)="confirmarPassword.set($event)"
+        />
+        @if (confirmarPassword()) {
+          <small
+            class="formulario-grupo-familiar__estado-password"
+            [class.formulario-grupo-familiar__estado-password--coincide]="contrasenasCoinciden()"
+            [class.formulario-grupo-familiar__estado-password--no-coincide]="!contrasenasCoinciden()"
+            role="status"
+          >
+            {{ contrasenasCoinciden() ? 'Las contraseñas coinciden.' : 'Las contraseñas no coinciden.' }}
+          </small>
+        }
+      </div>
+    </section>
+  }
+</form>

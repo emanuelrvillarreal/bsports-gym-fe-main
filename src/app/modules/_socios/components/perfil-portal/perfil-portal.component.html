@@ -1,0 +1,30 @@
+<app-card
+  titulo="Datos personales"
+  descripcion="Actualizá únicamente los datos habilitados por el portal."
+>
+  @if (cargando() && !perfil()) {
+    <div class="perfil-portal__carga"><app-load-spinner-blue /></div>
+  } @else if (perfil(); as datosPerfil) {
+    <app-formulario-perfil
+      [perfil]="datosPerfil"
+      [enviando]="guardando()"
+      [mensajeErrorExterno]="errorFormulario()"
+      (enviado)="guardar($event)"
+    />
+  } @else {
+    <div class="perfil-portal__error">
+      <p role="alert">{{ errorCarga() }}</p>
+      <app-boton tipo="button" (accion)="cargar()">Reintentar</app-boton>
+    </div>
+  }
+</app-card>
+
+@if (perfil(); as datosPerfil) {
+  @if (datosPerfil.memberUuid; as memberUuid) {
+    <app-certificados-medicos-portal
+      [memberUuid]="memberUuid"
+      [certificados]="datosPerfil.certificados ?? null"
+      (actualizado)="cargar()"
+    />
+  }
+}

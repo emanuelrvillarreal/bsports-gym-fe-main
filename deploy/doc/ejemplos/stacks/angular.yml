@@ -1,0 +1,14 @@
+# Ejemplo: stack angular (SPA)
+
+st7:
+  mi-frontend:
+    branch: develop
+    port: 9051
+    path: mi-app
+    domain: stg.blueopendata.com
+
+    stack: angular
+
+    environment: st7
+    composer_file: plantillas/angular-21-node-22/docker-compose.yml
+    nginx_config: plantillas/angular-21-node-22/nginx.host-reverse-proxy.conf

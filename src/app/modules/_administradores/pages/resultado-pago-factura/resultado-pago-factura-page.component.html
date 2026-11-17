@@ -1,0 +1,28 @@
+<main class="resultado-factura" [class.resultado-factura--exito]="estado() === 'exito'">
+  <section class="resultado-factura__panel" role="status" aria-live="polite">
+    <p class="resultado-factura__eyebrow">Estado del pago</p>
+    <h1>{{ titulo() }}</h1>
+    <p class="resultado-factura__descripcion">{{ descripcion() }}</p>
+
+    @if (cargando()) {
+      <div class="resultado-factura__carga">
+        <app-load-spinner-blue ariaLabel="Actualizando facturas" />
+        <span>Actualizando facturas y estado del gimnasio...</span>
+      </div>
+    } @else {
+      @if (errorConsulta()) {
+        <p class="resultado-factura__error" role="alert">
+          No pudimos completar toda la actualización. No asumimos que la factura esté pagada.
+        </p>
+        <app-boton apariencia="texto" (accion)="actualizarEstado()">Reintentar</app-boton>
+      } @else {
+        <p class="resultado-factura__estado-club">
+          {{ bloqueada() ? 'El acceso del gimnasio continúa bloqueado hasta que el CRM confirme el pago.' : 'El acceso del gimnasio está habilitado.' }}
+        </p>
+      }
+      <app-boton (accion)="volver()">
+        {{ bloqueada() ? 'Volver al estado de facturación' : 'Volver a CRM Manager' }}
+      </app-boton>
+    }
+  </section>
+</main>

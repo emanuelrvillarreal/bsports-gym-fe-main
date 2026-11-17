@@ -1,0 +1,15 @@
+# Ejemplo: stack tanstack (TanStack Start - React SSR con Vite)
+# Runtime Node en puerto 3000. Requiere package-lock.json y server.mjs en raíz.
+
+st7:
+  mi-landing:
+    branch: main
+    port: 6037
+    path: landing
+    domain: stg.blueopendata.com
+
+    stack: tanstack
+
+    environment: production
+    composer_file: plantillas/tanstack-start-node-22/docker-compose.yml
+    nginx_config: plantillas/tanstack-start-node-22/nginx.host-reverse-proxy.conf

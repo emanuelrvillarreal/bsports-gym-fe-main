@@ -1,0 +1,85 @@
+<form
+  id="formulario-administrador-club"
+  class="formulario-administrador-club"
+  appValidacionFormulario
+  (submit)="$event.preventDefault(); enviar()"
+  novalidate
+>
+  <small
+    class="formulario-administrador-club__error"
+    [class.formulario-administrador-club__error--visible]="errorVisible()"
+    role="alert"
+    >{{ mensajeError() }}</small
+  >
+
+  <label for="administrador-club-nombre">
+    <span>Nombre *</span>
+    <input
+      id="administrador-club-nombre"
+      required
+      [value]="nombre()"
+      (input)="actualizarTexto('nombre', $event)"
+    />
+  </label>
+  <label for="administrador-club-apellido">
+    <span>Apellido *</span>
+    <input
+      id="administrador-club-apellido"
+      required
+      [value]="apellido()"
+      (input)="actualizarTexto('apellido', $event)"
+    />
+  </label>
+
+  <label for="administrador-club-email">
+    <span>Email *</span>
+    <input
+      id="administrador-club-email"
+      type="email"
+      required
+      [value]="email()"
+      (input)="actualizarTexto('email', $event)"
+    />
+  </label>
+
+  @if (esAlta()) {
+    <app-input-password
+      id="administrador-club-password"
+      etiqueta="Contraseña *"
+      autocomplete="new-password"
+      [requerido]="true"
+      (valorCambiado)="password.set($event)"
+    />
+  }
+
+  <label for="administrador-club-dni">
+    <span>DNI *</span>
+    <input
+      id="administrador-club-dni"
+      required
+      inputmode="numeric"
+      maxlength="14"
+      [value]="dni()"
+      (input)="actualizarTexto('dni', $event)"
+    />
+  </label>
+
+  <label for="administrador-club-telefono">
+    <span>Teléfono</span>
+    <input
+      id="administrador-club-telefono"
+      type="tel"
+      inputmode="tel"
+      maxlength="23"
+      [value]="telefono()"
+      (input)="actualizarTexto('telefono', $event)"
+    />
+  </label>
+
+  <app-input-fecha
+    id="administrador-club-fecha-nacimiento"
+    etiqueta="Fecha de nacimiento"
+    [valorInicial]="fechaNacimiento()"
+    (valorCambiado)="fechaNacimiento.set($event)"
+  />
+</form>

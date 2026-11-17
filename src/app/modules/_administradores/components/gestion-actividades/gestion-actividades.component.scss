@@ -1,0 +1,720 @@
+:host {
+  display: block;
+}
+
+.gestion-actividades {
+  &__busqueda,
+  &__form,
+  &__inscripcion {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+    gap: 0.8rem;
+    align-items: end;
+  }
+
+  &__busqueda {
+    grid-template-columns: minmax(0, 1fr) minmax(12rem, 18rem) auto;
+    margin-bottom: 1rem;
+  }
+
+  &__campo-busqueda {
+    display: block;
+    min-width: 0;
+
+    > span {
+      display: block;
+      margin-bottom: 0.4rem;
+      font-size: 0.85rem;
+      font-weight: 800;
+      line-height: 1.2;
+      text-transform: none;
+    }
+
+    input {
+      width: 100%;
+    }
+  }
+
+  &__boton-buscar {
+    --app-boton-min-height: 2.75rem;
+  }
+
+  &__categoria-celda {
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  &__categoria-mas {
+    margin-left: -0.4rem;
+    color: var(--color-secundario, var(--app-secondary));
+    font-weight: 800;
+  }
+
+  &__categoria-contador {
+    display: inline-flex;
+    width: 1.4rem;
+    height: 1.4rem;
+    flex: 0 0 1.4rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--color-secundario, var(--app-secondary));
+    font-size: 0.85rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  &__acciones-listado {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+  }
+
+  &__disponibilidad {
+    --app-select-control-height: 2.75rem;
+    width: min(100%, 18rem);
+  }
+
+  &__nueva-actividad {
+    display: flex;
+    height: 2.75rem;
+    align-self: flex-end;
+    align-items: center;
+    gap: 0.65rem;
+    color: var(--app-text);
+    font-weight: 500;
+  }
+
+  &__seleccion-profesores {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--app-surface-border);
+    border-radius: 0.9rem;
+
+    h3 {
+      margin: 0;
+      color: var(--app-text);
+      font-size: 1.05rem;
+      line-height: 1.25;
+    }
+
+    p {
+      margin: 0.2rem 0 0;
+      color: var(--app-text-soft);
+      font-size: 0.9rem;
+    }
+  }
+
+  &__seleccion-profesores-titulo {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  &__numero-seccion {
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 50%;
+    background: var(--color-primario, var(--app-accent));
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+
+  &__opcional {
+    color: var(--app-text-soft);
+    font-size: 0.85rem;
+    font-weight: 400;
+  }
+
+  &__seleccion-profesores-encabezado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  &__busqueda-profesores {
+    width: min(100%, 22rem);
+  }
+
+  &__busqueda-socios {
+    display: grid;
+    gap: 0.35rem;
+    margin-bottom: 0.8rem;
+  }
+
+  :host-context(.theme-mode-dark) &__busqueda-profesores input,
+  :host-context(.dark-mode-on) &__busqueda-profesores input,
+  :host-context(.theme-mode-dark) &__busqueda-socios input,
+  :host-context(.dark-mode-on) &__busqueda-socios input {
+    background: #000;
+  }
+
+  &__detalle {
+    display: grid;
+    gap: 1.25rem;
+    padding-bottom: 1.5rem;
+  }
+
+  &__resumen,
+  &__profesor-detalle {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+    gap: 0.75rem;
+    margin: 0;
+
+    > div {
+      min-width: 0;
+      padding: 0.85rem;
+      border: 1px solid var(--app-surface-border);
+      border-radius: 0.75rem;
+      background: var(--app-surface-strong);
+    }
+
+    dt {
+      margin-bottom: 0.25rem;
+      color: var(--app-text-soft);
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: none;
+      letter-spacing: normal;
+    }
+
+    dd {
+      margin: 0;
+      overflow-wrap: anywhere;
+      color: var(--app-text);
+      font-weight: 600;
+    }
+  }
+
+  &__detalle-categorias {
+    summary {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      cursor: pointer;
+    }
+  }
+
+  &__categorias-restantes {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0.65rem 0 0;
+
+    p {
+      margin: 0;
+    }
+  }
+
+  &__seccion {
+    display: grid;
+    gap: 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--app-surface-border);
+
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h3 {
+      color: var(--app-text);
+      font-size: 1rem;
+    }
+  }
+
+  &__horario {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    ng-icon {
+      flex: 0 0 auto;
+      width: 1em;
+      height: 1em;
+      color: var(--app-accent);
+      font-size: 1em;
+    }
+  }
+
+  // Detalle: todas las franjas de la actividad, agrupadas por día.
+  &__horarios-detalle {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+    gap: 0.75rem;
+  }
+
+  &__horarios-dia {
+    h4 {
+      margin: 0 0 0.35rem;
+      color: var(--app-text-soft);
+      font-size: 0.82rem;
+      text-transform: none;
+      letter-spacing: normal;
+    }
+
+    ul {
+      display: grid;
+      gap: 0.4rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    li {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      column-gap: 0.5rem;
+      padding: 0.5rem 0.7rem;
+      border: 1px solid var(--app-surface-border);
+      border-radius: 0.6rem;
+      background: var(--app-surface);
+
+      ng-icon {
+        grid-row: span 2;
+        color: var(--app-accent);
+      }
+
+      strong {
+        color: var(--app-text);
+      }
+
+      span {
+        color: var(--app-text-soft);
+        font-size: 0.82rem;
+      }
+
+      &.gestion-actividades__horario-lleno {
+        border-color: color-mix(in srgb, var(--semantic-danger) 45%, var(--app-surface-border));
+
+        span {
+          color: var(--semantic-danger);
+          font-weight: 700;
+        }
+      }
+    }
+  }
+
+  &__seccion-encabezado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+
+    span {
+      color: var(--app-text-soft);
+      font-size: 0.85rem;
+    }
+  }
+
+  &__dias,
+  &__profesores {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  &__dias li,
+  &__todos-dias {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--app-surface-border);
+    border-radius: 999px;
+    background: var(--app-accent-soft);
+    color: var(--app-text);
+    font-weight: 700;
+  }
+
+  &__todos-dias {
+    width: fit-content;
+  }
+
+  &__profesores {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-block-size: 7.1rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+
+    li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      min-height: 3.25rem;
+      padding: 0.5rem 0.65rem 0.5rem 0.85rem;
+      border: 1px solid var(--app-surface-border);
+      border-radius: 0.75rem;
+      background: var(--app-surface);
+      color: var(--app-text);
+      font-weight: 600;
+    }
+  }
+
+  &__profesor-resumen {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 0.65rem;
+
+    img,
+    .gestion-actividades__profesor-avatar {
+      flex: 0 0 auto;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+    }
+
+    img {
+      object-fit: cover;
+      border: 1px solid var(--app-surface-border);
+    }
+
+    strong {
+      overflow-wrap: anywhere;
+    }
+  }
+
+  &__profesor-avatar {
+    display: inline-grid;
+    place-items: center;
+    background: var(--app-accent-soft);
+    color: var(--app-accent);
+    font-size: 0.8rem;
+    font-weight: 800;
+  }
+
+  &__vacio {
+    color: var(--app-text-soft);
+  }
+
+  &__profesor-detalle {
+    margin-top: 1rem;
+  }
+
+  &__encabezado-profesor {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 0.75rem;
+
+    app-titulo-hero {
+      min-width: 0;
+      flex: 1;
+    }
+
+    > img,
+    > .gestion-actividades__profesor-avatar {
+      flex: 0 0 auto;
+      width: clamp(2.5rem, 2rem + 1.7vw, 3rem);
+      height: clamp(2.5rem, 2rem + 1.7vw, 3rem);
+      border-radius: 50%;
+    }
+
+    > img {
+      object-fit: cover;
+      border: 1px solid var(--app-surface-border);
+    }
+  }
+
+  &__profesor-nombre {
+    grid-column: 1 / -1;
+  }
+
+  &__checkbox-seleccion {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    place-items: center;
+  }
+
+  &__tabla-profesores,
+  &__tabla-socios-inscripcion {
+    /* El ancho de Acciones lo mide la tabla: los botones ahora llevan texto. */
+    ::ng-deep .tabla-responsive table {
+      min-width: 0 !important;
+    }
+
+    ::ng-deep .tabla-responsive__table-wrap {
+      overflow-x: hidden;
+    }
+  }
+
+  &__tabla-inscriptos-detalle {
+    /* El ancho de Acciones lo mide la tabla: los botones ahora llevan texto. */
+    ::ng-deep .tabla-responsive table {
+      min-width: 0 !important;
+    }
+
+    ::ng-deep .tabla-responsive__table-wrap {
+      overflow-x: hidden;
+    }
+  }
+
+  &__checkbox-circular {
+    --checkbox-tamanio: 1.25rem;
+    width: var(--checkbox-tamanio);
+    height: var(--checkbox-tamanio);
+    margin: 0;
+    appearance: none;
+    border: 1px solid var(--app-surface-border);
+    border-radius: 50%;
+    background: var(--app-surface);
+    cursor: pointer;
+
+    &:checked {
+      border-color: var(--app-accent);
+      background: radial-gradient(circle, var(--app-accent) 0 42%, transparent 45%);
+    }
+
+    &:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--app-accent) 35%, white);
+      outline-offset: 2px;
+    }
+  }
+
+  &__boton-agregar {
+    --app-boton-min-height: 2.75rem;
+    --app-boton-padding: 0;
+    --app-boton-radio: 999px;
+    flex: 0 0 auto;
+    width: 2.75rem;
+    height: 2.75rem;
+
+    ng-icon {
+      display: block;
+      width: 1.25rem;
+      height: 1.25rem;
+      line-height: 1;
+    }
+  }
+
+  &__form,
+  &__inscripcion {
+    margin: 0;
+  }
+
+  label {
+    display: grid;
+    gap: 0.35rem;
+    color: var(--app-text-soft);
+  }
+
+  input:not([type='checkbox']) {
+    min-height: 2.75rem;
+    padding: 0.65rem;
+    border: 1px solid var(--app-surface-border);
+    border-radius: 0.55rem;
+    background: var(--app-surface);
+    color: var(--app-text);
+  }
+
+  input:focus-visible {
+    outline: none;
+    border-color: var(--app-accent);
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--app-accent) 62%, transparent);
+  }
+
+  &__opciones {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    padding: 0.75rem;
+    border: 1px solid var(--app-surface-border);
+    border-radius: 0.55rem;
+
+    label {
+      display: flex;
+      align-items: center;
+      min-height: 2.75rem;
+      gap: 0.35rem;
+    }
+  }
+
+  &__error {
+    color: var(--semantic-danger);
+  }
+
+  &__ok {
+    color: var(--semantic-success);
+  }
+
+  &__nota {
+    grid-column: 1 / -1;
+    color: var(--app-text-soft);
+  }
+
+  &__modalidades-inscripcion {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    width: min(100%, 34rem);
+    margin: 1.25rem auto 0;
+  }
+
+  &__opcion-inscripcion {
+    display: block;
+    aspect-ratio: 1;
+    min-width: 0;
+    --app-boton-min-height: 0;
+    --app-boton-padding: 1rem;
+    --app-boton-radio: 0.75rem;
+
+    ::ng-deep .app-boton {
+      height: 100%;
+      white-space: normal;
+    }
+
+    ::ng-deep .app-boton__contenido {
+      display: flex !important;
+      width: 100% !important;
+      height: 100% !important;
+      flex-direction: column !important;
+      gap: 0.75rem !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
+    }
+
+    ::ng-deep ng-icon {
+      flex: 0 0 auto;
+      align-self: center !important;
+    }
+  }
+
+  &__opcion-texto {
+    display: grid;
+    gap: 0.15rem;
+    justify-items: center;
+    font-size: clamp(0.9rem, 2.5vw, 1.05rem);
+    line-height: 1.2;
+
+    strong,
+    span {
+      display: block;
+    }
+  }
+
+  &__opcion-inscripcion--descuento {
+    --app-boton-color-texto: #000 !important;
+    --app-boton-color-texto-interaccion: #000 !important;
+    --app-boton-background-size: 260% 100%;
+    --app-boton-background-position: 0% 50%;
+    --app-boton-background-position-interaccion: 0% 50%;
+    --app-boton-animacion: gestion-actividades-brillo-oro 5s ease-in-out infinite;
+
+    ::ng-deep .app-boton {
+      transition:
+        transform 160ms ease,
+        box-shadow 160ms ease;
+    }
+
+    ::ng-deep .app-boton:not(:disabled):hover {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: 0 0.65rem 1.3rem color-mix(in srgb, #d89b13 35%, transparent);
+    }
+
+    ::ng-deep ng-icon {
+      color: #000;
+    }
+  }
+
+  &__descuentos-seleccionados {
+    margin-top: 1rem;
+    padding: 0.85rem;
+    border: 1px solid var(--app-surface-border);
+    border-radius: 0.55rem;
+    color: var(--app-text);
+
+    h3 {
+      margin: 0 0 0.5rem;
+      font-size: 1rem;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 1.25rem;
+    }
+  }
+}
+
+@keyframes gestion-actividades-brillo-oro {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+:host-context(.theme-mode-dark) {
+  .gestion-actividades__busqueda input { background: #000; }
+  ::ng-deep .gestion-actividades__busqueda app-select .app-select__control .app-boton { background: #000; }
+}
+
+@media (max-width: 47.99rem) {
+  .gestion-actividades {
+    &__profesores {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      max-block-size: 10.95rem;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gestion-actividades__opcion-inscripcion--descuento {
+    --app-boton-animacion: none;
+  }
+}
+
+@media (max-width: 40rem) {
+  .gestion-actividades {
+    &__busqueda {
+      grid-template-columns: 1fr;
+    }
+
+    &__boton-buscar,
+    &__disponibilidad {
+      width: 100%;
+    }
+
+    &__nueva-actividad {
+      justify-content: space-between;
+    }
+
+    &__modalidades-inscripcion {
+      grid-template-columns: 1fr;
+      max-width: 18rem;
+    }
+
+    &__seleccion-profesores-encabezado {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    &__busqueda-profesores {
+      width: 100%;
+    }
+
+    &__profesores {
+      grid-template-columns: 1fr;
+      max-block-size: 22.5rem;
+    }
+  }
+}

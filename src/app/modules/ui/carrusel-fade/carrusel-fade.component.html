@@ -1,0 +1,100 @@
+<section
+  class="carrusel-fade"
+  [style.--carrusel-fade-height]="altura()"
+  [style.--carrusel-fade-duration]="duracionTransicionMs() + 'ms'"
+  [class.carrusel-fade--altura-automatica]="alturaAutomatica()"
+  [class.carrusel-fade--navegacion-movil-deslizamiento]="navegacionMovilPorDeslizamiento()"
+  [attr.aria-label]="ariaLabel()"
+>
+  @if (cargando()) {
+    <div class="carrusel-fade__viewport carrusel-fade__viewport--cargando" aria-busy="true">
+      @if (titulo()) {
+        <p class="carrusel-fade__titulo">{{ titulo() }}</p>
+      }
+      <app-load-spinner-blue ariaLabel="Cargando carrusel" />
+    </div>
+  } @else if (!tieneItems()) {
+    <p class="carrusel-fade__vacio">No hay elementos para mostrar.</p>
+  } @else {
+    <div
+      class="carrusel-fade__viewport"
+      [class.carrusel-fade__viewport--altura-automatica]="alturaAutomatica()"
+      (pointerdown)="iniciarDeslizamiento($event)"
+      (pointerup)="finalizarDeslizamiento($event)"
+      (pointercancel)="cancelarDeslizamiento($event)"
+    >
+      @if (titulo()) {
+        <p class="carrusel-fade__titulo">{{ titulo() }}</p>
+      }
+
+      @if (itemSaliente(); as saliente) {
+        <article class="carrusel-fade__slide carrusel-fade__slide--saliente" aria-hidden="true">
+          @if (plantillaItem(); as plantilla) {
+            <ng-container
+              [ngTemplateOutlet]="plantilla.templateRef"
+              [ngTemplateOutletContext]="{
+                $implicit: saliente.item,
+                index: saliente.index,
+                active: true,
+              }"
+            />
+          }
+        </article>
+      }
+
+      @if (itemActivo(); as itemActivo) {
+        <article
+          class="carrusel-fade__slide carrusel-fade__slide--activa"
+          (click)="seleccionarItem()"
+        >
+          @if (plantillaItem(); as plantilla) {
+            <ng-container
+              [ngTemplateOutlet]="plantilla.templateRef"
+              [ngTemplateOutletContext]="{
+                $implicit: itemActivo,
+                index: indiceActivo(),
+                active: true,
+              }"
+            />
+          }
+        </article>
+      }
+
+      @if (mostrarControles() && tieneMultiples()) {
+        <app-boton
+          tipo="button"
+          apariencia="texto"
+          class="carrusel-fade__control carrusel-fade__control--prev"
+          aria-label="Elemento anterior"
+          (accion)="retroceder()"
+        >
+          <ng-icon name="heroChevronLeft" />
+        </app-boton>
+        <app-boton
+          tipo="button"
+          apariencia="texto"
+          class="carrusel-fade__control carrusel-fade__control--next"
+          aria-label="Elemento siguiente"
+          (accion)="avanzar()"
+        >
+          <ng-icon name="heroChevronRight" />
+        </app-boton>
+      }
+
+      @if (tieneMultiples()) {
+        <div class="carrusel-fade__dots" aria-label="Indicadores del carrusel">
+          @for (item of items(); track $index) {
+            <app-boton
+              tipo="button"
+              apariencia="texto"
+              class="carrusel-fade__dot"
+              [class.carrusel-fade__dot--activa]="$index === indiceActivo()"
+              [aria-label]="'Ir al elemento ' + ($index + 1)"
+              (accion)="irA($index)"
+            ></app-boton>
+          }
+        </div>
+      }
+    </div>
+  }
+</section>

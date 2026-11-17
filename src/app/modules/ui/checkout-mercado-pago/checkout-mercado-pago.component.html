@@ -1,0 +1,90 @@
+<app-popup
+  [abierto]="abierto()"
+  titulo="Cobrar con Mercado Pago"
+  [mostrarEncabezado]="false"
+  ancho="grande"
+  [mostrarCancelar]="false"
+  (cancelar)="cerrar.emit()"
+>
+  <section class="checkout-mp" aria-label="Checkout de Mercado Pago">
+    <app-titulo-hero
+      icono="tesoreria"
+      titulo="Cobrar con Mercado Pago"
+      [subtitulo]="subtitulo()"
+    />
+
+    <div class="checkout-mp__resumen">
+      <h2>{{ resumen() }}</h2>
+      @if (monto()) {
+        <strong>{{ monto() }}</strong>
+      }
+    </div>
+
+    <div class="checkout-mp__contenido">
+      <div class="checkout-mp__qr-columna">
+        <img
+          class="checkout-mp__logo"
+          src="assets/mercado%20pago/MP_RGB_HANDSHAKE_pluma_horizontal.svg"
+          alt="Mercado Pago"
+        />
+        <div class="checkout-mp__qr" aria-live="polite">
+          @if (qr()) {
+            <img [src]="qr()" alt="Código QR para abrir el pago en Mercado Pago" />
+          } @else {
+            <app-load-spinner-blue ariaLabel="Generando código QR" />
+            <span>Generando código QR...</span>
+          }
+        </div>
+        @if (tieneEnlace() && abrirDebajoQr()) {
+          <app-boton class="checkout-mp__abrir-debajo-qr" (accion)="abrirCheckout.emit()">
+            Abrir Mercado Pago
+          </app-boton>
+        }
+      </div>
+
+      <div class="checkout-mp__instrucciones">
+        <p>
+          {{
+            tieneEnlace()
+              ? 'Escaneá el QR desde otro teléfono o compartí el enlace de pago.'
+              : 'Escaneá el QR desde la aplicación de Mercado Pago.'
+          }}
+        </p>
+        @if (tieneEnlace() && mostrarEnlace()) {
+          <label>
+            <span>Enlace de pago</span>
+            <input
+              type="text"
+              readonly
+              [value]="enlace()"
+              aria-label="Enlace de pago de Mercado Pago"
+            />
+          </label>
+          <app-boton
+            colorPaleta="secundario"
+            [cargando]="copiando()"
+            ariaLabelCarga="Copiando enlace"
+            (accion)="copiarEnlace.emit()"
+          >
+            Copiar enlace
+          </app-boton>
+        }
+        <p class="checkout-mp__aviso">
+          Crear este enlace no registra el cobro. El estado se actualizará después de abonarlo.
+        </p>
+      </div>
+    </div>
+
+    @if (mensaje()) {
+      <p class="checkout-mp__mensaje" role="status">{{ mensaje() }}</p>
+    }
+    @if (mensajeError()) {
+      <p class="checkout-mp__error" role="alert">{{ mensajeError() }}</p>
+    }
+  </section>
+
+  <app-boton popupAcciones apariencia="texto" (accion)="cerrar.emit()">Cerrar</app-boton>
+  @if (tieneEnlace() && !abrirDebajoQr()) {
+    <app-boton popupAcciones (accion)="abrirCheckout.emit()">Abrir Mercado Pago</app-boton>
+  }
+</app-popup>

@@ -1,0 +1,70 @@
+<form class="formulario fs-form" appValidacionFormulario (submit)="$event.preventDefault(); enviar()">
+  <small class="formulario__error" [class.formulario__error--visible]="error()" role="alert">
+    {{ error() }}
+  </small>
+
+  <!-- 1. Qué movimiento -->
+  <section class="fs-seccion" aria-labelledby="fm-titulo-datos">
+    <header class="fs-seccion__cabecera">
+      <span class="fs-seccion__numero" aria-hidden="true">1</span>
+      <div>
+        <h3 id="fm-titulo-datos">¿Qué movimiento es?</h3>
+        <p>Indicá el concepto y el monto. Queda registrado en la caja del gimnasio.</p>
+      </div>
+    </header>
+    <div class="fs-seccion__cuerpo fs-grid">
+      @if (!tipoFijo()) {
+        <label for="movimiento-tipo">
+          <span>Tipo</span>
+          <select id="movimiento-tipo" [value]="tipo()" (change)="actualizarTipo($event)">
+            <option value="INGRESO">Ingreso (entra plata)</option>
+            <option value="EGRESO">Egreso (sale plata)</option>
+          </select>
+        </label>
+      }
+      <label for="movimiento-monto">
+        <span>Monto *</span>
+        <input id="movimiento-monto" type="number" min="0.01" step="0.01" required placeholder="$ 0" [value]="monto()" (input)="actualizar('monto', $event)" />
+      </label>
+      <label class="fs-grid__completo" for="movimiento-concepto">
+        <span>Concepto *</span>
+        <input id="movimiento-concepto" maxlength="255" required placeholder="Ej: Venta de bebidas, Pago de luz" [value]="concepto()" (input)="actualizar('concepto', $event)" />
+      </label>
+    </div>
+  </section>
+
+  <!-- 2. Detalles -->
+  <section class="fs-seccion" aria-labelledby="fm-titulo-detalles">
+    <header class="fs-seccion__cabecera">
+      <span class="fs-seccion__numero" aria-hidden="true">2</span>
+      <div>
+        <h3 id="fm-titulo-detalles">Detalles <span class="fs-opcional">(opcional)</span></h3>
+        <p>Si no indicás la fecha, se toma la de hoy.</p>
+      </div>
+    </header>
+    <div class="fs-seccion__cuerpo fs-grid">
+      <label for="movimiento-fecha">
+        <span>Fecha</span>
+        <input id="movimiento-fecha" type="date" [value]="fecha()" (input)="actualizar('fecha', $event)" />
+      </label>
+      @if ((tipoFijo() ?? tipo()) === 'INGRESO') {
+        <label for="movimiento-medio">
+          <span>Medio de pago</span>
+          <select id="movimiento-medio" [value]="medioPago()" (change)="actualizarMedioPago($event)">
+            <option value="EFECTIVO">Efectivo</option>
+            <option value="TRANSFERENCIA">Transferencia</option>
+            <option value="OTRO">Otro</option>
+          </select>
+        </label>
+      }
+      <label class="fs-grid__completo" for="movimiento-observaciones">
+        <span>Observaciones</span>
+        <textarea id="movimiento-observaciones" rows="3" placeholder="Algún dato extra que quieras dejar anotado" [value]="observaciones()" (input)="actualizar('observaciones', $event)"></textarea>
+      </label>
+    </div>
+  </section>
+
+  <app-boton tipo="submit" [cargando]="enviando()" ariaLabelCarga="Registrando movimiento">
+    Registrar {{ (tipoFijo() ?? tipo()) === 'INGRESO' ? 'ingreso' : 'egreso' }}
+  </app-boton>
+</form>

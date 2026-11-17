@@ -1,0 +1,33 @@
+<app-popup
+  [abierto]="!!titular()"
+  [titulo]="'Familiares de ' + (titular()?.nombre ?? '') + ' ' + (titular()?.apellido ?? '')"
+  descripcion="Integrantes vinculados al socio titular seleccionado."
+  [mostrarEncabezado]="false"
+  ancho="grande"
+  textoCancelar="Cerrar"
+  aparienciaCancelar="solido"
+  [cancelarDeshabilitado]="!!procesandoMemberUuid()"
+  (cancelar)="cancelar()"
+>
+  <app-titulo-hero
+    [titulo]="'Familiares de ' + (titular()?.nombre ?? '') + ' ' + (titular()?.apellido ?? '')"
+    subtitulo="Integrantes vinculados al socio titular seleccionado."
+    icono="socios"
+  />
+  @if (error()) {
+    <p class="grupo-familiar-socio__error" role="alert">{{ error() }}</p>
+  }
+
+  <div class="grupo-familiar-socio__tabla">
+    <app-tabla-responsive
+      [columnas]="columnas"
+      [filas]="filas()"
+      idFila="memberUuid"
+      [acciones]="acciones"
+      [cargando]="cargando()"
+      [vacio_reservar_filas]="false"
+      mensajeVacio="Este socio no tiene familiares vinculados."
+      (accionFila)="manejarAccion($event)"
+    />
+  </div>
+</app-popup>

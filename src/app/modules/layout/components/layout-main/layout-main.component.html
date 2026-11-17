@@ -1,0 +1,25 @@
+<div
+  class="layout-main"
+  [class.layout-main--menu-derecha]="ladoMenu() === 'derecha'"
+  [class.layout-main--menu-cerrado]="!menuAbierto()"
+  [class.layout-main--sin-transicion]="!transicionesMenuHabilitadas()"
+>
+  <app-nav-bar
+    [ladoMenu]="ladoMenu()"
+    [menuAbierto]="menuAbierto()"
+    [transicionesHabilitadas]="transicionesMenuHabilitadas()"
+    (cambioLadoMenu)="actualizarLadoMenu($event)"
+    (cambioEstadoMenu)="actualizarEstadoMenu($event)"
+  />
+
+  <main class="layout-main__contenido">
+    <app-header />
+    <section class="layout-main__viewport">
+      @if (solapas().length) {
+        <app-solapas [solapas]="solapas()" etiquetaGrupo="Pantallas de esta sección" />
+      }
+      <router-outlet />
+    </section>
+  </main>
+  <app-toast-alert-host />
+</div>

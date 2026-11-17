@@ -1,0 +1,121 @@
+:host {
+  display: block;
+}
+
+.formulario-filtro-socios {
+  display: flex;
+  flex-flow: row wrap;
+  gap: 1rem;
+  align-items: end;
+  margin-bottom: 1rem;
+
+  &__error {
+    display: none;
+  }
+
+  &__error--visible {
+    visibility: visible;
+  }
+
+  input {
+    min-height: 2.5rem;
+    padding: 0.55rem 0.75rem;
+    color: var(--app-text);
+    background: var(--app-bg);
+    border: 1px solid var(--app-surface-border);
+    border-radius: 0.6rem;
+    font: inherit;
+
+    &:focus-visible {
+      outline: none;
+      border-color: var(--app-accent);
+      box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--app-accent) 62%, transparent);
+    }
+  }
+
+  &__busqueda {
+    flex: 1 1 24rem;
+    display: grid;
+    gap: 0.35rem;
+
+    label {
+      color: var(--app-text-soft);
+      font-size: 0.85rem;
+      font-weight: 650;
+    }
+  }
+
+  &__busqueda-control {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.5rem;
+  }
+
+  &__estados {
+    background: var(--app-surface);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem 1rem;
+    margin: 0;
+    padding: 0.75rem 3rem;
+    border: 1px solid var(--app-surface-border);
+    border-radius: 0.65rem;
+
+    legend {
+      padding: 0 0.35rem;
+      color: var(--app-text-soft);
+      font-size: 0.82rem;
+      font-weight: 650;
+    }
+
+    label {
+      display: inline-flex;
+      gap: 0.4rem;
+      align-items: center;
+      font-size: 0.82rem;
+    }
+
+    input {
+      min-height: 0;
+    }
+  }
+
+  input#{&}__checkbox-circular {
+    --checkbox-tamanio: 1.25rem;
+    flex: 0 0 var(--checkbox-tamanio);
+    width: var(--checkbox-tamanio);
+    min-height: var(--checkbox-tamanio) !important;
+    height: var(--checkbox-tamanio);
+    padding: 0 !important;
+    margin: 0;
+    appearance: none;
+    border: 1px solid var(--app-surface-border);
+    border-radius: 50%;
+    background: var(--app-surface);
+    cursor: pointer;
+
+    &:checked {
+      border-color: var(--app-accent);
+      background: radial-gradient(circle, var(--app-accent) 0 42%, transparent 45%);
+    }
+
+    &:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--app-accent) 35%, white);
+      outline-offset: 2px;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+  }
+}
+
+@media (max-width: 48rem) {
+  .formulario-filtro-socios {
+    &__busqueda,
+    &__estados {
+      flex-basis: 100%;
+    }
+  }
+}

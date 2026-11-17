@@ -1,0 +1,11 @@
+<app-card titulo="Datos personales" descripcion="Mantené actualizada tu información personal.">
+  @if (cargando() && !datosPersonales()) {
+    <div class="gestion-mi-perfil__carga" role="status" aria-live="polite">
+      <app-load-spinner-blue ariaLabel="Cargando perfil" />
+    </div>
+  } @else if (datosPersonales(); as datos) {
+    <app-formulario-datos-personales [perfil]="datos" [enviando]="guardando()" [mensajeErrorExterno]="errorFormulario()" (enviado)="guardar($event)" />
+  } @else if (!cargando()) {
+    <div class="gestion-mi-perfil__error"><p role="alert">{{ errorCarga() }}</p><app-boton tipo="button" (accion)="cargar()">Reintentar</app-boton></div>
+  }
+</app-card>

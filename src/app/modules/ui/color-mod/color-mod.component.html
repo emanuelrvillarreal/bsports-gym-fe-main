@@ -1,0 +1,143 @@
+<section
+  class="color-mod"
+  [class.color-mod--alto-rendimiento]="altoRendimiento()"
+  aria-labelledby="color-mod-titulo"
+>
+  <header class="color-mod__header">
+    <div>
+      <h2 id="color-mod-titulo">
+        <ng-icon name="heroSwatch" aria-hidden="true" />
+        Personalizar colores
+      </h2>
+      <p>Elegí los colores primario y secundario del sistema.</p>
+    </div>
+
+    <div class="color-mod__acciones" aria-label="Acciones de la paleta">
+      <app-boton
+        tipo="button"
+        apariencia="texto"
+        class="color-mod__random-principal"
+        [style.--random-a]="colorPrimario()"
+        [style.--random-b]="colorSecundario()"
+        [style.--random-c]="colorTerciario()"
+        [deshabilitado]="bloqueado()"
+        (accion)="randomizarPaleta()"
+      >
+        <ng-icon name="heroSparkles" aria-hidden="true" />
+        Paleta aleatoria
+      </app-boton>
+
+      <app-boton
+        tipo="button"
+        apariencia="texto"
+        [deshabilitado]="bloqueado()"
+        [cargando]="restableciendo()"
+        ariaLabelCarga="Restableciendo colores"
+        (accion)="solicitarRestablecimiento()"
+      >
+        <ng-icon name="heroArrowPath" aria-hidden="true" />
+        Restablecer
+      </app-boton>
+
+      <app-boton
+        tipo="button"
+        class="color-mod__guardar"
+        [deshabilitado]="!hayCambiosPendientes() || bloqueado()"
+        [cargando]="guardando()"
+        ariaLabelCarga="Guardando colores"
+        (accion)="solicitarGuardado()"
+      >
+        Guardar colores
+      </app-boton>
+    </div>
+  </header>
+
+  <article class="color-mod__panel" [attr.aria-busy]="bloqueado()">
+    <div class="color-mod__tabs" role="tablist" aria-label="Color a editar">
+      @for (tab of tabs; track tab) {
+        <app-boton
+          tipo="button"
+          apariencia="texto"
+          role="tab"
+          class="color-mod__tab"
+          [style.--tab-color]="tab === 'primario' ? colorPrimario() : colorSecundario()"
+          [class.color-mod__tab--activa]="tabActiva() === tab"
+          [aria-selected]="tabActiva() === tab"
+          [deshabilitado]="bloqueado()"
+          (accion)="abrirTab(tab)"
+        >
+          {{ tab === 'primario' ? 'Primario' : 'Secundario' }}
+        </app-boton>
+      }
+    </div>
+
+    <p class="color-mod__ayuda" aria-live="polite">{{ ayudaTabActiva() }}</p>
+
+    <div class="color-mod__editor">
+      <label class="color-mod__picker" [style.--color-activo]="obtenerColorActivo()">
+        <span>Selector {{ tabActiva() }}</span>
+        <input
+          type="color"
+          [value]="obtenerColorActivo()"
+          [disabled]="bloqueado()"
+          [attr.aria-label]="'Elegir color ' + tabActiva()"
+          (input)="actualizarColorActivo($event)"
+        />
+        <output aria-live="polite">{{ obtenerColorActivo() }}</output>
+      </label>
+    </div>
+
+    <div class="color-mod__presets" role="group" aria-label="Colores preseleccionados">
+      @for (preset of presets; track preset.valor) {
+        <app-boton
+          tipo="button"
+          apariencia="texto"
+          class="color-mod__preset"
+          [style.--preset-color]="preset.valor"
+          [class.color-mod__preset--activo]="obtenerColorActivo() === preset.valor"
+          [aria-label]="'Seleccionar ' + preset.nombre"
+          [deshabilitado]="bloqueado()"
+          (accion)="seleccionarPreset(preset.valor)"
+        >
+          <span class="color-mod__preset-muestra" aria-hidden="true"></span>
+          <span>{{ preset.nombre }}</span>
+        </app-boton>
+      }
+    </div>
+  </article>
+
+  @if (confirmarRestablecerAbierto()) {
+    <div class="color-mod__modal-fondo">
+      <section
+        class="color-mod__dialogo"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="color-mod-confirmar-titulo"
+        aria-describedby="color-mod-confirmar-texto"
+      >
+        <h3 id="color-mod-confirmar-titulo">Restablecer colores</h3>
+        <p id="color-mod-confirmar-texto">
+          Se aplicará y guardará la paleta predeterminada de la empresa.
+        </p>
+        <div class="color-mod__dialogo-acciones">
+          <app-boton
+            #botonCancelar
+            tipo="button"
+            apariencia="texto"
+            (accion)="cancelarRestablecimiento()"
+          >
+            Cancelar
+          </app-boton>
+          <app-boton
+            tipo="button"
+            [cargando]="restableciendo()"
+            ariaLabelCarga="Restableciendo colores"
+            (accion)="confirmarRestablecimiento()"
+          >
+            Restablecer
+          </app-boton>
+        </div>
+      </section>
+    </div>
+  }
+</section>

@@ -1,0 +1,12 @@
+<form class="formulario-datos-personales" appValidacionFormulario (submit)="enviar(); $event.preventDefault()" novalidate>
+  <small class="formulario-datos-personales__error" [class.formulario-datos-personales__error--visible]="errorVisible()" role="alert">{{ mensajeError() || ' ' }}</small>
+
+  <label for="perfil-dni"><span>DNI <small>(solo lectura)</small></span><input id="perfil-dni" readonly inputmode="numeric" autocomplete="off" [value]="dni()" /></label>
+  <label for="perfil-email"><span>Email <small>(solo lectura)</small></span><input id="perfil-email" type="email" readonly autocomplete="email" [value]="email()" /></label>
+  <label for="perfil-nombre"><span>Nombre *</span><input id="perfil-nombre" required autocomplete="given-name" [attr.data-app-invalido]="!nombre().trim() ? 'true' : null" [value]="nombre()" (input)="actualizarTexto('nombre', $event)" /></label>
+  <label for="perfil-apellido"><span>Apellido *</span><input id="perfil-apellido" required autocomplete="family-name" [attr.data-app-invalido]="!apellido().trim() ? 'true' : null" [value]="apellido()" (input)="actualizarTexto('apellido', $event)" /></label>
+  <label for="perfil-telefono"><span>Teléfono</span><input id="perfil-telefono" type="tel" autocomplete="tel" [value]="telefono()" (input)="actualizarTelefono($event)" /></label>
+  <app-input-fecha etiqueta="Fecha de nacimiento *" id="perfil-fecha-nacimiento" [requerido]="true" modo="fecha" [valorInicial]="fechaNacimiento()" (valorCambiado)="fechaNacimiento.set($event)" />
+
+  <app-boton tipo="submit" [cargando]="enviando()" ariaLabelCarga="Guardando cambios">Guardar cambios</app-boton>
+</form>

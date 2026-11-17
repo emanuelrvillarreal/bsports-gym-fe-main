@@ -1,0 +1,105 @@
+:host { display: block; }
+
+.evaluaciones {
+  display: grid;
+  gap: 1rem;
+
+  &__vacio { margin: 0; color: var(--app-text-soft); }
+  &__error { margin: 0; color: var(--semantic-danger); }
+
+  &__aviso {
+    margin: 0;
+    padding: .55rem .75rem;
+    border-left: 3px solid var(--app-accent);
+    border-radius: .35rem;
+    background: color-mix(in srgb, var(--app-surface-border) 25%, transparent);
+    color: var(--app-text-soft);
+    font-size: .8rem;
+  }
+
+  &__config {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem 1.5rem;
+    padding: 1rem;
+    border: 1px solid var(--app-surface-border);
+    border-radius: .85rem;
+    background: var(--app-surface);
+
+    p { margin: .2rem 0 0; color: var(--app-text-soft); font-size: .88rem; }
+
+    &--apagado { border-style: dashed; }
+  }
+
+  &__switches { display: grid; gap: .35rem; }
+
+  &__check {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    min-height: 2.5rem;
+    font-size: .9rem;
+    cursor: pointer;
+
+    input { width: 1.15rem; height: 1.15rem; accent-color: var(--app-accent); }
+  }
+
+  &__buscar { max-width: 24rem; }
+
+  &__campo {
+    display: grid;
+    gap: .3rem;
+    min-width: 0;
+
+    span { font-size: .82rem; font-weight: 600; }
+
+    input, textarea {
+      box-sizing: border-box;
+      width: 100%;
+      min-height: 2.75rem;
+      padding: .6rem;
+      border: 1px solid var(--app-surface-border);
+      border-radius: .5rem;
+      background: var(--app-surface);
+      color: var(--app-text);
+      font: inherit;
+    }
+
+    textarea { resize: vertical; }
+  }
+
+  &__historial { display: grid; gap: .85rem; }
+
+  &__formulario { display: grid; gap: .85rem; }
+
+  &__grilla {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 11rem), 1fr));
+    align-items: end;
+    gap: .75rem;
+  }
+
+  &__bloque {
+    margin: 0;
+    padding: .85rem;
+    border: 1px solid var(--app-surface-border);
+    border-radius: .7rem;
+
+    legend { padding: 0 .3rem; font-weight: 700; }
+  }
+
+  &__imc {
+    display: grid;
+    gap: .2rem;
+    padding: .55rem .7rem;
+    border-radius: .5rem;
+    background: var(--app-accent-soft);
+
+    span { font-size: 0.85rem; color: var(--app-text-soft); }
+    strong { font-size: 1.05rem; }
+  }
+
+  &__pie { display: flex; justify-content: flex-end; }
+}

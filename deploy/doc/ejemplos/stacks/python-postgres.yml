@@ -1,0 +1,18 @@
+# Ejemplo: stack python_postgres (Python 3.11 + PostgreSQL 16)
+
+st7:
+  mi-python-api:
+    branch: main
+    port: 8000
+    path: mi-python-api
+    domain: stg.blueopendata.com
+
+    stack: python_postgres
+
+    postgres_user: mi-python-api
+    postgres_db: mi-python-api
+    postgres_pass: mi-python-api
+    postgres_external_port: 5433
+
+    composer_file: plantillas/python-3.11-postgres-16/docker-compose.yml
+    nginx_config: plantillas/python-3.11-postgres-16/nginx.python-api.conf

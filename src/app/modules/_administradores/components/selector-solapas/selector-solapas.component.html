@@ -1,0 +1,44 @@
+<div class="menu-solapas__grilla">
+  @for (item of secciones; track item.seccion.id) {
+    <app-card [titulo]="item.seccion.etiqueta" [compacto]="true">
+      <ul class="menu-solapas__lista">
+        @for (solapa of item.solapas; track solapa.id) {
+          <li>
+            <label class="menu-solapas__opcion">
+              <input
+                type="checkbox"
+                class="menu-solapas__check"
+                [checked]="estaVisible(solapa)"
+                (change)="alternar(solapa.id, $any($event.target).checked)"
+              />
+              <span class="menu-solapas__texto">
+                <span class="menu-solapas__nombre">{{ solapa.etiqueta }}</span>
+                <span class="menu-solapas__roles">{{ descripcionRoles(solapa) }}</span>
+              </span>
+            </label>
+          </li>
+        }
+      </ul>
+    </app-card>
+  }
+  <app-card titulo="Barra de arriba" [compacto]="true">
+    <ul class="menu-solapas__lista">
+      <li>
+        <label class="menu-solapas__opcion">
+          <input
+            type="checkbox"
+            class="menu-solapas__check"
+            [checked]="contadorVisible()"
+            (change)="alternar(idContador, $any($event.target).checked)"
+          />
+          <span class="menu-solapas__texto">
+            <span class="menu-solapas__nombre">Contador "en el gimnasio"</span>
+            <span class="menu-solapas__roles">
+              Cuántas personas hay adentro ahora. Sirve solo si registran las entradas (QR o molinete).
+            </span>
+          </span>
+        </label>
+      </li>
+    </ul>
+  </app-card>
+</div>

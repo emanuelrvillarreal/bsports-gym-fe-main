@@ -1,0 +1,228 @@
+<section class="competencias" aria-label="Competencias">
+  <div class="competencias__vistas" role="tablist" aria-label="Competencias">
+    <button type="button" role="tab" [attr.aria-selected]="vista() === 'equipos'" [class.competencias__vista--activa]="vista() === 'equipos'" (click)="elegirVista('equipos')">Equipos y planteles</button>
+    <button type="button" role="tab" [attr.aria-selected]="vista() === 'torneos'" [class.competencias__vista--activa]="vista() === 'torneos'" (click)="elegirVista('torneos')">Torneos</button>
+  </div>
+
+  <div class="competencias__filtros">
+    <label class="competencias__campo">
+      <span>Buscar</span>
+      <input type="search" [placeholder]="vista() === 'equipos' ? 'Equipo o temporada' : 'Torneo o temporada'" [value]="busqueda()" (input)="buscar($any($event.target).value)" />
+    </label>
+    <label class="competencias__check">
+      <input type="checkbox" [checked]="incluirInactivos()" (change)="alternarInactivos($any($event.target).checked)" />
+      {{ vista() === 'equipos' ? 'Incluir equipos inactivos' : 'Incluir torneos finalizados' }}
+    </label>
+    @if (vista() === 'equipos') {
+      <app-boton (accion)="nuevoEquipo()">Nuevo equipo</app-boton>
+    } @else {
+      <app-boton (accion)="nuevoTorneo()">Nuevo torneo</app-boton>
+    }
+  </div>
+
+  @if (vista() === 'equipos') {
+    <app-tabla-responsive [columnas]="columnasEquipos" [filas]="filasEquipos()" idFila="uuid" [acciones]="accionesEquipos" [cargando]="cargando()"
+      mensajeVacio="No hay equipos. Creá el primero con “Nuevo equipo”." (accionFila)="accionEquipo($event)" (verFila)="abrirEquipo($event.uuid)" />
+  } @else {
+    <app-tabla-responsive [columnas]="columnasTorneos" [filas]="filasTorneos()" idFila="uuid" [acciones]="accionesTorneos" [cargando]="cargando()"
+      mensajeVacio="No hay torneos. Creá el primero con “Nuevo torneo”." (accionFila)="accionTorneo($event)" (verFila)="abrirTorneo($event.uuid)" />
+  }
+</section>
+
+<!-- ================= Detalle de equipo ================= -->
+<app-popup [abierto]="!!equipo()" [titulo]="equipo()?.nombre ?? 'Equipo'" ancho="extraGrande" textoCancelar="Cerrar" (cancelar)="cerrarDetalle()">
+  @if (equipo(); as e) {
+    <div class="competencias__detalle">
+      <div class="competencias__acciones">
+        <app-boton (accion)="sumarJugador()">Sumar jugador</app-boton>
+        <app-boton apariencia="texto" (accion)="editarEquipo()">Editar equipo</app-boton>
+      </div>
+      <app-vista-equipo [equipo]="e" [editable]="true" (editarJugador)="editarJugador($event)" (bajaJugador)="pedirBaja($event)"
+        (paseJugador)="pedirPase($event)" (verTorneo)="abrirTorneo($event)" />
+    </div>
+  }
+</app-popup>
+
+<!-- ================= Detalle de torneo ================= -->
+<app-popup [abierto]="!!torneo()" [titulo]="torneo()?.nombre ?? 'Torneo'" ancho="extraGrande" textoCancelar="Cerrar" (cancelar)="cerrarDetalle()">
+  @if (torneo(); as t) {
+    <div class="competencias__detalle">
+      <div class="competencias__acciones">
+        <app-boton (accion)="nuevoPartido()" [deshabilitado]="t.participantes.length < 2">Cargar partido</app-boton>
+        <app-boton apariencia="texto" (accion)="abrirParticipante()">Participantes</app-boton>
+        <app-boton apariencia="texto" (accion)="editarTorneo()">Editar torneo</app-boton>
+      </div>
+      @if (t.participantes.length < 2) {
+        <p class="competencias__ayuda">Agregá al menos dos participantes (equipos del gimnasio o rivales) para cargar partidos.</p>
+      }
+      <app-vista-torneo [torneo]="t" [editable]="true" (editarPartido)="editarPartido($event)" (eliminarPartido)="eliminarPartido($event)"
+        (estadisticasPartido)="abrirEstadisticas($event)" (quitarParticipante)="quitarParticipante($event)" />
+    </div>
+  }
+</app-popup>
+
+<!-- ================= Formulario de equipo ================= -->
+<app-popup [abierto]="formEquipoAbierto()" [titulo]="editandoEquipo() ? 'Editar equipo' : 'Nuevo equipo'" ancho="grande" [cancelarDeshabilitado]="procesando()" (cancelar)="formEquipoAbierto.set(false)">
+  @let f = formEquipo();
+  <form class="competencias__formulario" (submit)="$event.preventDefault(); guardarEquipo()">
+    <label class="competencias__campo"><span>Nombre *</span><input maxlength="120" placeholder="Ej. Primera masculino" [value]="f.nombre" (input)="cambiarEquipo('nombre', $any($event.target).value)" /></label>
+    <label class="competencias__campo"><span>Disciplina *</span><input maxlength="80" placeholder="Ej. Fútbol" [value]="f.disciplina" (input)="cambiarEquipo('disciplina', $any($event.target).value)" /></label>
+    <app-select etiqueta="Categoría" [opciones]="opcionesCategorias()" [value]="f.categoriaUuid" (valueChange)="cambiarEquipo('categoriaUuid', $event)" />
+    <app-select etiqueta="Actividad donde entrena" [opciones]="opcionesActividades()" [value]="f.actividadUuid" (valueChange)="cambiarEquipo('actividadUuid', $event)" />
+    <label class="competencias__campo"><span>Temporada</span><input maxlength="40" [value]="f.temporada" (input)="cambiarEquipo('temporada', $any($event.target).value)" /></label>
+    <label class="competencias__check"><input type="checkbox" [checked]="f.activo" (change)="alternarActivo($any($event.target).checked)" /> Equipo activo</label>
+    <fieldset class="competencias__bloque competencias__ancho">
+      <legend>Entrenadores</legend>
+      @if (!(opciones()?.profesores ?? []).length) { <p class="competencias__ayuda">No hay profesores cargados en Equipo › Profesores.</p> }
+      <div class="competencias__chips">
+        @for (p of opciones()?.profesores ?? []; track p.uuid) {
+          <label class="competencias__chip"><input type="checkbox" [checked]="f.entrenadores.has(p.uuid)" (change)="alternarEntrenador(p.uuid)" /> {{ p.nombre }}</label>
+        }
+      </div>
+    </fieldset>
+    <label class="competencias__campo competencias__ancho"><span>Descripción</span><textarea rows="2" [value]="f.descripcion" (input)="cambiarEquipo('descripcion', $any($event.target).value)"></textarea></label>
+    @if (error()) { <p class="competencias__error competencias__ancho" role="alert">{{ error() }}</p> }
+    <div class="competencias__pie competencias__ancho"><app-boton tipo="submit" [cargando]="procesando()">{{ editandoEquipo() ? 'Guardar cambios' : 'Crear equipo' }}</app-boton></div>
+  </form>
+</app-popup>
+
+<!-- ================= Jugador ================= -->
+<app-popup [abierto]="jugadorAbierto()" [titulo]="jugadorEditando() ? 'Editar jugador' : 'Sumar jugador'" [descripcion]="jugadorEditando() ? (jugadorEditando()!.nombre + ' ' + jugadorEditando()!.apellido) : (equipo()?.nombre ?? '')" ancho="grande" [cancelarDeshabilitado]="procesando()" (cancelar)="jugadorAbierto.set(false)">
+  <form class="competencias__formulario" (submit)="$event.preventDefault(); guardarJugador()">
+    @if (!jugadorEditando()) {
+      <div class="competencias__ancho competencias__socios">
+        <label class="competencias__campo"><span>Buscar socio</span><input type="search" placeholder="Nombre, apellido o DNI" [value]="busquedaSocio()" (input)="buscarSocio($any($event.target).value)" /></label>
+        <ul role="listbox" aria-label="Socios">
+          @for (s of socios(); track s.memberUuid) {
+            <li>
+              <label [class.competencias__socio--elegido]="socioElegido() === s.memberUuid">
+                <input type="radio" name="socio" [checked]="socioElegido() === s.memberUuid" (change)="socioElegido.set(s.memberUuid)" />
+                <span><strong>{{ s.apellido }}, {{ s.nombre }}</strong><small>{{ s.dni }}{{ s.categoria ? ' · ' + s.categoria : '' }}</small></span>
+              </label>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+    <label class="competencias__campo"><span>Dorsal</span><input type="number" min="0" max="999" inputmode="numeric" [value]="dorsal()" (input)="dorsal.set($any($event.target).value)" /></label>
+    <label class="competencias__campo"><span>Posición</span><input maxlength="60" placeholder="Ej. Arquero, base, líbero" [value]="posicion()" (input)="posicion.set($any($event.target).value)" /></label>
+    @if (!jugadorEditando()) {
+      <app-input-fecha etiqueta="En el plantel desde" [valorInicial]="fechaAlta()" [maximo]="hoy" (valorCambiado)="fechaAlta.set($event)" />
+    }
+    <label class="competencias__check"><input type="checkbox" [checked]="capitan()" (change)="capitan.set($any($event.target).checked)" /> Capitán</label>
+    @if (error()) { <p class="competencias__error competencias__ancho" role="alert">{{ error() }}</p> }
+    <div class="competencias__pie competencias__ancho"><app-boton tipo="submit" [cargando]="procesando()">{{ jugadorEditando() ? 'Guardar' : 'Sumar al plantel' }}</app-boton></div>
+  </form>
+</app-popup>
+
+<!-- ================= Baja ================= -->
+<app-popup [abierto]="!!bajaDe()" titulo="Dar de baja del plantel" [descripcion]="bajaDe() ? bajaDe()!.nombre + ' ' + bajaDe()!.apellido + ' queda en el plantel histórico.' : ''" ancho="pequeno" [cancelarDeshabilitado]="procesando()" (cancelar)="bajaDe.set(null)">
+  <form class="competencias__formulario" (submit)="$event.preventDefault(); confirmarBaja()">
+    <label class="competencias__campo competencias__ancho"><span>Motivo</span><input maxlength="255" placeholder="Ej. Lesión, se fue del gimnasio" [value]="motivoBaja()" (input)="motivoBaja.set($any($event.target).value)" /></label>
+    <div class="competencias__pie competencias__ancho"><app-boton tipo="submit" [cargando]="procesando()">Dar de baja</app-boton></div>
+  </form>
+</app-popup>
+
+<!-- ================= Pase ================= -->
+<app-popup [abierto]="!!paseDe()" titulo="Pase a otro equipo" [descripcion]="paseDe() ? paseDe()!.nombre + ' ' + paseDe()!.apellido : ''" ancho="pequeno" [cancelarDeshabilitado]="procesando()" (cancelar)="paseDe.set(null)">
+  <form class="competencias__formulario" (submit)="$event.preventDefault(); confirmarPase()">
+    <app-select class="competencias__ancho" etiqueta="Equipo de destino" [opciones]="opcionesDestino()" [value]="destinoPase()" (valueChange)="destinoPase.set($event)" />
+    <label class="competencias__campo"><span>Dorsal en el nuevo equipo</span><input type="number" min="0" max="999" [value]="dorsal()" (input)="dorsal.set($any($event.target).value)" /></label>
+    @if (error()) { <p class="competencias__error competencias__ancho" role="alert">{{ error() }}</p> }
+    <div class="competencias__pie competencias__ancho"><app-boton tipo="submit" [cargando]="procesando()">Registrar pase</app-boton></div>
+  </form>
+</app-popup>
+
+<!-- ================= Formulario de torneo ================= -->
+<app-popup [abierto]="formTorneoAbierto()" [titulo]="editandoTorneo() ? 'Editar torneo' : 'Nuevo torneo'" ancho="grande" [cancelarDeshabilitado]="procesando()" (cancelar)="formTorneoAbierto.set(false)">
+  @let t = formTorneo();
+  <form class="competencias__formulario" (submit)="$event.preventDefault(); guardarTorneo()">
+    <label class="competencias__campo"><span>Nombre *</span><input maxlength="120" placeholder="Ej. Liga regional Apertura" [value]="t.nombre" (input)="cambiarTorneo('nombre', $any($event.target).value)" /></label>
+    <label class="competencias__campo"><span>Disciplina *</span><input maxlength="80" [value]="t.disciplina" (input)="cambiarTorneo('disciplina', $any($event.target).value)" /></label>
+    <app-select etiqueta="Categoría" [opciones]="opcionesCategorias()" [value]="t.categoriaUuid" (valueChange)="cambiarTorneo('categoriaUuid', $event)" />
+    <label class="competencias__campo"><span>Temporada</span><input maxlength="40" [value]="t.temporada" (input)="cambiarTorneo('temporada', $any($event.target).value)" /></label>
+    <app-input-fecha etiqueta="Inicio" [valorInicial]="t.fechaInicio" (valorCambiado)="cambiarTorneo('fechaInicio', $event)" />
+    <app-input-fecha etiqueta="Fin" [valorInicial]="t.fechaFin" [minimo]="t.fechaInicio" (valorCambiado)="cambiarTorneo('fechaFin', $event)" />
+    <app-select etiqueta="Estado" [opciones]="opcionesEstadoTorneo" [value]="t.estado" (valueChange)="cambiarTorneo('estado', $event)" />
+    <fieldset class="competencias__bloque competencias__ancho">
+      <legend>Puntos por resultado</legend>
+      <div class="competencias__puntos">
+        <label class="competencias__campo"><span>Victoria</span><input type="number" min="0" max="10" [value]="t.puntosVictoria" (input)="cambiarTorneo('puntosVictoria', $any($event.target).value)" /></label>
+        <label class="competencias__campo"><span>Empate</span><input type="number" min="0" max="10" [value]="t.puntosEmpate" (input)="cambiarTorneo('puntosEmpate', $any($event.target).value)" /></label>
+        <label class="competencias__campo"><span>Derrota</span><input type="number" min="0" max="10" [value]="t.puntosDerrota" (input)="cambiarTorneo('puntosDerrota', $any($event.target).value)" /></label>
+      </div>
+      <small class="competencias__ayuda">Fútbol suele usar 3-1-0; básquet y vóley, 2-1-1 o similares.</small>
+    </fieldset>
+    <label class="competencias__campo competencias__ancho"><span>Descripción</span><textarea rows="2" [value]="t.descripcion" (input)="cambiarTorneo('descripcion', $any($event.target).value)"></textarea></label>
+    @if (error()) { <p class="competencias__error competencias__ancho" role="alert">{{ error() }}</p> }
+    <div class="competencias__pie competencias__ancho"><app-boton tipo="submit" [cargando]="procesando()">{{ editandoTorneo() ? 'Guardar cambios' : 'Crear torneo' }}</app-boton></div>
+  </form>
+</app-popup>
+
+<!-- ================= Participantes ================= -->
+<app-popup [abierto]="participanteAbierto()" titulo="Participantes" [descripcion]="torneo()?.nombre ?? ''" ancho="mediano" textoCancelar="Listo" [cancelarDeshabilitado]="procesando()" (cancelar)="participanteAbierto.set(false)">
+  <form class="competencias__formulario" (submit)="$event.preventDefault(); guardarParticipante()">
+    <app-select class="competencias__ancho" etiqueta="Equipo del gimnasio" [opciones]="opcionesEquiposParticipantes()" [value]="participanteEquipo()" (valueChange)="participanteEquipo.set($event)" />
+    @if (!participanteEquipo()) {
+      <label class="competencias__campo competencias__ancho"><span>Nombre del rival</span><input maxlength="120" placeholder="Ej. Gimnasio Atlético Vecino" [value]="participanteRival()" (input)="participanteRival.set($any($event.target).value)" /></label>
+    }
+    @if (error()) { <p class="competencias__error competencias__ancho" role="alert">{{ error() }}</p> }
+    <div class="competencias__pie competencias__ancho"><app-boton tipo="submit" [cargando]="procesando()">Agregar</app-boton></div>
+    <ul class="competencias__lista competencias__ancho" role="list">
+      @for (p of torneo()?.participantes ?? []; track p.uuid) { <li>{{ p.nombre }} <small>{{ p.propio ? 'del gimnasio' : 'rival' }}</small></li> }
+    </ul>
+  </form>
+</app-popup>
+
+<!-- ================= Partido ================= -->
+<app-popup [abierto]="partidoAbierto()" [titulo]="partidoEditando() ? 'Resultado del partido' : 'Cargar partido'" ancho="grande" [cancelarDeshabilitado]="procesando()" (cancelar)="partidoAbierto.set(false)">
+  @let p = formPartido();
+  <form class="competencias__formulario" (submit)="$event.preventDefault(); guardarPartido()">
+    <label class="competencias__campo"><span>Fecha o ronda *</span><input maxlength="60" placeholder="Fecha 1, Semifinal…" [value]="p.ronda" (input)="cambiarPartido('ronda', $any($event.target).value)" /></label>
+    <label class="competencias__campo"><span>Día y hora</span><input type="datetime-local" [value]="p.fechaHora" (input)="cambiarPartido('fechaHora', $any($event.target).value)" /></label>
+    <label class="competencias__campo"><span>Lugar</span><input maxlength="120" [value]="p.lugar" (input)="cambiarPartido('lugar', $any($event.target).value)" /></label>
+    <app-select etiqueta="Estado" [opciones]="opcionesEstadoPartido" [value]="p.estado" (valueChange)="cambiarPartido('estado', $event)" />
+    <div class="competencias__resultado competencias__ancho">
+      <app-select etiqueta="Local *" [opciones]="opcionesParticipantes()" [value]="p.localUuid" (valueChange)="cambiarPartido('localUuid', $event)" />
+      <label class="competencias__campo"><span>Tantos</span><input type="number" min="0" inputmode="numeric" [disabled]="p.estado !== 'JUGADO'" [value]="p.tantosLocal" (input)="cambiarPartido('tantosLocal', $any($event.target).value)" /></label>
+      <span class="competencias__vs" aria-hidden="true">–</span>
+      <label class="competencias__campo"><span>Tantos</span><input type="number" min="0" inputmode="numeric" [disabled]="p.estado !== 'JUGADO'" [value]="p.tantosVisitante" (input)="cambiarPartido('tantosVisitante', $any($event.target).value)" /></label>
+      <app-select etiqueta="Visitante *" [opciones]="opcionesParticipantes()" [value]="p.visitanteUuid" (valueChange)="cambiarPartido('visitanteUuid', $event)" />
+    </div>
+    <label class="competencias__campo competencias__ancho"><span>Observaciones</span><textarea rows="2" [value]="p.observaciones" (input)="cambiarPartido('observaciones', $any($event.target).value)"></textarea></label>
+    @if (error()) { <p class="competencias__error competencias__ancho" role="alert">{{ error() }}</p> }
+    <div class="competencias__pie competencias__ancho"><app-boton tipo="submit" [cargando]="procesando()">Guardar</app-boton></div>
+  </form>
+</app-popup>
+
+<!-- ================= Estadísticas ================= -->
+<app-popup [abierto]="!!estadisticas()" titulo="Estadísticas del partido"
+  [descripcion]="estadisticas() ? estadisticas()!.partido.local.nombre + ' ' + estadisticas()!.partido.tantosLocal + ' - ' + estadisticas()!.partido.tantosVisitante + ' ' + estadisticas()!.partido.visitante.nombre : ''"
+  ancho="extraGrande" [cancelarDeshabilitado]="procesando()" (cancelar)="estadisticas.set(null)">
+  <form class="competencias__estadisticas" (submit)="$event.preventDefault(); guardarEstadisticas()">
+    <p class="competencias__ayuda">Aparecen los jugadores que estaban en el plantel el día del partido. Si falta alguien, revisá su fecha de alta en el equipo.</p>
+    @if (!filasEstadisticas().length) {
+      <p class="competencias__ayuda">No hay jugadores del gimnasio en el plantel en esa fecha.</p>
+    } @else {
+      <div class="competencias__scroll">
+        <table>
+          <thead><tr><th scope="col">Jugador</th><th scope="col">Tantos</th><th scope="col">Asist.</th><th scope="col">Amon.</th><th scope="col">Exp.</th><th scope="col">Figura</th></tr></thead>
+          <tbody>
+            @for (f of filasEstadisticas(); track f.jugadorUuid; let i = $index) {
+              <tr>
+                <td><strong>{{ f.dorsal ?? '' }} {{ f.nombre }}</strong><small>{{ f.equipo }}</small></td>
+                <td><input type="number" min="0" [attr.aria-label]="'Tantos de ' + f.nombre" [value]="f.tantos" (input)="cambiarEstadistica(i, 'tantos', $any($event.target).value)" /></td>
+                <td><input type="number" min="0" [attr.aria-label]="'Asistencias de ' + f.nombre" [value]="f.asistencias" (input)="cambiarEstadistica(i, 'asistencias', $any($event.target).value)" /></td>
+                <td><input type="number" min="0" max="10" [attr.aria-label]="'Amonestaciones de ' + f.nombre" [value]="f.amonestaciones" (input)="cambiarEstadistica(i, 'amonestaciones', $any($event.target).value)" /></td>
+                <td><input type="number" min="0" max="5" [attr.aria-label]="'Expulsiones de ' + f.nombre" [value]="f.expulsiones" (input)="cambiarEstadistica(i, 'expulsiones', $any($event.target).value)" /></td>
+                <td><input type="checkbox" [attr.aria-label]="'Figura: ' + f.nombre" [checked]="f.figura" (change)="alternarFigura(i)" /></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (error()) { <p class="competencias__error" role="alert">{{ error() }}</p> }
+      <div class="competencias__pie"><app-boton tipo="submit" [cargando]="procesando()">Guardar estadísticas</app-boton></div>
+    }
+  </form>
+</app-popup>

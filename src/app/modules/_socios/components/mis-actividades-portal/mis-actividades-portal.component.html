@@ -1,0 +1,84 @@
+<section class="mis-actividades-portal" aria-label="Mis actividades">
+  <app-card
+    titulo="Mis actividades"
+    [descripcion]="
+      esTitular
+        ? 'Inscripciones vigentes tuyas o de un integrante de tu grupo familiar.'
+        : 'Inscripciones vigentes asociadas a tu cuenta.'
+    "
+  >
+    @if (esTitular) {
+      <div cardHeaderActions class="mis-actividades-portal__selector-socio">
+        <app-select
+          etiqueta="Ver actividades de socio"
+          [opciones]="opcionesMiembros()"
+          [value]="miembroSeleccionado()"
+          (valueChange)="cambiarMiembro($event)"
+        />
+      </div>
+    }
+
+    @if (errorGrupo()) {
+      <p class="mis-actividades-portal__error-grupo" role="alert">{{ errorGrupo() }}</p>
+    }
+
+    @if (error()) {
+      <div class="mis-actividades-portal__estado">
+        <p role="alert">{{ error() }}</p>
+        <app-boton tipo="button" (accion)="cargar()">Reintentar</app-boton>
+      </div>
+    } @else {
+      <app-tabla-responsive
+        [columnas]="columnas"
+        [filas]="filas()"
+        idFila="inscripcionUuid"
+        [cargando]="cargando()"
+        [acciones]="acciones"
+        [mostrarAcciones]="acciones.length > 0"
+        [tbody_rows]="4"
+        mensajeVacio="Todavía no hay inscripciones vigentes."
+        (accionFila)="manejarAccion($event)"
+      />
+    }
+  </app-card>
+</section>
+
+<app-popup
+  [abierto]="inscripcionEditada() !== null"
+  titulo="Cambiar horarios"
+  [mostrarEncabezado]="false"
+  [mostrarCancelar]="false"
+  [cancelarDeshabilitado]="guardandoHorarios()"
+  (cancelar)="cerrarCambioHorarios()"
+>
+  @if (inscripcionEditada(); as inscripcion) {
+    <app-titulo-hero
+      [titulo]="'Horarios de ' + inscripcion.actividad"
+      [subtitulo]="'Elegí a qué horarios va ' + inscripcion.inscripto + '. La cuota no cambia.'"
+      icono="actividades"
+    />
+    <app-selector-horarios-actividad
+      [horarios]="inscripcion.horariosActividad"
+      [seleccionados]="horariosEditados()"
+      [horariosPropios]="inscripcion.horarioUuids"
+      [deshabilitado]="guardandoHorarios()"
+      (seleccionCambiada)="horariosEditados.set($event)"
+    />
+  }
+  <app-boton
+    popupAcciones
+    tipo="button"
+    apariencia="texto"
+    [deshabilitado]="guardandoHorarios()"
+    (accion)="cerrarCambioHorarios()"
+    >Cancelar</app-boton
+  >
+  <app-boton
+    popupAcciones
+    tipo="button"
+    [cargando]="guardandoHorarios()"
+    [deshabilitado]="!hayCambiosHorarios()"
+    (accion)="guardarHorarios()"
+    >Guardar horarios</app-boton
+  >
+</app-popup>

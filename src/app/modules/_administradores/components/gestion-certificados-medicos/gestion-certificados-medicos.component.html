@@ -1,0 +1,82 @@
+<app-card
+  titulo="Certificados médicos"
+  descripcion="Quién tiene el certificado al día, quién está por vencer y quién tiene que renovarlo."
+>
+  @if (bloqueados() > 0) {
+    <div class="certificados__alerta" role="status">
+      <strong>{{ bloqueados() }} {{ bloqueados() === 1 ? 'socio no puede' : 'socios no pueden' }} hacer una actividad</strong>
+      porque la actividad exige certificado vigente y no lo tienen.
+      <button type="button" class="certificados__alerta-accion" (click)="verBloqueados()">Ver quiénes son</button>
+    </div>
+  }
+
+  <div class="certificados__tarjetas" role="group" aria-label="Filtrar por situación del certificado">
+    @for (tarjeta of tarjetas; track tarjeta.situacion) {
+      <button
+        type="button"
+        class="certificados__tarjeta"
+        [class.certificados__tarjeta--activa]="situacion() === tarjeta.situacion"
+        [attr.data-situacion]="tarjeta.situacion"
+        [attr.aria-pressed]="situacion() === tarjeta.situacion"
+        (click)="alternarSituacion(tarjeta.situacion)"
+      >
+        <span class="certificados__tarjeta-numero">{{ conteo(tarjeta.situacion) }}</span>
+        <span class="certificados__tarjeta-titulo">{{ tarjeta.titulo }}</span>
+        <span class="certificados__tarjeta-ayuda">{{ tarjeta.ayuda }}</span>
+      </button>
+    }
+  </div>
+
+  <form class="certificados__filtros" (submit)="buscar($event)">
+    <label class="certificados__buscar">
+      <span>Buscar socio</span>
+      <input
+        type="search"
+        placeholder="Nombre, apellido o DNI"
+        [value]="busqueda()"
+        (input)="busqueda.set($any($event.target).value)"
+      />
+    </label>
+    <label class="certificados__check">
+      <input type="checkbox" [checked]="soloQueLoNecesitan()" (change)="alternarSoloNecesitan($event)" />
+      <span>Solo quienes hacen actividades que lo exigen</span>
+    </label>
+    <button type="submit" class="certificados__boton">Buscar</button>
+    @if (hayFiltros()) {
+      <button type="button" class="certificados__boton certificados__boton--texto" (click)="limpiarFiltros()">
+        Limpiar filtros
+      </button>
+    }
+  </form>
+
+  @if (error()) {
+    <p class="certificados__error" role="alert">
+      {{ error() }}
+      <button type="button" class="certificados__boton certificados__boton--texto" (click)="reintentar()">Reintentar</button>
+    </p>
+  }
+
+  <ng-template #celdaSituacion let-fila>
+    <span class="certificados__chip" [attr.data-situacion]="fila.situacion">{{ fila.situacionTexto }}</span>
+    @if (fila.bloqueado) {
+      <span class="certificados__bloqueado" title="Hoy no puede hacer una actividad que exige certificado">Bloqueado</span>
+    }
+  </ng-template>
+
+  <app-tabla-responsive
+    [columnas]="columnas"
+    [filas]="filas()"
+    [plantillasCeldas]="{ situacionTexto: celdaSituacion }"
+    idFila="memberUuid"
+    [mostrarAcciones]="false"
+    [cargando]="cargando()"
+    [tbody_rows]="7"
+    mensajeVacio="No hay socios que coincidan con el filtro."
+  />
+  <app-paginacion
+    [paginaActual]="pagina()"
+    [totalPaginas]="totalPaginas()"
+    [deshabilitado]="cargando()"
+    (paginaCambiada)="cambiarPagina($event)"
+  />
+</app-card>

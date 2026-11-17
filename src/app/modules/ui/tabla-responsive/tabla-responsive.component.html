@@ -1,0 +1,745 @@
+<div
+  class="tabla-responsive"
+  [class.tabla-responsive--filas-limitadas]="(filasVisiblesConfiguradas() ?? 0) > 0"
+  [class.tabla-responsive--input-activo]="mostrarFilaInput()"
+  [class.tabla-responsive--alto-rendimiento]="altoRendimiento()"
+  [style.--tabla-max-filas]="
+    (filasVisiblesConfiguradas() ?? 0) > 0 ? filasVisiblesConfiguradas() : null
+  "
+  role="region"
+  aria-label="Tabla de datos"
+  [attr.aria-busy]="cargando() || trInputCargando()"
+  tabindex="0"
+  (keydown.enter)="manejarEnterComoAgregar($event)"
+>
+  <div class="tabla-responsive__shell">
+    @if (mostrarToolbarTrInput()) {
+      <div class="tabla-responsive__header">
+        <div class="tabla-responsive__toolbar">
+          @if (mostrarMensajeToolbar()) {
+            <div class="tabla-responsive__toolbar-message" aria-live="polite">
+              <small>{{ trInputMensaje() }}</small>
+            </div>
+          }
+
+          @if (trInputConmutador()) {
+            <label class="tabla-responsive__switch">
+              <input
+                type="checkbox"
+                [checked]="filaInputVisible()"
+                [attr.aria-label]="
+                  filaInputVisible()
+                    ? 'Ocultar fila de carga manual'
+                    : 'Mostrar fila de carga manual'
+                "
+                (change)="alternarFilaInputDesdeEvento($event)"
+              />
+              <span class="tabla-responsive__switch-ui" aria-hidden="true"></span>
+              <strong>{{ filaInputVisible() ? 'Ocultar input' : 'Mostrar input' }}</strong>
+            </label>
+          }
+
+          @if (
+            trInputHoldControl() ||
+            trInputBotonAgregar() ||
+            accionesCabecera().length ||
+            filtrosCabecera().length
+          ) {
+            <div class="tabla-responsive__toolbar-actions">
+              @for (filtro of filtrosCabecera(); track filtro.id) {
+                @if (filtro.variante === 'hold') {
+                  <label class="tabla-responsive__hold-toggle" [class.tabla-responsive__hold-toggle--primario]="filtro.acento === 'primario'" [attr.aria-label]="filtro.texto">
+                    <span class="tabla-responsive__hold-label">{{ filtro.texto }}</span>
+                    <input type="checkbox" [checked]="filtro.activo" [disabled]="filtro.deshabilitado ?? false" (change)="cambiarFiltroCabecera(filtro.id, $event)" />
+                    <span class="tabla-responsive__hold-checkbox" aria-hidden="true"><span class="tabla-responsive__hold-light"></span></span>
+                  </label>
+                } @else {
+                  <label class="tabla-responsive__filtro-cabecera">
+                    <span class="tabla-responsive__add-text">{{ filtro.texto }}</span>
+                    <input
+                      type="checkbox"
+                      [checked]="filtro.activo"
+                      [disabled]="filtro.deshabilitado ?? false"
+                      [attr.aria-label]="filtro.texto"
+                      (change)="cambiarFiltroCabecera(filtro.id, $event)"
+                    />
+                    <span class="tabla-responsive__filtro-cabecera-control" aria-hidden="true"></span>
+                  </label>
+                }
+              }
+
+              @if (trInputHoldControl() || trInputBotonAgregar()) {
+                <div class="tabla-responsive__toolbar-group">
+                  @if (trInputHoldControl()) {
+                    <label
+                      class="tabla-responsive__hold-toggle"
+                      aria-label="Mantener abierta la carga"
+                    >
+                      <span class="tabla-responsive__hold-label">{{ trInputHoldLabel() }}</span>
+                      <input
+                        type="checkbox"
+                        [checked]="trInputHoldActivo()"
+                        (change)="alternarHoldTrInput($event)"
+                      />
+                      <span class="tabla-responsive__hold-checkbox" aria-hidden="true">
+                        <span class="tabla-responsive__hold-light"></span>
+                      </span>
+                    </label>
+                  }
+
+                  @if (trInputBotonAgregar()) {
+                    <app-boton
+                      tipo="button"
+                      class="tabla-responsive__add-button"
+                      [aria-haspopup]="trInputBotonAgregarModo() === 'emitir' ? 'dialog' : null"
+                      (accion)="abrirNuevoTrInput()"
+                    >
+                      <ng-icon name="heroPlus" aria-hidden="true" />
+                      <span>{{ trInputBotonAgregarTexto().trim() || 'Agregar' }}</span>
+                    </app-boton>
+                  }
+                </div>
+              }
+
+              @for (accion of accionesCabecera(); track accion.id) {
+                <div class="tabla-responsive__toolbar-group">
+                  <app-boton
+                    tipo="button"
+                    class="tabla-responsive__add-button"
+                    [deshabilitado]="accion.deshabilitada ?? false"
+                    [aria-haspopup]="accion.abreDialogo ? 'dialog' : null"
+                    (accion)="accionCabecera.emit(accion.id)"
+                  >
+                    <ng-icon name="heroPlus" aria-hidden="true" />
+                    <span>{{ accion.texto }}</span>
+                  </app-boton>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <div class="tabla-responsive__body">
+      @if (cargando()) {
+        <div
+          class="tabla-responsive__cargando"
+          [class.tabla-responsive__cargando--reservado]="vacioReservado()"
+          role="status"
+          aria-live="polite"
+        >
+          <app-load-spinner-blue ariaLabel="Cargando datos de la tabla" />
+        </div>
+      } @else if (mostrarEstadoVacio()) {
+        <div
+          class="tabla-responsive__vacio"
+          [class.tabla-responsive__vacio--reservado]="vacioReservado()"
+          role="status"
+          aria-live="polite"
+        >
+          <p class="tabla-responsive__vacio-inner">{{ mensajeVacio() }}</p>
+        </div>
+      } @else {
+          <div
+            class="tabla-responsive__table-wrap"
+            [class.tabla-responsive__table-wrap--alto-limitado]="!!maxAltura()"
+            [style.max-height]="maxAltura()"
+          >
+          <table [style.--tabla-columnas]="plantillaColumnas()">
+            <thead>
+              <tr>
+                @for (columna of columnas(); track columna.id) {
+                  <th scope="col">{{ columna.titulo }}</th>
+                }
+                @if (mostrarAcciones()) {
+                  <th scope="col" class="tabla-responsive__acciones-titulo">{{ tituloAcciones() }}</th>
+                }
+              </tr>
+            </thead>
+
+            <tbody
+              #carruselFilas
+              (pointerdown)="iniciarArrastreCarrusel($event)"
+              (pointermove)="moverArrastreCarrusel($event)"
+              (pointerup)="finalizarArrastreCarrusel($event)"
+              (pointercancel)="cancelarArrastreCarrusel($event)"
+              (wheel)="cancelarNavegacionProgramaticaCarrusel()"
+              (scroll)="manejarScrollCarrusel($event)"
+            >
+              <ng-template #filaEditable let-fila="fila" let-esNueva="esNueva">
+                <tr class="tabla-responsive__fila-input">
+                  @for (columna of columnas(); track versionTrInput() + '-' + columna.id) {
+                    <td
+                      [attr.data-label]="columna.titulo"
+                      [class.tabla-responsive__celda--oculta-mobile]="
+                        !mostrarColumnaEnTrInput(columna)
+                      "
+                      [ngClass]="'tabla-responsive__celda--' + (columna.tipo ?? 'texto')"
+                    >
+                      @if (mostrarColumnaEnTrInput(columna) && esColumnaEditableEnTrInput(columna)) {
+                        <label class="tabla-responsive__input-label">
+                          <span>{{ columna.titulo }}</span>
+                          @if (usaChipsMulti(columna)) {
+                            <div
+                              class="tabla-responsive__chips-input"
+                              [class.tabla-responsive__chips-input--invalido]="
+                                esCampoInvalido(columna)
+                              "
+                            >
+                              @for (opcion of columna.opciones ?? []; track opcion.value) {
+                                <app-boton
+                                  tipo="button"
+                                  apariencia="texto"
+                                  class="tabla-responsive__chips-option"
+                                  [class.tabla-responsive__chips-option--activo]="
+                                    opcionChipsActiva(columna, opcion)
+                                  "
+                                  (accion)="alternarOpcionChipsMulti(columna, opcion)"
+                                >
+                                  {{ opcion.label }}
+                                </app-boton>
+                              }
+                            </div>
+                          } @else if (usaSelect(columna)) {
+                            <select
+                              class="tabla-responsive__input tabla-responsive__select"
+                              [class.tabla-responsive__input--invalido]="esCampoInvalido(columna)"
+                              [attr.aria-label]="columna.titulo"
+                              [value]="obtenerValorSelect(columna)"
+                              (change)="actualizarValorInput(columna, $event)"
+                            >
+                              @if (mostrarPlaceholderSelect(columna, esNueva)) {
+                                <option value="">{{ columna.titulo }}</option>
+                              }
+                              @for (opcion of columna.opciones; track opcion.value) {
+                                <option
+                                  [value]="normalizarOpcionSelectValue(opcion.value)"
+                                  [selected]="
+                                    normalizarOpcionSelectValue(opcion.value) ===
+                                    obtenerValorSelect(columna)
+                                  "
+                                >
+                                  {{ opcion.label }}
+                                </option>
+                              }
+                            </select>
+                          } @else if (usaPickerNativo(columna)) {
+                            <div
+                              class="tabla-responsive__input-wrap tabla-responsive__input-wrap--date"
+                            >
+                              <input
+                                class="tabla-responsive__input tabla-responsive__input--date"
+                                [class.tabla-responsive__input--invalido]="esCampoInvalido(columna)"
+                                [type]="tipoInput(columna)"
+                                [attr.aria-label]="columna.titulo"
+                                [attr.placeholder]="columna.titulo"
+                                [attr.maxlength]="columna.maxLength ?? null"
+                                [attr.min]="columna.min ?? null"
+                                [attr.max]="columna.max ?? null"
+                                [value]="obtenerValorInput(columna)"
+                                (input)="actualizarValorInput(columna, $event)"
+                                (change)="actualizarValorInput(columna, $event)"
+                              />
+                              <app-boton
+                                tipo="button"
+                                apariencia="texto"
+                                class="tabla-responsive__picker-toggle"
+                                [aria-label]="'Abrir selector de ' + columna.titulo"
+                                (accion)="abrirSelectorFecha($event)"
+                              >
+                                <ng-icon [name]="iconoPicker(columna)" aria-hidden="true" />
+                              </app-boton>
+                            </div>
+                          } @else if (esInputMoneda(columna)) {
+                            <div
+                              class="tabla-responsive__input-wrap tabla-responsive__input-wrap--money"
+                            >
+                              <input
+                                class="tabla-responsive__input tabla-responsive__input--money"
+                                [class.tabla-responsive__input--invalido]="esCampoInvalido(columna)"
+                                type="text"
+                                [attr.aria-label]="columna.titulo"
+                                [attr.placeholder]="columna.titulo"
+                                [attr.inputmode]="columna.inputMode ?? 'decimal'"
+                                [attr.maxlength]="columna.maxLength ?? null"
+                                [value]="obtenerValorInput(columna)"
+                                (input)="actualizarValorMoneda(columna, $event)"
+                                (blur)="formatearInputMoneda(columna, $event)"
+                                (change)="actualizarValorMoneda(columna, $event)"
+                              />
+                            </div>
+                          } @else {
+                            <input
+                              class="tabla-responsive__input"
+                              [class.tabla-responsive__input--invalido]="esCampoInvalido(columna)"
+                              [type]="tipoInput(columna)"
+                              [attr.aria-label]="columna.titulo"
+                              [attr.placeholder]="columna.titulo"
+                              [attr.inputmode]="columna.inputMode ?? null"
+                              [attr.maxlength]="columna.maxLength ?? null"
+                              [attr.min]="columna.min ?? null"
+                              [attr.max]="columna.max ?? null"
+                              [attr.pattern]="columna.pattern ?? null"
+                              [checked]="
+                                columna.tipo === 'estado' ? obtenerValorInput(columna) : null
+                              "
+                              [value]="
+                                columna.tipo === 'estado' ? '' : obtenerValorVisibleInput(columna)
+                              "
+                              (input)="actualizarValorInput(columna, $event)"
+                              (change)="actualizarValorInput(columna, $event)"
+                            />
+                          }
+                        </label>
+                      } @else if (mostrarColumnaEnTrInput(columna)) {
+                        @if (columna.tipo === 'avatar') {
+                          <span
+                            aria-hidden="true"
+                            class="tabla-responsive__avatar-placeholder"
+                          ></span>
+                        } @else {
+                          <span class="tabla-responsive__texto">{{
+                            esNueva ? '-' : obtenerTexto(fila, columna)
+                          }}</span>
+                        }
+                      }
+                    </td>
+                  }
+
+                  @if (mostrarAcciones()) {
+                    <td
+                      class="tabla-responsive__acciones tabla-responsive__acciones--input"
+                      [attr.data-label]="tituloAcciones()"
+                    >
+                      <div class="tabla-responsive__input-acciones" aria-label="Acciones de carga">
+                        <app-boton
+                          tipo="button"
+                          apariencia="texto"
+                          class="tabla-responsive__action-btn tabla-responsive__action-btn--warning"
+                          [attr.data-action-text]="textoAccionRestablecerTrInput()"
+                          [attr.aria-label]="textoAccionRestablecerTrInput() + ' carga'"
+                          [deshabilitado]="trInputCargando()"
+                          (accion)="restablecerTrInput()"
+                        >
+                          <ng-icon name="heroArrowPath" aria-hidden="true" />
+                          <span class="tabla-responsive__action-text">{{ textoAccionRestablecerTrInput() }}</span>
+                        </app-boton>
+                        <app-boton
+                          tipo="button"
+                          apariencia="texto"
+                          class="tabla-responsive__action-btn tabla-responsive__action-btn--success"
+                          data-action-text="Confirmar"
+                          aria-label="Confirmar carga"
+                          [cargando]="trInputCargando()"
+                          ariaLabelCarga="Guardando registro"
+                          (accion)="confirmarTrInput()"
+                        >
+                          <ng-icon name="heroCheck" aria-hidden="true" />
+                          <span class="tabla-responsive__action-text">Confirmar</span>
+                        </app-boton>
+                      </div>
+                    </td>
+                  } @else {
+                    <td class="tabla-responsive__input-acciones" aria-label="Acciones de carga">
+                      <div class="tabla-responsive__input-acciones-contenido">
+                        <app-boton
+                          tipo="button"
+                          apariencia="texto"
+                          class="tabla-responsive__action-btn tabla-responsive__action-btn--warning"
+                          [attr.data-action-text]="textoAccionRestablecerTrInput()"
+                          [attr.aria-label]="textoAccionRestablecerTrInput() + ' carga'"
+                          [deshabilitado]="trInputCargando()"
+                          (accion)="restablecerTrInput()"
+                        >
+                          <ng-icon name="heroArrowPath" aria-hidden="true" />
+                          <span class="tabla-responsive__action-text">{{ textoAccionRestablecerTrInput() }}</span>
+                        </app-boton>
+                        <app-boton
+                          tipo="button"
+                          apariencia="texto"
+                          class="tabla-responsive__action-btn tabla-responsive__action-btn--success"
+                          data-action-text="Confirmar"
+                          aria-label="Confirmar carga"
+                          [cargando]="trInputCargando()"
+                          ariaLabelCarga="Guardando registro"
+                          (accion)="confirmarTrInput()"
+                        >
+                          <ng-icon name="heroCheck" aria-hidden="true" />
+                          <span class="tabla-responsive__action-text">Confirmar</span>
+                        </app-boton>
+                      </div>
+                    </td>
+                  }
+                </tr>
+              </ng-template>
+
+              @if (mostrarFilaInput() && !trInputFilaEditandoId()) {
+                <ng-container
+                  *ngTemplateOutlet="filaEditable; context: { fila: null, esNueva: true }"
+                />
+              }
+
+              @for (fila of filas(); track obtenerTrack(fila)) {
+                @if (mostrarFilaInput() && esFilaEditando(fila)) {
+                  <ng-container
+                    *ngTemplateOutlet="filaEditable; context: { fila: fila, esNueva: false }"
+                  />
+                } @else {
+                  <tr
+                    [ngClass]="obtenerClaseFila(fila)"
+                    [class.tabla-responsive__fila--clickeable]="filaClickeable()"
+                    [attr.tabindex]="filaClickeable() ? 0 : null"
+                    (click)="clickEnFila(fila, $event)"
+                    (keydown.enter)="clickEnFila(fila, $event)"
+                  >
+                    @for (columna of columnas(); track columna.id) {
+                      <td
+                        [attr.data-label]="columna.titulo"
+                        [ngClass]="'tabla-responsive__celda--' + (columna.tipo ?? 'texto')"
+                      >
+                        <div
+                          class="tabla-responsive__celda-contenido"
+                          [attr.tabindex]="altoRendimiento() ? null : 0"
+                          [attr.role]="altoRendimiento() ? null : 'button'"
+                          [attr.aria-expanded]="
+                            altoRendimiento() ? null : tooltipEstaAbierto(fila, columna)
+                          "
+                          [attr.title]="
+                            altoRendimiento() ? obtenerTooltipTexto(fila, columna) : null
+                          "
+                          (click)="
+                            altoRendimiento() ? null : alternarTooltip(fila, columna, $event)
+                          "
+                          (keydown.enter)="
+                            altoRendimiento()
+                              ? null
+                              : alternarTooltipDesdeTeclado(fila, columna, $event)
+                          "
+                          (keydown.space)="
+                            altoRendimiento()
+                              ? null
+                              : alternarTooltipDesdeTeclado(fila, columna, $event)
+                          "
+                        >
+                          @if (obtenerPlantillaCelda(columna); as plantillaCelda) {
+                            <ng-container
+                              *ngTemplateOutlet="plantillaCelda; context: { $implicit: fila }"
+                            />
+                          } @else {
+                          @switch (columna.tipo) {
+                            @case ('avatar') {
+                              <span class="tabla-responsive__socio">
+                                @if (fotoDisponible(fila, columna)) {
+                                  <span class="tabla-responsive__avatar-media">
+                                    @if (fotoCargando(fila, columna)) {
+                                      <span
+                                        class="tabla-responsive__avatar-spinner"
+                                        aria-hidden="true"
+                                      >
+                                        <app-load-spinner
+                                          tipo="imagen"
+                                          [altoRendimiento]="altoRendimiento()"
+                                        />
+                                      </span>
+                                    }
+                                    <img
+                                      class="tabla-responsive__avatar-image"
+                                      [src]="obtenerFoto(fila, columna)"
+                                      [attr.alt]="obtenerNombreCompleto(fila)"
+                                      [attr.aria-label]="obtenerNombreCompleto(fila)"
+                                      [class.tabla-responsive__avatar-image--cargando]="
+                                        fotoCargando(fila, columna)
+                                      "
+                                      (load)="manejarFotoCargada(fila, columna)"
+                                      (error)="manejarFotoError(fila, columna)"
+                                    />
+                                  </span>
+                                } @else {
+                                  <span
+                                    class="tabla-responsive__avatar-fallback"
+                                    aria-hidden="true"
+                                    >{{ obtenerIniciales(fila) }}</span
+                                  >
+                                }
+                                @if (mostrarNombreEnAvatar(columna)) {
+                                  <strong>{{ obtenerNombreCompleto(fila) }}</strong>
+                                }
+                              </span>
+                            }
+                            @case ('estado') {
+                              <span
+                                class="tabla-responsive__estado"
+                                [ngClass]="obtenerClaseEstado(fila, columna)"
+                              >
+                                {{ obtenerTexto(fila, columna) }}
+                              </span>
+                            }
+                            @case ('chips') {
+                              <span class="tabla-responsive__chips">
+                                @for (item of obtenerArray(fila, columna); track $index) {
+                                  <span [ngClass]="obtenerClaseChip(fila, columna, item)">{{
+                                    item
+                                  }}</span>
+                                }
+                              </span>
+                            }
+                            @case ('horario') {
+                              <span class="tabla-responsive__horario">
+                                <span>{{ obtenerTexto(fila, columna) }}</span>
+                                <ng-icon name="heroClock" aria-hidden="true" />
+                              </span>
+                            }
+                            @default {
+                              <span
+                                class="tabla-responsive__texto"
+                                [ngClass]="obtenerClaseCelda(fila, columna)"
+                                [style.color]="obtenerColorTexto(fila, columna)"
+                                >{{ obtenerTexto(fila, columna) }}</span
+                              >
+                            }
+                          }
+                          }
+                        </div>
+                      </td>
+                    }
+
+                    @if (mostrarAcciones()) {
+                      <td class="tabla-responsive__acciones" [attr.data-label]="tituloAcciones()">
+                        <div class="tabla-responsive__acciones-contenido">
+                          @if (plantillaAcciones()) {
+                            <ng-container
+                              *ngTemplateOutlet="plantillaAcciones(); context: { $implicit: fila }"
+                            />
+                          } @else if (accionesResueltas().length) {
+                            <div
+                              class="tabla-responsive__acciones-botones"
+                              role="group"
+                              aria-label="Acciones disponibles"
+                            >
+                              @for (accion of accionesEnLinea(fila); track accion.id) {
+                                @if (accionEstaVisible(accion, fila)) {
+                                  <app-boton
+                                    tipo="button"
+                                    apariencia="texto"
+                                    [soloIcono]="!(accion.mostrarTexto ?? true)"
+                                    class="tabla-responsive__action-btn"
+                                    [class.tabla-responsive__action-btn--accent]="
+                                      accion.variante === 'accent'
+                                    "
+                                    [class.tabla-responsive__action-btn--custom]="
+                                      accion.variante === 'custom'
+                                    "
+                                    [class.tabla-responsive__action-btn--danger]="
+                                      accion.variante === 'danger'
+                                    "
+                                    [class.tabla-responsive__action-btn--neutral]="
+                                      accion.variante === 'neutral'
+                                    "
+                                    [class.tabla-responsive__action-btn--success]="
+                                      accion.variante === 'success'
+                                    "
+                                    [class.tabla-responsive__action-btn--warning]="
+                                      accion.variante === 'warning'
+                                    "
+                                    [class.tabla-responsive__action-btn--deshabilitado]="
+                                      accionEstaDeshabilitada(accion, fila)
+                                    "
+                                    [class.tabla-responsive__action-btn--con-texto]="accion.mostrarTexto ?? true"
+                                    [style.--tabla-action-custom-hue]="
+                                      obtenerColorAccion(accion, fila)
+                                    "
+                                    [attr.data-action-text]="accion.texto"
+                                    [attr.title]="obtenerTituloAccion(accion, fila)"
+                                    [aria-label]="accion.texto"
+                                    [deshabilitado]="accionEstaDeshabilitada(accion, fila)"
+                                    [cargando]="accionEstaCargando(accion, fila)"
+                                    [ariaLabelCarga]="'Procesando ' + accion.texto.toLowerCase()"
+                                    (accion)="ejecutarAccionTabla(accion, fila, $event)"
+                                  >
+                                    @if (accion.imagenIcono) {
+                                      @if (accion.imagenIconoConGradiente) {
+                                        <span class="tabla-responsive__action-image tabla-responsive__action-image--gradiente" [style.mask-image]="'url(' + accion.imagenIcono + ')'" [style.-webkit-mask-image]="'url(' + accion.imagenIcono + ')'" aria-hidden="true"></span>
+                                      } @else {
+                                        <img class="tabla-responsive__action-image" [src]="accion.imagenIcono" alt="" aria-hidden="true" />
+                                      }
+                                    } @else {
+                                      <ng-icon [name]="accion.icono" aria-hidden="true" />
+                                    }
+                                    <span class="tabla-responsive__action-text">{{
+                                      accion.texto
+                                    }}</span>
+                                  </app-boton>
+                                }
+                              }
+                              @if (accionesEnMenu(fila).length) {
+                                <app-boton
+                                  tipo="button"
+                                  apariencia="texto"
+                                  class="tabla-responsive__action-btn tabla-responsive__action-btn--neutral tabla-responsive__action-btn--menu tabla-responsive__action-btn--con-texto"
+                                  [class.tabla-responsive__action-btn--menu-abierto]="menuAbiertoPara(fila)"
+                                  data-action-text="Más acciones"
+                                  title="Más acciones"
+                                  aria-label="Más acciones"
+                                  aria-haspopup="menu"
+                                  [aria-expanded]="menuAbiertoPara(fila)"
+                                  (accion)="alternarMenuAcciones(fila, $event)"
+                                >
+                                  <ng-icon name="heroEllipsisVertical" aria-hidden="true" />
+                                  <span class="tabla-responsive__action-text">Más</span>
+                                </app-boton>
+                              }
+                            </div>
+                          }
+                        </div>
+                      </td>
+                    }
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (cantidadCards() > 1) {
+          <nav
+            class="tabla-responsive__carousel-nav"
+            aria-label="Navegación entre registros"
+          >
+            <app-boton
+              tipo="button"
+              apariencia="texto"
+              [soloIcono]="true"
+              class="tabla-responsive__carousel-button"
+              aria-label="Ver registro anterior"
+              [deshabilitado]="indiceCardActiva() === 0"
+              (accion)="irACardAnterior()"
+            >
+              <ng-icon name="heroChevronLeft" aria-hidden="true" />
+            </app-boton>
+
+            <output class="tabla-responsive__carousel-counter" aria-live="polite">
+              {{ indiceCardActiva() + 1 }} de {{ cantidadCards() }}
+            </output>
+
+            <app-boton
+              tipo="button"
+              apariencia="texto"
+              [soloIcono]="true"
+              class="tabla-responsive__carousel-button"
+              aria-label="Ver registro siguiente"
+              [deshabilitado]="indiceCardActiva() >= cantidadCards() - 1"
+              (accion)="irACardSiguiente()"
+            >
+              <ng-icon name="heroChevronRight" aria-hidden="true" />
+            </app-boton>
+          </nav>
+        }
+      }
+    </div>
+
+    @if (mostrarBarraInferior()) {
+      <div class="tabla-responsive__footer">
+        <div class="tabla-responsive__time-filter">
+          <label
+            class="tabla-responsive__time-filter-field tabla-responsive__time-filter-field--anio"
+          >
+            <input
+              type="text"
+              inputmode="numeric"
+              maxlength="4"
+              aria-label="Año"
+              placeholder="2026"
+              [value]="filtroTiempoAnio()"
+              (input)="actualizarFiltroTiempoAnio($event)"
+            />
+          </label>
+
+          <label
+            class="tabla-responsive__time-filter-field tabla-responsive__time-filter-field--mes"
+          >
+            <app-select
+              [altoRendimiento]="altoRendimiento()"
+              [value]="filtroTiempoMes()"
+              [opciones]="filtroTiempoOpcionesMes()"
+              placeholder="Mes"
+              (valueChange)="actualizarFiltroTiempoMes($event)"
+            />
+          </label>
+
+          <div class="tabla-responsive__time-filter-actions">
+            <app-boton
+              tipo="button"
+              apariencia="texto"
+              class="tabla-responsive__action-btn tabla-responsive__action-btn--success"
+              data-action-text="Aplicar"
+              aria-label="Aplicar periodo"
+              title="Aplicar periodo"
+              (accion)="filtroTiempoAplicar.emit()"
+            >
+              <ng-icon name="heroCheck" aria-hidden="true" />
+              <span class="tabla-responsive__action-text">Aplicar</span>
+            </app-boton>
+            <app-boton
+              tipo="button"
+              apariencia="texto"
+              class="tabla-responsive__action-btn tabla-responsive__action-btn--warning"
+              data-action-text="Limpiar"
+              aria-label="Restablecer periodo"
+              title="Restablecer periodo"
+              (accion)="filtroTiempoReset.emit()"
+            >
+              <ng-icon name="heroArrowPath" aria-hidden="true" />
+              <span class="tabla-responsive__action-text">Limpiar</span>
+            </app-boton>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Menú ⋯ de acciones de fila: en la capa superior (popover) para que no lo recorte la tabla. -->
+@if (menuAcciones(); as menu) {
+  <div
+    #menuAcciones
+    popover="manual"
+    class="tabla-responsive__menu-acciones"
+    [class.tabla-responsive__menu-acciones--arriba]="menu.haciaArriba"
+    role="menu"
+    aria-label="Más acciones"
+    [style.top.px]="menu.top"
+    [style.left.px]="menu.left"
+    (keydown)="manejarTecladoMenuAcciones($event)"
+  >
+    @for (accion of menu.acciones; track accion.id; let indice = $index) {
+      @if (
+        esAccionDestructiva(accion, menu.fila) &&
+        indice > 0 &&
+        !esAccionDestructiva(menu.acciones[indice - 1], menu.fila)
+      ) {
+        <div class="tabla-responsive__menu-separador" role="separator"></div>
+      }
+      <button
+        type="button"
+        role="menuitem"
+        class="tabla-responsive__menu-item"
+        [class.tabla-responsive__menu-item--destructiva]="esAccionDestructiva(accion, menu.fila)"
+        [style.--tabla-menu-item-color]="obtenerColorAccion(accion, menu.fila)"
+        [disabled]="accionEstaDeshabilitada(accion, menu.fila) || accionEstaCargando(accion, menu.fila)"
+        [attr.title]="obtenerTituloAccion(accion, menu.fila)"
+        (click)="ejecutarAccionDelMenu(accion, $event)"
+      >
+        @if (accion.imagenIcono) {
+          <img class="tabla-responsive__menu-imagen" [src]="accion.imagenIcono" alt="" aria-hidden="true" />
+        } @else {
+          <ng-icon [name]="accion.icono" aria-hidden="true" />
+        }
+        <span>{{ accion.texto }}</span>
+        @if (accionEstaDeshabilitada(accion, menu.fila) && accion.descripcionDeshabilitada) {
+          <small>{{ accion.descripcionDeshabilitada }}</small>
+        }
+      </button>
+    }
+  </div>
+}

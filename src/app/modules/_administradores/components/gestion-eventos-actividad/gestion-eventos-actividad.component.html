@@ -1,0 +1,82 @@
+<section class="gestion-eventos">
+  <app-card>
+    <div class="gestion-eventos__busqueda">
+      <label class="gestion-eventos__campo-busqueda"
+        ><span>Buscar</span
+        ><input
+          type="search"
+          placeholder="Busca por evento o ubicación"
+          [value]="busqueda()"
+          (input)="actualizarBusqueda($event)"
+          (keydown.enter)="buscar()"
+      /></label>
+      <app-boton tipo="button" (accion)="buscar()" [cargando]="cargando()">Buscar</app-boton>
+      <app-select
+        etiqueta="Actividad"
+        [opciones]="opcionesActividades()"
+        [value]="actividadUuid()"
+        [maximoOpcionesVisibles]="5"
+        (valueChange)="cambiarActividad($event)"
+      />
+    </div>
+    <div class="gestion-eventos__acciones-listado">
+      <div class="gestion-eventos__nuevo">
+        <span>Nuevo evento</span
+        ><app-boton
+          tipo="button"
+          [soloIcono]="true"
+          class="gestion-eventos__boton-nuevo"
+          aria-label="Nuevo evento"
+          (accion)="abrirAlta()"
+          ><ng-icon name="heroPlus"
+        /></app-boton>
+      </div>
+    </div>
+    @if (error() && !popupAbierto()) {
+      <p class="gestion-eventos__error" role="alert">{{ error() }}</p>
+    }
+    <app-tabla-responsive
+      [columnas]="columnas"
+      [filas]="eventos()"
+      idFila="uuid"
+      [acciones]="acciones"
+      [cargando]="cargando()"
+      [tbody_rows]="6"
+      mensajeVacio="No hay eventos para mostrar."
+      (accionFila)="manejarAccion($event)"
+    />
+    <app-paginacion
+      [paginaActual]="paginaActual()"
+      [totalPaginas]="totalPaginas()"
+      [deshabilitado]="cargando()"
+      (paginaCambiada)="cambiarPagina($event)"
+    />
+  </app-card>
+  <app-popup
+    [abierto]="popupAbierto()"
+    [titulo]="eventoEditando() ? 'Editar evento' : 'Nuevo evento'"
+    [mostrarEncabezado]="false"
+    ancho="grande"
+    [cancelarDeshabilitado]="guardando()"
+    (cancelar)="cerrarPopup()"
+  >
+    <app-titulo-hero
+      [titulo]="eventoEditando() ? 'Editar evento' : 'Nuevo evento'"
+      subtitulo="Seleccioná primero la actividad y completá los datos del evento."
+    />
+    @if (error()) {
+      <p class="gestion-eventos__error" role="alert">{{ error() }}</p>
+    }
+    <app-formulario-evento-actividad
+      formId="formulario-evento-admin"
+      [opcionesActividades]="opcionesActividades()"
+      [valorInicial]="eventoEditando()"
+      [actividadBloqueada]="!!eventoEditando()"
+      [reinicioVersion]="formularioVersion()"
+      (enviado)="guardar($event)"
+    />
+    <app-boton popupAcciones tipo="submit" form="formulario-evento-admin" [cargando]="guardando()"
+      >Guardar evento</app-boton
+    >
+  </app-popup>
+</section>

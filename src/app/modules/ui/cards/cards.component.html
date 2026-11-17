@@ -1,0 +1,80 @@
+<app-boton
+  class="cards"
+  tipo="button"
+  apariencia="texto"
+  [class.cards--completa]="progresoCompleto()"
+  [class.cards--casi-completa]="progresoAlto()"
+  [class.cards--alto-rendimiento]="altoRendimiento()"
+  [aria-label]="'Seleccionar ' + item().titulo"
+  (accion)="seleccionarItem()"
+>
+  <header class="cards__header">
+    <div>
+      @if (item().eyebrow) {
+        <p class="cards__eyebrow">{{ item().eyebrow }}</p>
+      }
+      <h3>{{ item().titulo | titlecase }}</h3>
+    </div>
+
+    @if (item().badge; as badge) {
+      <span class="cards__badge">
+        @if (badge.icon) {
+          <ng-icon [name]="badge.icon" />
+        }
+        {{ badge.text }}
+      </span>
+    }
+  </header>
+
+  @if (item().metadatos?.length) {
+    <dl class="cards__datos" [attr.aria-label]="'Datos de ' + item().titulo">
+      @for (meta of item().metadatos; track meta.label) {
+        <div>
+          <dt>{{ meta.label }}</dt>
+          <dd>
+            @if (meta.icon) {
+              <ng-icon [name]="meta.icon" />
+            }
+            {{ meta.value }}
+          </dd>
+        </div>
+      }
+    </dl>
+  }
+
+  @if (item().monto) {
+    <p class="cards__monto">
+      Monto: <strong>{{ formatearMoneda(item().monto!) }}</strong>
+    </p>
+  }
+
+  @if (item().etiquetas?.length) {
+    <div class="cards__dias" aria-label="Etiquetas">
+      @for (etiqueta of item().etiquetas; track etiqueta) {
+        <span>{{ etiqueta }}</span>
+      }
+    </div>
+  }
+
+  @if (mostrarProgreso()) {
+    <div class="cards__ocupacion">
+      <div class="cards__ocupacion-header">
+        <span>Progreso</span>
+        <strong>
+          {{ item().progreso!.actual }}/{{ item().progreso!.maximo }}
+          @if (progresoCompleto()) {
+            <ng-icon name="heroBolt" />
+          }
+        </strong>
+      </div>
+      <div class="cards__barra" aria-hidden="true">
+        <span [style.width.%]="porcentajeProgreso()"></span>
+      </div>
+      <small>{{ porcentajeProgreso() | number: '1.0-0' }}%</small>
+    </div>
+  }
+
+  @if (item().notaPie) {
+    <p class="cards__apto">{{ item().notaPie }}</p>
+  }
+</app-boton>

@@ -1,0 +1,289 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.formulario-registro {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+
+  &__error-formulario {
+    display: block;
+    min-height: 1rem;
+    color: var(--semantic-danger, #ef4444);
+    font-size: 0.85rem;
+    line-height: 1.2;
+    visibility: hidden;
+  }
+
+  &__error-formulario--visible {
+    visibility: visible;
+  }
+
+  &__modos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+
+    legend {
+      margin-bottom: 0.5rem;
+      color: var(--app-text-soft);
+      font-size: 0.85rem;
+      font-weight: 800;
+      text-transform: none;
+    }
+
+    label {
+      display: flex;
+      gap: 0.65rem;
+      align-items: flex-start;
+      padding: 0.75rem;
+      color: var(--app-text-soft);
+      background: color-mix(in srgb, var(--app-surface-strong) 70%, transparent);
+      border: 1px solid var(--app-surface-border);
+      border-radius: 8px;
+      cursor: pointer;
+
+      input {
+        margin-top: 0.2rem;
+        accent-color: var(--app-accent);
+      }
+
+      span {
+        display: grid;
+        gap: 0.2rem;
+        font-size: 0.85rem;
+        line-height: 1.3;
+      }
+
+      strong {
+        color: var(--app-text);
+        font-size: 0.82rem;
+      }
+    }
+  }
+
+  &__modo--activo {
+    border-color: var(--app-accent) !important;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--app-accent) 18%, transparent);
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  &__field {
+    display: grid;
+    gap: 0.3rem;
+    min-width: 0;
+
+    > label {
+      color: var(--app-text-soft);
+      font-size: 0.85rem;
+      font-weight: 800;
+      text-transform: none;
+    }
+
+    input {
+      min-height: 2.55rem;
+      width: 100%;
+      padding: 0.65rem 0.75rem;
+      color: var(--app-text);
+      background: color-mix(in srgb, var(--app-surface-strong) 84%, transparent);
+      border: 1px solid color-mix(in srgb, var(--app-surface-border) 72%, transparent);
+      border-radius: 8px;
+      font: inherit;
+
+      &[readonly] {
+        color: var(--app-text-soft);
+        cursor: default;
+        background: color-mix(in srgb, var(--app-surface-strong) 58%, transparent);
+      }
+    }
+
+    app-input-fecha {
+      --input-fecha-borde-foco: color-mix(
+        in srgb,
+        var(--app-surface-border) 72%,
+        transparent
+      );
+    }
+
+    &--ancho-completo {
+      grid-column: 1 / -1;
+    }
+  }
+
+  &__password-hint,
+  &__required {
+    margin: 0;
+    color: var(--app-text-soft);
+    font-size: 0.85rem;
+  }
+
+  &__password-hint {
+    grid-column: 1 / -1;
+  }
+
+  &__submit {
+    min-height: 2.8rem;
+    display: grid;
+    place-items: center;
+    color: #05140f;
+    background: var(--app-accent);
+    border: 1px solid var(--app-accent);
+    border-radius: 8px;
+    font: inherit;
+    font-weight: 800;
+    text-transform: none;
+    cursor: pointer;
+
+    app-load-spinner {
+      width: 1em;
+      height: 1em;
+    }
+
+    &--error {
+      animation: formulario-submit-shake 280ms ease-in-out 0s 4;
+      box-shadow:
+        0 0 0 0.3rem rgb(239 68 68 / 40%),
+        0 0.85rem 1.7rem rgb(239 68 68 / 18%);
+    }
+  }
+
+  input[type='date'] {
+    color-scheme: light dark;
+    accent-color: var(--app-accent);
+
+    &::-webkit-calendar-picker-indicator {
+      padding: 0.25rem;
+      cursor: pointer;
+      color: var(--app-accent);
+      background-color: var(--app-accent);
+      border-radius: 4px;
+      opacity: 0.9;
+    }
+  }
+
+  &__password-field {
+    position: relative;
+    width: 100%;
+
+    input {
+      padding-right: 3rem;
+
+      &::-ms-reveal,
+      &::-ms-clear {
+        display: none;
+      }
+    }
+  }
+
+  &__password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 0.55rem;
+    width: 2rem;
+    height: 2rem;
+    min-height: 0;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    color: var(--app-text-soft);
+    background: transparent;
+    border: 0;
+    border-radius: 999px;
+    cursor: pointer;
+    transform: translateY(-50%);
+
+    ng-icon {
+      width: 1.05rem;
+      height: 1.05rem;
+    }
+
+    &:hover,
+    &:focus-visible {
+      color: var(--app-text);
+      outline: none;
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--app-accent) 24%, white);
+    }
+
+    &--activa {
+      color: var(--app-accent);
+
+      ng-icon {
+        filter: drop-shadow(0 0 0.45rem color-mix(in srgb, var(--app-accent) 55%, transparent));
+      }
+    }
+  }
+
+  &__submit-content {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    width: 100%;
+  }
+
+  &__field input:focus-visible,
+  &__modos input:focus-visible,
+  &__submit:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--app-accent) 36%, white);
+    outline-offset: 2px;
+  }
+}
+
+:host-context(.theme-mode-dark) {
+  .formulario-registro {
+    &__field input {
+      color: #fff;
+      background: #050505;
+      border-color: #1f1f1f;
+    }
+
+    &__field input::placeholder {
+      color: #9ca3af;
+    }
+  }
+}
+
+@keyframes formulario-submit-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-0.35rem);
+  }
+
+  40% {
+    transform: translateX(0.35rem);
+  }
+
+  60% {
+    transform: translateX(-0.25rem);
+  }
+
+  80% {
+    transform: translateX(0.25rem);
+  }
+}
+
+@media (max-width: 40rem) {
+  .formulario-registro {
+    &__grid,
+    &__modos {
+      grid-template-columns: 1fr;
+    }
+  }
+}

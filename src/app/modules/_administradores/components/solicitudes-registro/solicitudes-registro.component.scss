@@ -1,0 +1,46 @@
+.solicitudes-registro {
+  display: grid;
+  gap: 1.5rem;
+}
+
+button {
+  padding: 0.6rem 0.85rem;
+  color: var(--app-bg);
+  background: var(--app-accent);
+  border: 1px solid var(--app-accent);
+  border-radius: 0.6rem;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.solicitudes-registro__error {
+  color: var(--app-danger);
+}
+
+.solicitudes-registro__ayuda,
+.solicitudes-registro__estado {
+  margin: 0;
+  color: var(--app-text-soft);
+}
+
+.solicitudes-registro__agregar-descuento,
+.solicitudes-registro__descuentos-seleccionados {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.solicitudes-registro__agregar-descuento {
+  padding: 1rem;
+  border: 1px solid var(--app-surface-border);
+  border-radius: 0.75rem;
+}
+
+.solicitudes-registro__descuentos-seleccionados h3 {
+  margin: 0;
+  color: var(--app-text);
+  font-size: 1rem;
+}

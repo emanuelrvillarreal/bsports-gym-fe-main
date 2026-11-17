@@ -1,0 +1,40 @@
+<article class="factura-resumen" aria-label="Resumen de factura">
+  <header class="factura-resumen__encabezado">
+    <div>
+      <span>Estado</span>
+      <strong [class]="'factura-resumen__estado factura-resumen__estado--' + factura().estado.toLowerCase()">
+        {{ factura().estado }}
+      </strong>
+    </div>
+    <div class="factura-resumen__importe">
+      <span>Importe</span>
+      <strong>{{ importe() }} </strong>
+    </div>
+  </header>
+
+  <dl class="factura-resumen__datos">
+    <div>
+      <dt>Plan</dt>
+      <dd>{{ plan() }}</dd>
+    </div>
+    <div>
+      <dt>Fecha de generación</dt>
+      <dd>{{ factura().fechaGeneracion }}</dd>
+    </div>
+    <div>
+      <dt>Vencimiento</dt>
+      <dd>{{ factura().fechaVencimiento }}</dd>
+    </div>
+  </dl>
+
+  @if (productos().length) {
+    <section class="factura-resumen__productos">
+      <h3>Productos</h3>
+      <ul>
+        @for (producto of productos(); track producto) {
+          <li>{{ producto }}</li>
+        }
+      </ul>
+    </section>
+  }
+</article>

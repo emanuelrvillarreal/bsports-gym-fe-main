@@ -1,0 +1,24 @@
+<app-titulo-hero
+  icono="configuracion"
+  titulo="Menú y solapas"
+  subtitulo="Elegí qué pantallas ve tu equipo. Lo que ocultes desaparece del menú para administración y recepción."
+/>
+
+@if (cargando()) {
+  <p class="menu-solapas__estado" role="status">Cargando configuración…</p>
+} @else {
+  <app-selector-solapas [ocultas]="ocultas()" (ocultasChange)="ocultas.set($event)" />
+
+  <div class="menu-solapas__acciones">
+    <app-boton apariencia="texto" [deshabilitado]="guardando()" (accion)="mostrarTodo()">
+      Mostrar todo
+    </app-boton>
+    <app-boton [deshabilitado]="!hayCambios()" [cargando]="guardando()" (accion)="guardar()">
+      Guardar cambios
+    </app-boton>
+  </div>
+  <p class="menu-solapas__ayuda">
+    Si una sección se queda sin solapas visibles, deja de aparecer en el menú. La configuración
+    del gimnasio y esta pantalla siempre quedan visibles para administración.
+  </p>
+}

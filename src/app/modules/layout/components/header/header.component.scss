@@ -1,0 +1,213 @@
+:host {
+  display: block;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: var(--layout-header-padding-vertical, 0.55rem) 0.7rem;
+ 
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--app-surface) 82%, transparent);
+  border: 1px solid var(--app-surface-border);
+  backdrop-filter: blur(6px);
+
+  &__saludo {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 1 auto;
+    gap: 0.65rem;
+    min-width: 0;
+    min-height: var(--layout-header-control-alto, 2.35rem);
+    box-sizing: border-box;
+    padding: 0 0.2rem 0 0.25rem;
+    border-radius: 8px;
+    color: var(--app-text);
+    background: color-mix(in srgb, var(--app-surface-strong) 76%, transparent);
+    border: 1px solid color-mix(in srgb, var(--app-surface-border) 72%, transparent);
+
+    strong {
+      font-size: 0.98rem;
+      font-weight: 700;
+      line-height: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  &__saludo-texto {
+    display: grid;
+    gap: 0.15rem;
+    min-width: 0;
+    padding-right: 0.65rem;
+  }
+
+  // Leyenda que dice dónde se carga la foto; resalta cuando todavía no hay ninguna.
+  &__foto-link {
+    justify-self: start;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--app-text-soft);
+    font: inherit;
+    font-size: 0.85rem;
+    line-height: 1.1;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    white-space: nowrap;
+    cursor: pointer;
+
+    &:hover {
+      color: var(--app-accent);
+    }
+
+    &:focus-visible {
+      outline: 2px solid color-mix(in srgb, var(--app-accent) 45%, white);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+
+    &--destacado {
+      color: var(--app-text-soft);
+    }
+  }
+
+  &__avatar-badge {
+    position: absolute;
+    right: -0.4rem;
+    bottom: -0.4rem;
+    display: grid;
+    place-items: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid var(--app-surface);
+    border-radius: 50%;
+    color: var(--app-surface);
+    background: var(--app-accent);
+    pointer-events: none;
+
+    ng-icon {
+      font-size: 0.8rem;
+      --ng-icon__stroke-width: 2.2;
+    }
+  }
+
+  &__perfil {
+    position: relative;
+    flex: 0 0 auto;
+  }
+
+  &__avatar-button {
+    position: relative;
+    width: 2rem;
+    height: 2rem;
+    box-sizing: border-box;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--app-accent) 28%, var(--app-surface-border));
+    border-radius: 8px;
+    background:
+      radial-gradient(circle at 30% 25%, color-mix(in srgb, var(--app-accent) 20%, transparent), transparent 48%),
+      linear-gradient(135deg, color-mix(in srgb, var(--app-surface-strong) 92%, transparent), color-mix(in srgb, var(--app-accent) 14%, var(--app-surface)));
+    color: var(--app-accent);
+    font: inherit;
+    padding: 0;
+    appearance: none;
+    cursor: pointer;
+    transition:
+      border-color 150ms ease,
+      background-color 150ms ease,
+      transform 100ms ease;
+
+    &:hover {
+      border-color: color-mix(in srgb, var(--app-accent) 62%, var(--app-surface-border));
+    }
+
+    &:active {
+      transform: translateY(1px);
+    }
+
+    &:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--app-accent) 45%, transparent);
+      outline-offset: 2px;
+    }
+
+    ng-icon {
+      font-size: 1.18rem;
+    }
+
+  }
+
+  &__avatar-image {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    transition: opacity 140ms ease;
+  }
+
+  &__avatar-image--cargando {
+    opacity: 0;
+  }
+
+  &__avatar-spinner {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 0.2rem;
+  }
+
+  &__avatar-fallback {
+    font-size: 0.9rem;
+    font-weight: 800;
+    letter-spacing: normal;
+  }
+
+  &__acciones {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+    margin-left: auto;
+    gap: 0.6rem;
+  }
+}
+
+@media (max-width: 42rem) {
+  .header {
+    flex-wrap: nowrap;
+    padding-right: 3.35rem;
+  }
+
+  :host-context(.layout-main:not(.layout-main--menu-derecha)) .header {
+    padding-right: 0.7rem;
+    padding-left: 3.35rem;
+  }
+}
+
+@media (max-width: 26.5625rem) {
+  .header__saludo {
+    min-height: var(--layout-header-control-alto, 2.35rem);
+    padding: 0;
+    background: transparent;
+    border: 0;
+
+    .header__saludo-texto {
+      display: none;
+    }
+  }
+
+  .header__avatar-button {
+    width: var(--layout-header-control-alto, 2.35rem);
+    height: var(--layout-header-control-alto, 2.35rem);
+  }
+}

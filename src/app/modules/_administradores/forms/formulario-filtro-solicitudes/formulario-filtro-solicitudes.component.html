@@ -1,0 +1,19 @@
+<form
+  class="formulario-filtro-solicitudes"
+  appValidacionFormulario
+  (submit)="$event.preventDefault(); enviar()"
+>
+  <label>
+    <span>Buscar</span>
+    <input
+      id="filtro-solicitudes-busqueda"
+      type="search"
+      [value]="busqueda()"
+      placeholder="Nombre, apellido, DNI o email"
+      (input)="actualizarBusqueda($event)"
+    />
+  </label>
+  <app-boton tipo="submit" [cargando]="cargando()" ariaLabelCarga="Buscando solicitudes"
+    >Buscar</app-boton
+  >
+</form>

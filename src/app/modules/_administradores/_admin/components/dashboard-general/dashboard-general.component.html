@@ -1,0 +1,125 @@
+<section class="panorama" aria-label="Panorama del gimnasio">
+  <header class="panorama__cabecera">
+    <h2>Panorama del gimnasio</h2>
+    @if (datos()) { <app-boton apariencia="texto" [cargando]="cargando()" (accion)="cargar()">Actualizar</app-boton> }
+  </header>
+
+  @if (error()) {
+    <div class="panorama__error" role="alert">No se pudo cargar el panorama. <app-boton apariencia="texto" (accion)="cargar()">Reintentar</app-boton></div>
+  } @else if (cargando() && !datos()) {
+    <p class="panorama__vacio">Cargando indicadores…</p>
+  } @else if (datos(); as d) {
+    <div class="panorama__kpis">
+      <a class="panorama__kpi" routerLink="/admin/socios/listado">
+        <span>Socios activos</span><strong>{{ d.sociosActivos }}</strong>
+        <small>+{{ d.sociosNuevosMes }} este mes · {{ d.sociosBajasMes }} bajas</small>
+      </a>
+      <a class="panorama__kpi" routerLink="/admin/actividades/listado">
+        <span>Inscriptos en actividades</span><strong>{{ d.inscriptos }}</strong>
+        <small>{{ d.actividades }} actividades · {{ d.profesoresActivos }} profesores</small>
+      </a>
+      <a class="panorama__kpi" routerLink="/admin/actividades/asistencia">
+        <span>Asistencia (3 meses)</span><strong>{{ porcentaje(d.asistenciaPromedio) }}</strong>
+        <small>{{ d.bajaAsistencia }} con baja asistencia</small>
+      </a>
+      <a class="panorama__kpi" [class.panorama__kpi--negativo]="d.balanceMes < 0" routerLink="/admin/tesoreria/reportes">
+        <span>Balance del mes</span><strong>{{ moneda(d.balanceMes) }}</strong>
+        <small>Ingresos {{ moneda(d.ingresosMes) }} · egresos {{ moneda(d.egresosMes) }}</small>
+      </a>
+      <a class="panorama__kpi" routerLink="/admin/competencias">
+        <span>Deportivo</span><strong>{{ d.equiposActivos }} equipos</strong>
+        <small>{{ d.jugadoresEnPlanteles }} jugadores · {{ d.torneosEnCurso }} torneos en curso</small>
+      </a>
+      <div class="panorama__kpi panorama__kpi--alertas" [class.panorama__kpi--ok]="!alertas()">
+        <span>Para revisar</span><strong>{{ alertas() }}</strong>
+        <small class="panorama__enlaces">
+          @if (d.deudaVencida > 0) { <a routerLink="/admin/tesoreria/cuotas">Deuda vencida {{ moneda(d.deudaVencida) }}</a> }
+          @if (d.bajaAsistencia) { <a routerLink="/admin/actividades/asistencia">{{ d.bajaAsistencia }} baja asistencia</a> }
+          @if (d.mantenimientosVencidos) { <a routerLink="/admin/equipamiento">{{ d.mantenimientosVencidos }} mantenimientos</a> }
+          @if (d.evaluacionesVencidas) { <a routerLink="/admin/socios/evaluaciones">{{ d.evaluacionesVencidas }} evaluaciones</a> }
+          @if (!alertas()) { Todo al día }
+        </small>
+      </div>
+    </div>
+
+    <div class="panorama__secciones" role="tablist" aria-label="Sección del panorama">
+      @for (s of secciones; track s.id) {
+        <button type="button" role="tab" [attr.aria-selected]="seccion() === s.id" [class.panorama__seccion--activa]="seccion() === s.id" (click)="seccion.set(s.id)">{{ s.etiqueta }}</button>
+      }
+    </div>
+
+    @switch (seccion()) {
+      @case ('socios') {
+        <div class="panorama__graficos">
+          <section class="panorama__panel panorama__panel--ancho">
+            <h3>Altas de socios (últimos 6 meses) <a routerLink="/admin/socios/listado">Ver socios →</a></h3>
+            <app-grafico-barras class="panorama__vertical" [barras]="barrasSocios()" estilo="compacto" orientacion="vertical" />
+          </section>
+          <section class="panorama__panel">
+            <h3>Socios por categoría</h3>
+            @if (barrasCategorias().length) { <app-grafico-barras [barras]="barrasCategorias()" estilo="compacto" /> }
+            @else { <p class="panorama__vacio">Sin datos.</p> }
+            <p class="panorama__nota">{{ d.sociosMorosos }} socios morosos.</p>
+          </section>
+        </div>
+      }
+      @case ('actividades') {
+        <div class="panorama__graficos">
+          <section class="panorama__panel">
+            <h3>Demanda por actividad <a routerLink="/admin/actividades/listado">Ver actividades →</a></h3>
+            @if (barrasDemanda().length) { <app-grafico-barras [barras]="barrasDemanda()" estilo="compacto" /> }
+            @else { <p class="panorama__vacio">No hay actividades.</p> }
+            @if (menorDemanda().length > 1) {
+              <p class="panorama__nota">Menor demanda: {{ menorDemanda()[0].nombre }} ({{ menorDemanda()[0].valor }} inscriptos).</p>
+            }
+          </section>
+          <section class="panorama__panel panorama__panel--ancho">
+            <h3>Evolución de la asistencia <a routerLink="/admin/actividades/asistencia">Ver asistencia →</a></h3>
+            @if (barrasAsistencia().length) { <app-grafico-barras class="panorama__vertical" [barras]="barrasAsistencia()" estilo="compacto" orientacion="vertical" /> }
+            @else { <p class="panorama__vacio">Todavía no hay asistencias registradas.</p> }
+            <p class="panorama__nota">{{ d.dejaronDeAsistir }} alumnos dejaron de asistir.</p>
+          </section>
+          <section class="panorama__panel panorama__panel--ancho">
+            <h3>Inscripciones (últimos 6 meses)</h3>
+            <app-grafico-barras class="panorama__vertical" [barras]="barrasInscripciones()" estilo="compacto" orientacion="vertical" />
+          </section>
+        </div>
+      }
+      @case ('deportivo') {
+        <div class="panorama__graficos">
+          <section class="panorama__panel">
+            <h3>Participación por disciplina <a routerLink="/admin/competencias">Ver competencias →</a></h3>
+            @if (barrasDisciplinas().length) { <app-grafico-barras [barras]="barrasDisciplinas()" estilo="compacto" /> }
+            @else { <p class="panorama__vacio">Todavía no hay jugadores en planteles.</p> }
+          </section>
+          <section class="panorama__panel">
+            <h3>Resumen</h3>
+            <dl class="panorama__datos">
+              <div><dt>Equipos activos</dt><dd>{{ d.equiposActivos }}</dd></div>
+              <div><dt>Jugadores en planteles</dt><dd>{{ d.jugadoresEnPlanteles }}</dd></div>
+              <div><dt>Torneos en curso</dt><dd>{{ d.torneosEnCurso }}</dd></div>
+              <div><dt>Evaluaciones vencidas</dt><dd>{{ d.evaluacionesVencidas }}</dd></div>
+            </dl>
+          </section>
+        </div>
+      }
+      @case ('economia') {
+        <div class="panorama__graficos">
+          <section class="panorama__panel panorama__panel--ancho">
+            <h3>Ingresos y egresos (últimos 6 meses) <a routerLink="/admin/tesoreria/reportes">Ver reportes →</a></h3>
+            <app-grafico-barras [barras]="barrasEconomia()" estilo="vs" [escala]="true" />
+          </section>
+          <section class="panorama__panel">
+            <h3>Acumulado del año</h3>
+            <dl class="panorama__datos">
+              <div><dt>Ingresos</dt><dd>{{ moneda(d.ingresosAnio) }}</dd></div>
+              <div><dt>Egresos</dt><dd>{{ moneda(d.egresosAnio) }}</dd></div>
+              <div><dt>Balance</dt><dd>{{ moneda(d.ingresosAnio - d.egresosAnio) }}</dd></div>
+              <div><dt>Deuda vencida</dt><dd>{{ moneda(d.deudaVencida) }}</dd></div>
+            </dl>
+          </section>
+        </div>
+      }
+    }
+  }
+</section>

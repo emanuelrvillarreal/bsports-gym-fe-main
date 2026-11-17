@@ -1,0 +1,78 @@
+<main
+  class="resultado-pago"
+  [class.resultado-pago--exito]="esExito()"
+  [class.resultado-pago--error]="!esExito()"
+  [class.resultado-pago--alto-rendimiento]="altoRendimiento()"
+>
+  <section class="resultado-pago__panel" role="status" aria-live="polite">
+    <div class="resultado-pago__ilustracion" aria-hidden="true">
+      <span class="resultado-pago__halo"></span>
+      <svg class="resultado-pago__icono" viewBox="0 0 120 120" focusable="false">
+        <circle class="resultado-pago__circulo" cx="60" cy="60" r="52" />
+
+        @if (esExito()) {
+          <path class="resultado-pago__simbolo" d="M35 62 52 79 86 43" />
+        } @else {
+          <path class="resultado-pago__simbolo" d="M40 40 80 80 M80 40 40 80" />
+        }
+      </svg>
+    </div>
+
+    <div class="resultado-pago__contenido">
+      <p class="resultado-pago__eyebrow">Estado del pago</p>
+      <h1>{{ titulo() }}</h1>
+      <p class="resultado-pago__descripcion">{{ descripcion() }}</p>
+    </div>
+
+    @if (esExito()) {
+      <section class="resultado-pago__comprobante" aria-label="Datos del comprobante">
+        @if (cargandoComprobante()) {
+          <div class="resultado-pago__comprobante-carga" role="status">
+            <app-load-spinner-blue ariaLabel="Consultando comprobante" />
+            <span>Consultando comprobante...</span>
+          </div>
+        } @else if (comprobanteDisponible(); as disponible) {
+          @if (disponible && pago(); as pagoConfirmado) {
+            <dl>
+              @if (detallePago()) {
+                <div>
+                  <dt>Detalle</dt>
+                  <dd>{{ detallePago() }}</dd>
+                </div>
+              }
+              <div>
+                <dt>Número de comprobante</dt>
+                <dd>{{ pagoConfirmado.paymentId }}</dd>
+              </div>
+              <div>
+                <dt>Importe</dt>
+                <dd>{{ formatearMoneda(pagoConfirmado.montoTotal) }}</dd>
+              </div>
+            </dl>
+          }
+        } @else if (pago(); as pagoPendiente) {
+          <p class="resultado-pago__comprobante-aviso" role="status">
+            @if (pagoPendiente.estado === 'PENDIENTE') {
+              Estamos confirmando el pago. El comprobante estará disponible cuando finalice el
+              webhook.
+            } @else {
+              El comprobante todavía no está disponible. Revisá el estado desde tus cuotas.
+            }
+          </p>
+        } @else if (errorComprobante()) {
+          <p class="resultado-pago__comprobante-error" role="alert">
+            {{ errorComprobante() }}
+          </p>
+        }
+      </section>
+    }
+
+    <app-boton
+      class="resultado-pago__accion"
+      [colorFondo]="esExito() ? 'var(--app-success)' : 'var(--app-danger)'"
+      (accion)="volver()"
+    >
+      {{ textoBotonRegreso }}
+    </app-boton>
+  </section>
+</main>

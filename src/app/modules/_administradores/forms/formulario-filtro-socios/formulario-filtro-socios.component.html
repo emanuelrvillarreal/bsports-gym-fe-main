@@ -1,0 +1,42 @@
+<form
+  class="formulario-filtro-socios"
+  appValidacionFormulario
+  (submit)="$event.preventDefault(); enviar()"
+>
+  <small
+    class="formulario-filtro-socios__error"
+    [class.formulario-filtro-socios__error--visible]="errorVisible()"
+    role="alert"
+    >{{ mensajeError() }}</small
+  >
+  <div class="formulario-filtro-socios__busqueda">
+    <label for="socios-busqueda">Buscar</label>
+    <div class="formulario-filtro-socios__busqueda-control">
+      <input
+        id="socios-busqueda"
+        type="search"
+        [value]="busqueda()"
+        placeholder="Nombre y apellido, DNI o N.º de socio"
+        (input)="actualizarBusqueda($event)"
+      />
+      <app-boton tipo="submit" [cargando]="cargando()" ariaLabelCarga="Buscando socios"
+        >Buscar</app-boton
+      >
+    </div>
+  </div>
+  <fieldset class="formulario-filtro-socios__estados">
+    <legend>Filtrar por estado</legend>
+    @for (estado of estadosDisponibles; track estado) {
+      <label>
+        <input
+          class="formulario-filtro-socios__checkbox-circular"
+          type="checkbox"
+          [checked]="estadoSeleccionado(estado)"
+          [disabled]="cargando()"
+          (change)="alternarEstado(estado, $any($event.target).checked)"
+        />
+        <span>{{ estado.charAt(0) + estado.slice(1).toLowerCase() }}</span>
+      </label>
+    }
+  </fieldset>
+</form>

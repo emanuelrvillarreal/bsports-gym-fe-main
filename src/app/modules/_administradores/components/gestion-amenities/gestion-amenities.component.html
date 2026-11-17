@@ -1,0 +1,94 @@
+<section class="gestion-amenities">
+  <app-card titulo="Instalaciones" descripcion="Configuración de espacios reservables">
+    <app-tabla-responsive [columnas]="columnasAmenities" [filas]="filasAmenities()" idFila="amenityUuid" [mostrarAcciones]="puedeConfigurar()" [acciones]="puedeConfigurar() ? accionesAmenities : []" [accionesCabecera]="puedeConfigurar() ? accionesCabeceraAmenities : []" [tr_input_conmutador]="false" [cargando]="cargandoAmenities()" [tbody_rows]="5" mensajeVacio="No hay instalaciones activas." (accionFila)="manejarAmenity($event)" (accionCabecera)="manejarCabeceraAmenities($event)" />
+  </app-card>
+
+  <app-card titulo="Reservas" descripcion="Gestión de reservas, confirmaciones y cobros">
+    <app-tabla-responsive [columnas]="columnasReservas" [filas]="filasReservas()" idFila="reservaUuid" [acciones]="accionesReservas" [accionesCabecera]="accionesCabeceraReservas" [tr_input_conmutador]="false" [cargando]="cargandoReservas()" [tbody_rows]="5" mensajeVacio="No hay reservas para mostrar." (accionFila)="manejarReserva($event)" (accionCabecera)="manejarCabeceraReservas($event)" />
+  </app-card>
+
+  <app-popup [abierto]="popupAmenityAbierto()" [titulo]="amenityEditando() ? 'Editar instalación' : 'Nueva instalación'" [mostrarEncabezado]="false" [mostrarCancelar]="false" ancho="grande" (cancelar)="cerrarAmenity()">
+    <app-titulo-hero [titulo]="amenityEditando() ? 'Editar instalación' : 'Nueva instalación'" subtitulo="Configurá disponibilidad, tarifa y seña." icono="heroBuildingOffice2" />
+    <app-formulario-amenity [amenity]="amenityEditando()" (enviado)="guardarAmenity($event)" />
+    <app-boton popupAcciones tipo="submit" form="formulario-amenity" [cargando]="guardando()">{{ amenityEditando() ? 'Confirmar cambios' : 'Crear instalación' }}</app-boton>
+    <app-boton popupAcciones apariencia="texto" [deshabilitado]="guardando()" (accion)="cerrarAmenity()">Cancelar</app-boton>
+  </app-popup>
+
+  <app-popup [abierto]="popupReservaAbierto()" titulo="Nueva reserva" [mostrarEncabezado]="false" [mostrarCancelar]="false" ancho="extraGrande" (cancelar)="cerrarReserva()">
+    <app-gestion-reserva-amenity #wizardReserva [abierto]="popupReservaAbierto()" [amenities]="amenities()" [procesando]="guardando()" (confirmar)="crearReserva($event)" (cancelar)="cerrarReserva()" />
+    <app-boton popupAcciones apariencia="texto" [deshabilitado]="guardando()" (accion)="cerrarReserva()">Cancelar</app-boton>
+    @if (wizardReserva.pasoActual() > 1) {
+      <app-boton popupAcciones colorPaleta="secundario" [deshabilitado]="guardando()" (accion)="wizardReserva.anterior()">Atrás</app-boton>
+    }
+    @if (wizardReserva.pasoActual() === 3) {
+      <app-boton popupAcciones [deshabilitado]="!wizardReserva.puedeConfirmar()" [cargando]="guardando()" (accion)="wizardReserva.confirmarReserva()">Confirmar reserva</app-boton>
+    }
+  </app-popup>
+
+  <app-popup [abierto]="reservaSeleccionada() !== null" titulo="Registrar cobro" [mostrarEncabezado]="false" [mostrarCancelar]="false" ancho="mediano" (cancelar)="cerrarCobro()">
+    @if (reservaSeleccionada(); as reserva) {
+      <app-titulo-hero titulo="Registrar cobro" subtitulo="Ingresá el importe y medio de pago." icono="heroBanknotes" />
+      @if (qrCobro(); as qr) {
+        <section class="gestion-amenities__checkout-mp">
+          <p>Escaneá el código para completar el pago con Mercado Pago.</p>
+          <img [src]="fuenteQr(qr)" alt="Código QR para pagar la reserva con Mercado Pago" />
+        </section>
+      } @else {
+      <form id="formulario-cobro-amenity" class="gestion-amenities__cobro" (submit)="cobrarFormulario($event)">
+        <strong class="gestion-amenities__cobro-titulo">{{ reserva.amenityNombre || 'Reserva' }}</strong>
+        <app-select etiqueta="Tipo de cobro" [opciones]="tiposCobroDisponibles()" [value]="tipoCobro()" (valueChange)="seleccionarTipoCobro($event)" />
+        <app-select etiqueta="Canal de cobro" [opciones]="canalesCobro" [value]="canalCobro()" (valueChange)="seleccionarCanalCobro($event)" />
+        @if (esCobroManual()) {
+        <label class="gestion-amenities__campo-monto">
+          <span>Monto</span>
+          <input name="monto" inputmode="numeric" pattern="[0-9]*" required [value]="montoCobro()" (input)="actualizarMontoCobro($event)" (blur)="formatearMontoCobro()" />
+          <small>Mínimo {{ formatearMoneda(minimoMontoCobro()) }} · Máximo {{ formatearMoneda(maximoMontoCobro()) }}</small>
+        </label>
+        <app-input-fecha etiqueta="Fecha" modo="fecha" [minimo]="fechaMinimaCobro" [ngModel]="fechaCobro()" (ngModelChange)="fechaCobro.set($event)" [ngModelOptions]="{ standalone: true }" />
+        <app-select etiqueta="Medio de pago" [opciones]="mediosPago" [value]="medioPago()" (valueChange)="medioPago.set($event)" />
+        <label class="gestion-amenities__campo-observaciones">
+          <span>Observaciones</span>
+          <textarea name="observaciones" rows="3" maxlength="500" [value]="observacionesCobro()" (input)="actualizarObservaciones($event)"></textarea>
+          <small><b>{{ observacionesCobro().length }}</b>/500 caracteres</small>
+        </label>
+        } @else {
+          <p class="gestion-amenities__aviso-mp">Se generará un código QR para cobrar mediante Mercado Pago.</p>
+        }
+      </form>
+      }
+    }
+    <app-boton popupAcciones colorPaleta="secundario" [deshabilitado]="guardando()" (accion)="cerrarCobro()">{{ qrCobro() ? 'Cerrar' : 'Cancelar' }}</app-boton>
+    @if (!qrCobro()) {
+      <app-boton popupAcciones tipo="submit" form="formulario-cobro-amenity" [cargando]="guardando()">{{ esCobroManual() ? 'Registrar cobro' : 'Generar QR' }}</app-boton>
+    }
+  </app-popup>
+  <app-popup [abierto]="reservaDetalle() !== null" titulo="Detalle de reserva" [mostrarEncabezado]="false" [mostrarCancelar]="false" ancho="grande" (cancelar)="reservaDetalle.set(null)">
+    @if (reservaDetalle(); as reserva) {
+      <app-titulo-hero titulo="Detalle de reserva" subtitulo="Información del socio, la instalación y el turno." icono="heroCalendarDays" />
+      <section class="gestion-amenities__detalle-reserva">
+        <article>
+          <h3>Socio</h3>
+          <dl>
+            <div><dt>Nombre</dt><dd>{{ reserva.memberNombre || '—' }}</dd></div>
+            <div><dt>Apellido</dt><dd>{{ reserva.memberApellido || '—' }}</dd></div>
+          </dl>
+        </article>
+        <article>
+          <h3>Reserva</h3>
+          <dl>
+            <div><dt>Instalación</dt><dd>{{ reserva.amenityNombre || '—' }}</dd></div>
+            <div><dt>Inicio</dt><dd>{{ reserva.slotInicio || reserva.inicio || '—' }}</dd></div>
+            <div><dt>Fin</dt><dd>{{ reserva.slotFin || reserva.fin || '—' }}</dd></div>
+            <div><dt>Estado</dt><dd><span class="gestion-amenities__estado" [class]="claseEstadoDetalle(reserva.estado)">{{ formatearEstadoReserva(reserva.estado) }}</span></dd></div>
+            <div><dt>Total</dt><dd>{{ formatearMoneda(reserva.montoTotal) }}</dd></div>
+            <div><dt>Seña</dt><dd>{{ formatearMoneda(montoSena(reserva)) }}</dd></div>
+            <div><dt>Saldo pendiente</dt><dd>{{ formatearMoneda(reserva.saldoPendiente) }}</dd></div>
+            @if (venceSenaAt(reserva); as vencimiento) { <div><dt>Vencimiento de seña</dt><dd>{{ vencimiento }}</dd></div> }
+            @if (reserva.canceladaAt) { <div><dt>Cancelada el</dt><dd>{{ reserva.canceladaAt }}</dd></div> }
+          </dl>
+        </article>
+      </section>
+    }
+    <app-boton popupAcciones (accion)="reservaDetalle.set(null)">Cerrar</app-boton>
+  </app-popup>
+</section>

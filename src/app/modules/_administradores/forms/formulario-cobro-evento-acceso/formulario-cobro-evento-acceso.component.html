@@ -1,0 +1,158 @@
+<app-popup
+  [abierto]="abierto()"
+  [titulo]="titulo()"
+  [mostrarEncabezado]="false"
+  ancho="grande"
+  [mostrarCancelar]="false"
+  [cancelarDeshabilitado]="guardando() || checkoutAbierto()"
+  (cancelar)="solicitarCierre()"
+>
+  <app-titulo-hero
+    icono="tesoreria"
+    [titulo]="titulo()"
+    [subtitulo]="
+      modo() === 'socio'
+        ? 'Registrá el cobro pendiente para habilitar la entrada.'
+        : 'Registrá las entradas y el canal de cobro del invitado.'
+    "
+  />
+
+  <section class="cobro-evento" [attr.aria-busy]="guardando()">
+    <div class="cobro-evento__evento">
+      <strong>{{ evento().titulo }}</strong>
+      <span>{{ montoEventoFormateado() }} por entrada</span>
+    </div>
+
+    @if (!resultado()) {
+      <form
+        id="formulario-cobro-evento"
+        class="cobro-evento__formulario"
+        appValidacionFormulario
+        (submit)="$event.preventDefault(); guardar()"
+      >
+        <small
+          class="cobro-evento__resumen-error"
+          [class.cobro-evento__resumen-error--visible]="intentoEnvio() && formularioInvalido()"
+          role="alert"
+        >
+          Revisá la cantidad y los campos obligatorios.
+        </small>
+
+        @if (modo() === 'invitado') {
+          <label class="cobro-evento__nombre" for="cobro-evento-nombre-invitado">
+            Nombre del invitado *
+          </label>
+          <input
+            id="cobro-evento-nombre-invitado"
+            class="cobro-evento__nombre"
+            type="text"
+            maxlength="120"
+            autocomplete="name"
+            [value]="nombreInvitado()"
+            [attr.data-app-invalido]="intentoEnvio() && !nombreInvitadoValido() ? 'true' : null"
+            (input)="nombreInvitado.set($any($event.target).value)"
+          />
+        }
+
+        <div class="cobro-evento__campo-cantidad">
+          <label for="cobro-evento-cantidad">Cantidad *</label>
+          <input
+            id="cobro-evento-cantidad"
+            type="number"
+            min="1"
+            step="1"
+            inputmode="numeric"
+            [value]="cantidadEntradas()"
+            [attr.data-app-invalido]="intentoEnvio() && !cantidadValida() ? 'true' : null"
+            (input)="cantidadEntradas.set($any($event.target).valueAsNumber)"
+          />
+        </div>
+
+        <app-select
+          etiqueta="Canal de cobro *"
+          [opciones]="opcionesCanal"
+          [value]="canalCobro()"
+          (valueChange)="cambiarCanal($event)"
+        />
+
+        @if (canalCobro() === 'MANUAL') {
+          <app-select
+            etiqueta="Medio de pago *"
+            [opciones]="opcionesMedio"
+            [value]="medioPago()"
+            (valueChange)="cambiarMedio($event)"
+          />
+
+          <label class="cobro-evento__observaciones" for="cobro-evento-observaciones">
+            Observaciones
+          </label>
+          <textarea
+            id="cobro-evento-observaciones"
+            class="cobro-evento__observaciones"
+            maxlength="500"
+            rows="3"
+            [value]="observaciones()"
+            (input)="observaciones.set($any($event.target).value)"
+          ></textarea>
+        }
+      </form>
+
+      <p class="cobro-evento__total" aria-live="polite">
+        Total <strong>{{ totalFormateado() }}</strong>
+      </p>
+    } @else {
+      <div class="cobro-evento__resultado" role="status">
+        @if (resultado()?.resultado === 'ACCESO_PERMITIDO') {
+          <strong>Cobro registrado</strong>
+          @if (resultado()?.movimientoUuid; as movimientoUuid) {
+            <span>Movimiento: {{ movimientoUuid }}</span>
+          }
+        } @else {
+          <strong>Pago de Mercado Pago generado</strong>
+          <span>La acreditación queda pendiente hasta que el webhook confirme el pago.</span>
+          @if (qrNormalizado()) {
+            <app-boton tipo="button" (accion)="reabrirCheckout()">Ver QR de pago</app-boton>
+          }
+        }
+        <span>{{ resultado()?.concepto }}</span>
+        <span>Total: {{ montoCheckout() }}</span>
+      </div>
+    }
+
+    @if (errorFormulario()) {
+      <p class="cobro-evento__error" role="alert">{{ errorFormulario() }}</p>
+    }
+    @if (estadoOperacion().error) {
+      <p class="cobro-evento__error" role="alert">{{ estadoOperacion().error }}</p>
+    }
+    @if (pagoPendienteSinQr()) {
+      <p class="cobro-evento__error" role="alert">
+        El pago quedó pendiente, pero no se recibió un QR válido. Cerrá e intentá nuevamente.
+      </p>
+    }
+  </section>
+
+  <app-boton
+    popupAcciones
+    apariencia="texto"
+    [deshabilitado]="guardando() || checkoutAbierto()"
+    (accion)="solicitarCierre()"
+  >
+    {{ resultado() ? 'Cerrar' : 'Cancelar' }}
+  </app-boton>
+  @if (!resultado()) {
+    <app-boton popupAcciones tipo="submit" form="formulario-cobro-evento" [cargando]="guardando()">
+      {{ canalCobro() === 'MERCADO_PAGO' ? 'Generar QR de pago' : 'Registrar cobro' }}
+    </app-boton>
+  }
+</app-popup>
+
+<app-checkout-mercado-pago
+  [abierto]="checkoutAbierto()"
+  [enlace]="''"
+  [qr]="qrNormalizado()"
+  [resumen]="resumenCheckout()"
+  [monto]="montoCheckout()"
+  subtitulo="El pago quedará pendiente hasta que Mercado Pago notifique la acreditación mediante webhook."
+  (cerrar)="cerrarCheckout()"
+/>

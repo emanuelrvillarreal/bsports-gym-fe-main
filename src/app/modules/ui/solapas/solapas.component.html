@@ -1,0 +1,25 @@
+<nav class="solapas" [attr.aria-label]="etiquetaGrupo()">
+  <ul class="solapas__lista">
+    @for (solapa of solapas(); track solapa.ruta) {
+      <li>
+        <a
+          class="solapas__item"
+          [routerLink]="solapa.ruta"
+          routerLinkActive="solapas__item--activa"
+          ariaCurrentWhenActive="page"
+        >
+          @if (solapa.icono) {
+            <ng-icon [name]="iconos.obtenerNombre(solapa.icono)" aria-hidden="true" />
+          }
+          <span>{{ solapa.etiqueta }}</span>
+          @if (solapa.contador) {
+            <span class="solapas__contador">
+              {{ solapa.contador }}
+              <span class="solapas__sr">pendientes</span>
+            </span>
+          }
+        </a>
+      </li>
+    }
+  </ul>
+</nav>

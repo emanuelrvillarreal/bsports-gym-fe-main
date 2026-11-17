@@ -1,0 +1,101 @@
+@let t = torneo();
+<div class="vista-torneo">
+  <dl class="vista-torneo__ficha">
+    <div><dt>Disciplina</dt><dd>{{ t.disciplina }}</dd></div>
+    @if (t.categoria) { <div><dt>Categoría</dt><dd>{{ t.categoria }}</dd></div> }
+    @if (t.temporada) { <div><dt>Temporada</dt><dd>{{ t.temporada }}</dd></div> }
+    <div><dt>Estado</dt><dd>{{ estadoTorneo(t.estado) }}</dd></div>
+    @if (t.fechaInicio) { <div><dt>Fechas</dt><dd>{{ fecha(t.fechaInicio) }}{{ t.fechaFin ? ' al ' + fecha(t.fechaFin) : '' }}</dd></div> }
+    <div><dt>Puntos</dt><dd>G {{ t.puntosVictoria }} · E {{ t.puntosEmpate }} · P {{ t.puntosDerrota }}</dd></div>
+  </dl>
+
+  <section aria-label="Tabla de posiciones">
+    <h4>Tabla de posiciones</h4>
+    @if (!t.tabla.length) {
+      <p class="vista-torneo__vacio">Agregá participantes para armar la tabla.</p>
+    } @else {
+      <div class="vista-torneo__scroll">
+        <table class="vista-torneo__tabla">
+          <thead>
+            <tr>
+              <th scope="col">#</th><th scope="col">Equipo</th><th scope="col" title="Jugados">PJ</th><th scope="col" title="Ganados">G</th>
+              <th scope="col" title="Empatados">E</th><th scope="col" title="Perdidos">P</th><th scope="col" title="A favor">AF</th>
+              <th scope="col" title="En contra">EC</th><th scope="col" title="Diferencia">Dif</th><th scope="col">Pts</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of t.tabla; track p.participanteUuid; let i = $index) {
+              <tr [class.vista-torneo__propio]="p.propio">
+                <td>{{ i + 1 }}</td>
+                <td class="vista-torneo__equipo">{{ p.nombre }}</td>
+                <td>{{ p.jugados }}</td><td>{{ p.ganados }}</td><td>{{ p.empatados }}</td><td>{{ p.perdidos }}</td>
+                <td>{{ p.favor }}</td><td>{{ p.contra }}</td><td>{{ p.diferencia > 0 ? '+' : '' }}{{ p.diferencia }}</td>
+                <td><strong>{{ p.puntos }}</strong></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+
+  <section aria-label="Partidos">
+    <h4>Partidos ({{ t.partidos.length }})</h4>
+    @if (!t.partidos.length) {
+      <p class="vista-torneo__vacio">Todavía no hay partidos cargados.</p>
+    }
+    @for (grupo of rondas(); track grupo.ronda) {
+      <div class="vista-torneo__ronda">
+        <h5>{{ grupo.ronda }}</h5>
+        @for (m of grupo.partidos; track m.uuid) {
+          <article class="vista-torneo__partido" [class]="'vista-torneo__partido vista-torneo__partido--' + (resultado(m) ?? 'n')">
+            <div class="vista-torneo__marcador">
+              <span [class.vista-torneo__nombre-propio]="m.local.propio">{{ m.local.nombre }}</span>
+              <strong>{{ m.estado === 'JUGADO' ? m.tantosLocal + ' - ' + m.tantosVisitante : 'vs' }}</strong>
+              <span [class.vista-torneo__nombre-propio]="m.visitante.propio">{{ m.visitante.nombre }}</span>
+            </div>
+            <small>
+              {{ estadoPartido(m.estado) }} · {{ fechaHora(m.fechaHora) }}{{ m.lugar ? ' · ' + m.lugar : '' }}
+              @if (m.conEstadisticas) { · con estadísticas }
+            </small>
+            @if (m.observaciones) { <small>{{ m.observaciones }}</small> }
+            @if (editable()) {
+              <div class="vista-torneo__acciones">
+                <app-boton apariencia="texto" (accion)="editarPartido.emit(m)">{{ m.estado === 'JUGADO' ? 'Editar resultado' : 'Cargar resultado' }}</app-boton>
+                @if (m.estado === 'JUGADO' && m.conEquipoPropio) {
+                  <app-boton apariencia="texto" (accion)="estadisticasPartido.emit(m)">Estadísticas</app-boton>
+                }
+                <app-boton apariencia="texto" (accion)="eliminarPartido.emit(m)">Eliminar</app-boton>
+              </div>
+            }
+          </article>
+        }
+      </div>
+    }
+  </section>
+
+  @if (t.goleadores.length) {
+    <section aria-label="Goleadores">
+      <h4>Goleadores y figuras del gimnasio</h4>
+      <ol class="vista-torneo__goleadores">
+        @for (g of t.goleadores; track g.jugadorUuid) {
+          <li><strong>{{ g.nombre }}</strong> <span>{{ g.equipo }}</span> <em>{{ g.tantos }} tantos · {{ g.asistencias }} asist. · {{ g.figuras }} figura</em></li>
+        }
+      </ol>
+    </section>
+  }
+
+  <section aria-label="Participantes">
+    <h4>Participantes ({{ t.participantes.length }})</h4>
+    <ul class="vista-torneo__participantes" role="list">
+      @for (p of t.participantes; track p.uuid) {
+        <li [class.vista-torneo__propio]="p.propio">
+          {{ p.nombre }} <small>{{ p.propio ? 'del gimnasio' : 'rival' }}</small>
+          @if (editable()) {
+            <button type="button" class="vista-torneo__quitar" [attr.aria-label]="'Quitar ' + p.nombre" (click)="quitarParticipante.emit(p)">✕</button>
+          }
+        </li>
+      }
+    </ul>
+  </section>
+</div>

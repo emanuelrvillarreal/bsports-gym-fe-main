@@ -1,0 +1,207 @@
+<section
+  class="calendario"
+  [class.calendario--alto-rendimiento]="altoRendimiento()"
+  [ngStyle]="estiloGrilla()"
+>
+  <header class="calendario__header">
+    <div class="calendario__copy">
+      <span class="calendario__eyebrow">
+        <ng-icon name="heroCalendarDays" />
+        Vista mensual
+      </span>
+      <h3>{{ mesTitulo() }}</h3>
+    </div>
+
+    <div class="calendario__controls">
+      <app-boton
+        tipo="button"
+        apariencia="texto"
+        class="calendario__nav"
+        aria-label="Mes anterior"
+        [deshabilitado]="!puedeIrMesAnterior()"
+        (accion)="cambiarMes(-1)"
+      >
+        <ng-icon name="heroChevronLeft" />
+      </app-boton>
+      <app-boton
+        tipo="button"
+        apariencia="texto"
+        class="calendario__nav"
+        aria-label="Mes siguiente"
+        [deshabilitado]="!puedeIrMesSiguiente()"
+        (accion)="cambiarMes(1)"
+      >
+        <ng-icon name="heroChevronRight" />
+      </app-boton>
+    </div>
+  </header>
+
+  @if (vistaSemanal()) {
+    <div class="calendario__week-controls">
+      <app-boton
+        tipo="button"
+        apariencia="texto"
+        class="calendario__nav calendario__nav--week"
+        aria-label="Semana anterior"
+        [deshabilitado]="!puedeIrSemanaAnterior()"
+        (accion)="cambiarSemana(-1)"
+      >
+        <ng-icon name="heroChevronLeft" />
+      </app-boton>
+      <strong>{{ semanaTitulo() }}</strong>
+      <app-boton
+        tipo="button"
+        apariencia="texto"
+        class="calendario__nav calendario__nav--week"
+        aria-label="Semana siguiente"
+        [deshabilitado]="!puedeIrSemanaSiguiente()"
+        (accion)="cambiarSemana(1)"
+      >
+        <ng-icon name="heroChevronRight" />
+      </app-boton>
+    </div>
+  }
+
+  <div class="calendario__cuerpo" [class.calendario__cuerpo--mensual]="!vistaSemanal()">
+    @if (!vistaSemanal()) {
+      <div class="calendario__weekdays">
+        @for (dia of diasSemana; track dia) {
+          <span>{{ dia }}</span>
+        }
+      </div>
+    }
+
+    @if (cargando()) {
+      <div class="calendario__cargando" role="status" aria-live="polite">
+        <app-load-spinner-blue ariaLabel="Cargando calendario" />
+      </div>
+    } @else {
+      <div class="calendario__grid">
+        @for (dia of diasMostrados(); track dia.iso) {
+          <app-boton
+          tipo="button"
+          apariencia="texto"
+          [contenidoVertical]="true"
+          class="calendario__day"
+          [ngClass]="{
+            'calendario__day--outside': !dia.actual,
+            'calendario__day--today': dia.hoy,
+            'calendario__day--busy': dia.eventos.length > 0,
+            'calendario__day--stacked': dia.eventos.length > 1,
+          }"
+          [attr.aria-label]="etiquetaDia(dia)"
+          (accion)="abrirDia(dia)"
+        >
+          <div class="calendario__day-top">
+            <span class="calendario__day-label">{{ dia.nombreVisible }}</span>
+            @if (dia.eventos.length > 1) {
+              <span class="calendario__day-count" [style.color]="colorTextoContadorDia()">
+                {{ dia.eventos.length }}
+              </span>
+            }
+          </div>
+
+          <div class="calendario__day-body">
+            @if (dia.eventos.length === 0) {
+              <p class="calendario__empty-slot">Sin actividad</p>
+            } @else {
+              @for (
+                evento of dia.eventos.slice(0, 2);
+                track (evento.diaHoraInicio ?? '') + (evento.titulo ?? '')
+              ) {
+                <article class="calendario__pill">
+                  @if (dia.eventos.length <= 1) {
+                    <strong>{{ rangoHorario(evento) }}</strong>
+                  }
+                  <span [ngClass]="claseEvento(evento)">{{ tituloEvento(evento) }}</span>
+                </article>
+              }
+            }
+          </div>
+          </app-boton>
+        }
+      </div>
+    }
+  </div>
+
+  @if (!cargando() && eventos().length === 0 && proximaActividad()) {
+    <div class="calendario__blank-state">
+      <strong>Mes despejado</strong>
+      <p>{{ leyendaVacia() }}</p>
+
+      @if (proximaActividad(); as proxima) {
+        <div class="calendario__next-activity">
+          <span>Próxima actividad</span>
+          <strong>{{ tituloEvento(proxima) }}</strong>
+          <p>{{ fechaProximaActividad(proxima) }} · {{ rangoHorario(proxima) }}</p>
+        </div>
+      }
+    </div>
+  }
+
+  @if (!cargando() && eventos().length === 0 && !proximaActividad()) {
+    <div class="calendario__blank-state">
+      <strong>Mes despejado</strong>
+      <p>{{ leyendaVacia() }}</p>
+    </div>
+  }
+
+  @if (!cargando() && eventos().length > 0) {
+    @if (proximaActividad(); as proxima) {
+      <div class="calendario__next-activity">
+        <span>Proxima actividad</span>
+        <strong>{{ tituloEvento(proxima) }}</strong>
+        <p>{{ fechaProximaActividad(proxima) }} - {{ rangoHorario(proxima) }}</p>
+      </div>
+    }
+  }
+
+  @if (diaModal(); as diaSeleccionado) {
+    <div
+      class="calendario__overlay"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-label]="etiquetaDia(diaSeleccionado)"
+      (click)="cerrarModal()"
+    >
+      <article class="calendario__modal" (click)="$event.stopPropagation()">
+        <header class="calendario__modal-header">
+          <div>
+            <span>{{ etiquetaDia(diaSeleccionado) }}</span>
+            <h4>{{ eventosDiaModal().length }} evento(s)</h4>
+          </div>
+
+          <app-boton
+            tipo="button"
+            apariencia="texto"
+            class="calendario__close"
+            aria-label="Cerrar detalle"
+            (accion)="cerrarModal()"
+          >
+            <ng-icon name="heroXMark" />
+          </app-boton>
+        </header>
+
+        <div class="calendario__cards">
+          @for (
+            evento of eventosDiaModal();
+            track (evento.diaHoraInicio ?? '') + (evento.titulo ?? '')
+          ) {
+            <article class="calendario__event-card">
+              <div class="calendario__event-accent"></div>
+
+              <div class="calendario__event-copy">
+                <span class="calendario__event-time">
+                  <ng-icon name="heroClock" />
+                  {{ rangoHorario(evento) }}
+                </span>
+                <strong [ngClass]="claseEvento(evento)">{{ tituloEvento(evento) }}</strong>
+                <p>{{ duracionEvento(evento) }}</p>
+              </div>
+            </article>
+          }
+        </div>
+      </article>
+    </div>
+  }
+</section>

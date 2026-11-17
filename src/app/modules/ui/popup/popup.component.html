@@ -1,0 +1,46 @@
+<dialog
+  #dialogo
+  class="popup"
+  role="dialog"
+  [class.popup--alto-completo]="altoCompleto()"
+  [class.popup--pequeno]="ancho() === 'pequeno'"
+  [class.popup--grande]="ancho() === 'grande'"
+  [class.popup--extra-grande]="ancho() === 'extraGrande'"
+  aria-modal="true"
+  [attr.aria-labelledby]="mostrarEncabezado() ? tituloId : null"
+  [attr.aria-label]="mostrarEncabezado() ? null : titulo()"
+  [attr.aria-describedby]="mostrarEncabezado() && descripcion() ? descripcionId : null"
+  (cancel)="impedirCierreImplicito($event)"
+  (click)="$event.stopPropagation()"
+>
+  <article class="popup__panel">
+    @if (mostrarEncabezado()) {
+      <header class="popup__encabezado">
+        <h2 [id]="tituloId">{{ titulo() }}</h2>
+        @if (descripcion()) {
+          <p [id]="descripcionId">{{ descripcion() }}</p>
+        }
+      </header>
+    }
+
+    <section class="popup__contenido">
+      <div class="popup__cuerpo">
+        <ng-content />
+      </div>
+
+      <footer class="popup__acciones">
+        @if (mostrarCancelar()) {
+          <app-boton
+            tipo="button"
+            [apariencia]="aparienciaCancelar()"
+            [deshabilitado]="cancelarDeshabilitado()"
+            (accion)="solicitarCancelacion()"
+          >
+            {{ textoCancelar() }}
+          </app-boton>
+        }
+        <ng-content select="[popupAcciones]" />
+      </footer>
+    </section>
+  </article>
+</dialog>

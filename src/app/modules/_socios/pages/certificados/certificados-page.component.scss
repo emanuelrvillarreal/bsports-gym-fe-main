@@ -1,0 +1,35 @@
+:host {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.certificados-page {
+  &__carga {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    display: grid;
+    width: min(100%, 18rem);
+    min-height: 12rem;
+    margin-inline: auto;
+    place-items: center;
+    place-content: center;
+    justify-self: center;
+
+    app-load-spinner-blue {
+      width: 100%;
+      max-width: 100%;
+    }
+  }
+
+  &__error {
+    display: grid;
+    justify-items: start;
+    gap: 0.75rem;
+    color: var(--semantic-danger);
+
+    p {
+      margin: 0;
+    }
+  }
+}

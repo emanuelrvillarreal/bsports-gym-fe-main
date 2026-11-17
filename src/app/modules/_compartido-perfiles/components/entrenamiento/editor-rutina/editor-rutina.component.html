@@ -1,0 +1,136 @@
+<app-popup
+  [abierto]="abierto()"
+  [titulo]="titulo()"
+  [descripcion]="descripcion()"
+  ancho="extraGrande"
+  [cancelarDeshabilitado]="guardando()"
+  (cancelar)="cerrar.emit()"
+>
+  @let b = borrador();
+  <form class="editor" (submit)="$event.preventDefault(); guardar()">
+    <fieldset class="editor__bloque">
+      <legend>Datos generales</legend>
+      <div class="editor__grilla">
+        <label class="editor__campo editor__campo--ancho">
+          <span>Nombre *</span>
+          <input required maxlength="120" placeholder="Ej. Pretemporada sub-15" [value]="b.nombre" (input)="cambiar('nombre', $any($event.target).value)" />
+        </label>
+        <label class="editor__campo">
+          <span>Disciplina</span>
+          <input maxlength="80" placeholder="Ej. Fútbol" [value]="b.disciplina" (input)="cambiar('disciplina', $any($event.target).value)" />
+        </label>
+        <app-select etiqueta="Actividad" [opciones]="opcionesActividades()" [value]="b.actividadUuid" (valueChange)="cambiar('actividadUuid', $event)" />
+        <app-input-fecha etiqueta="Inicio" [valorInicial]="b.fechaInicio" (valorCambiado)="cambiar('fechaInicio', $event)" />
+        <app-input-fecha etiqueta="Finalización" [valorInicial]="b.fechaFin" [minimo]="b.fechaInicio" (valorCambiado)="cambiar('fechaFin', $event)" />
+        <label class="editor__campo editor__campo--ancho">
+          <span>Objetivo</span>
+          <textarea rows="2" placeholder="Qué busca esta rutina" [value]="b.objetivo" (input)="cambiar('objetivo', $any($event.target).value)"></textarea>
+        </label>
+        <label class="editor__campo editor__campo--ancho">
+          <span>Observaciones</span>
+          <textarea rows="2" [value]="b.observaciones" (input)="cambiar('observaciones', $any($event.target).value)"></textarea>
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset class="editor__bloque">
+      <legend>Días y ejercicios <span>{{ b.dias.length }} {{ b.dias.length === 1 ? 'día' : 'días' }} · {{ totalEjercicios() }} ejercicios</span></legend>
+      @if (opcionesEjercicios().length <= 1) {
+        <p class="editor__aviso">La biblioteca está vacía: cargá ejercicios en la solapa "Biblioteca de ejercicios" para poder armar la rutina.</p>
+      }
+      @for (dia of b.dias; track dia.clave; let indiceDia = $index) {
+        <section class="editor__dia" [attr.aria-label]="dia.nombre">
+          <header class="editor__dia-cabecera">
+            <label class="editor__campo">
+              <span>Nombre del día</span>
+              <input maxlength="80" [value]="dia.nombre" (input)="renombrarDia(indiceDia, $any($event.target).value)" />
+            </label>
+            @if (b.dias.length > 1) {
+              <app-boton apariencia="texto" (accion)="quitarDia(indiceDia)" [attr.aria-label]="'Quitar ' + dia.nombre">Quitar día</app-boton>
+            }
+          </header>
+
+          <ol class="editor__items">
+            @for (item of dia.items; track item.clave; let indiceItem = $index, primero = $first, ultimo = $last) {
+              <li class="editor__item">
+                <span class="editor__orden" aria-hidden="true">{{ indiceItem + 1 }}</span>
+                <app-select
+                  class="editor__ejercicio"
+                  etiqueta="Ejercicio"
+                  [opciones]="opcionesEjercicios()"
+                  [value]="item.ejercicioUuid"
+                  (valueChange)="cambiarItem(indiceDia, indiceItem, 'ejercicioUuid', $event)"
+                />
+                <label class="editor__campo editor__campo--chico">
+                  <span>Series</span>
+                  <input type="number" min="1" max="50" inputmode="numeric" [value]="item.series" (input)="cambiarItem(indiceDia, indiceItem, 'series', $any($event.target).value)" />
+                </label>
+                <label class="editor__campo editor__campo--chico">
+                  <span>Repeticiones</span>
+                  <input maxlength="40" placeholder="10-12" [value]="item.repeticiones" (input)="cambiarItem(indiceDia, indiceItem, 'repeticiones', $any($event.target).value)" />
+                </label>
+                <label class="editor__campo editor__campo--chico">
+                  <span>Peso / intensidad</span>
+                  <input maxlength="60" placeholder="20 kg, RPE 7" [value]="item.carga" (input)="cambiarItem(indiceDia, indiceItem, 'carga', $any($event.target).value)" />
+                </label>
+                <label class="editor__campo editor__campo--chico">
+                  <span>Descanso (seg)</span>
+                  <input type="number" min="0" max="3600" inputmode="numeric" [value]="item.descanso" (input)="cambiarItem(indiceDia, indiceItem, 'descanso', $any($event.target).value)" />
+                </label>
+                <label class="editor__campo editor__campo--obs">
+                  <span>Observaciones</span>
+                  <input maxlength="500" [value]="item.observaciones" (input)="cambiarItem(indiceDia, indiceItem, 'observaciones', $any($event.target).value)" />
+                </label>
+                <div class="editor__mover" role="group" aria-label="Ordenar y quitar">
+                  <button type="button" [disabled]="primero" (click)="moverItem(indiceDia, indiceItem, -1)" aria-label="Subir ejercicio">↑</button>
+                  <button type="button" [disabled]="ultimo" (click)="moverItem(indiceDia, indiceItem, 1)" aria-label="Bajar ejercicio">↓</button>
+                  <button type="button" class="editor__quitar" [disabled]="dia.items.length === 1" (click)="quitarItem(indiceDia, indiceItem)" aria-label="Quitar ejercicio">✕</button>
+                </div>
+              </li>
+            }
+          </ol>
+          <app-boton apariencia="texto" (accion)="agregarItem(indiceDia)">+ Agregar ejercicio</app-boton>
+        </section>
+      }
+      @if (b.dias.length < 14) {
+        <app-boton apariencia="texto" (accion)="agregarDia()">+ Agregar día</app-boton>
+      }
+    </fieldset>
+
+    @if (modo() === 'crear') {
+      <fieldset class="editor__bloque">
+        <legend>Asignar a socios <span>opcional · {{ elegidos().size }} elegidos</span></legend>
+        @if (alumnos().length) {
+          <label class="editor__campo">
+            <span>Buscar socio</span>
+            <input type="search" placeholder="Nombre, apellido o DNI" [value]="busquedaAlumno()" (input)="busquedaAlumno.set($any($event.target).value)" />
+          </label>
+          <ul class="editor__alumnos" role="list">
+            @for (alumno of alumnosFiltrados(); track alumno.memberUuid) {
+              <li>
+                <label>
+                  <input type="checkbox" [checked]="elegidos().has(alumno.memberUuid)" (change)="alternarAlumno(alumno.memberUuid)" />
+                  <span>
+                    <strong>{{ alumno.apellido }}, {{ alumno.nombre }}</strong>
+                    <small>{{ alumno.actividades }}</small>
+                  </span>
+                </label>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="editor__aviso">No hay socios inscriptos en tus actividades para asignar. Podés asignarla más tarde.</p>
+        }
+      </fieldset>
+    }
+
+    @if (error()) {
+      <p class="editor__error" role="alert">{{ error() }}</p>
+    }
+    <div class="editor__acciones">
+      <app-boton tipo="submit" [cargando]="guardando()">
+        {{ modo() === 'crear' ? 'Crear rutina' : modo() === 'editar' ? 'Guardar cambios' : 'Crear versión nueva' }}
+      </app-boton>
+    </div>
+  </form>
+</app-popup>

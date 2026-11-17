@@ -1,0 +1,71 @@
+<app-popup
+  [abierto]="abierto()"
+  titulo="Nuevo cobro"
+  [mostrarEncabezado]="false"
+  [mostrarCancelar]="false"
+  ancho="extraGrande"
+  (cancelar)="cerrar.emit()"
+>
+  <app-wizard-cobro-cuotas
+    #wizardCobro
+    [abierto]="abierto()"
+    (cancelar)="cerrar.emit()"
+    (cobrosActualizados)="cobrosActualizados.emit()"
+    (completado)="cerrar.emit()"
+  />
+  @if (wizardCobro.pasoActual() === 'listo') {
+    <app-boton popupAcciones apariencia="texto" (accion)="wizardCobro.cobrarOtroSocio()">
+      Cobrar a otro socio
+    </app-boton>
+  }
+  @if (wizardCobro.pasoActual() === 'listo') {
+    <app-boton popupAcciones (accion)="wizardCobro.finalizar()">Listo</app-boton>
+  }
+  @if (wizardCobro.pasoActual() !== 'listo') {
+    <app-boton
+      popupAcciones
+      apariencia="texto"
+      [deshabilitado]="
+        wizardCobro.procesando() ||
+        wizardCobro.cargandoSeleccionTotal() ||
+        wizardCobro.checkoutActivo()
+      "
+      (accion)="wizardCobro.solicitarCancelacion()"
+    >
+      Cancelar
+    </app-boton>
+  }
+  @if (wizardCobro.pasoActual() === 'deuda' || wizardCobro.pasoActual() === 'confirmacion') {
+    <app-boton
+      popupAcciones
+      colorPaleta="secundario"
+      [deshabilitado]="
+        wizardCobro.procesando() ||
+        wizardCobro.cargandoSeleccionTotal() ||
+        wizardCobro.checkoutActivo()
+      "
+      (accion)="wizardCobro.anterior()"
+    >
+      Atrás
+    </app-boton>
+  }
+  @if (wizardCobro.pasoActual() === 'deuda') {
+    <app-boton
+      popupAcciones
+      [deshabilitado]="!wizardCobro.puedeContinuar()"
+      (accion)="wizardCobro.siguiente()"
+    >
+      Continuar
+    </app-boton>
+  } @else if (wizardCobro.pasoActual() === 'confirmacion') {
+    <app-boton
+      popupAcciones
+      [deshabilitado]="!wizardCobro.puedeConfirmar()"
+      [cargando]="wizardCobro.procesando()"
+      ariaLabelCarga="Registrando cobros"
+      (accion)="wizardCobro.confirmarCobro()"
+    >
+      {{ wizardCobro.textoConfirmar() }}
+    </app-boton>
+  }
+</app-popup>

@@ -1,0 +1,431 @@
+:host {
+  display: block;
+}
+
+.wizard-cobro {
+  display: grid;
+  gap: 1.5rem;
+
+  &__paso {
+    display: grid;
+    gap: 1rem;
+
+    h3 {
+      margin: 0;
+      color: var(--app-text);
+    }
+  }
+
+  &__ayuda {
+    margin: 0;
+    color: var(--app-text-soft);
+    font-size: 0.92rem;
+  }
+
+  &__vacio {
+    margin: 0;
+    padding: 1.25rem;
+    border: 1px dashed var(--app-surface-border);
+    border-radius: 0.75rem;
+    color: var(--app-text-soft);
+    text-align: center;
+  }
+
+  // Paso "¿Qué paga?": una fila por cuota con la casilla a la izquierda.
+  &__cuotas {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__cuota {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0.85rem;
+    min-height: 3.5rem;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--app-surface-border);
+    border-radius: 0.75rem;
+    background: var(--app-surface);
+    cursor: pointer;
+
+    input {
+      width: 1.35rem;
+      height: 1.35rem;
+      margin: 0;
+      accent-color: var(--app-accent);
+      cursor: inherit;
+    }
+
+    &--elegida {
+      border-color: var(--app-accent);
+      background: color-mix(in srgb, var(--app-accent) 8%, var(--app-surface));
+    }
+  }
+
+  &__cuota-texto {
+    display: grid;
+    gap: 0.15rem;
+    min-width: 0;
+    color: var(--app-text-soft);
+    font-size: 0.88rem;
+
+    strong {
+      color: var(--app-text);
+      font-size: 0.98rem;
+    }
+  }
+
+  &__cuota-vencida {
+    color: var(--semantic-danger);
+    font-weight: 700;
+  }
+
+  &__total--fijo {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  // Paso "¿Cómo paga?": medios como botones grandes.
+  &__medios {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+    gap: 0.75rem;
+  }
+
+  &__medio {
+    display: grid;
+    justify-items: center;
+    gap: 0.3rem;
+    min-height: 7rem;
+    padding: 1rem 0.75rem;
+    border: 2px solid var(--app-surface-border);
+    border-radius: 0.9rem;
+    color: var(--app-text);
+    background: var(--app-surface);
+    font: inherit;
+    text-align: center;
+    cursor: pointer;
+
+    ng-icon {
+      font-size: 2rem;
+      color: var(--app-accent);
+    }
+
+    strong {
+      font-size: 1.02rem;
+    }
+
+    span {
+      color: var(--app-text-soft);
+      font-size: 0.82rem;
+    }
+
+    &:hover:not(:disabled) {
+      border-color: color-mix(in srgb, var(--app-accent) 60%, var(--app-surface-border));
+    }
+
+    &:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--app-accent) 40%, white);
+      outline-offset: 2px;
+    }
+
+    &--elegido {
+      border-color: var(--app-accent);
+      background: color-mix(in srgb, var(--app-accent) 14%, var(--app-surface));
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--app-accent) 22%, transparent);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+  }
+
+  &__modo-alternativo {
+    justify-self: start;
+  }
+
+  // Pantalla final.
+  &__listo {
+    display: grid;
+    justify-items: center;
+    gap: 0.4rem;
+    padding: 1.5rem 1rem;
+    text-align: center;
+
+    ng-icon {
+      font-size: 3.5rem;
+      color: var(--semantic-success);
+    }
+
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h3 {
+      color: var(--app-text);
+      font-size: 1.3rem;
+    }
+  }
+
+  &__listo-monto {
+    color: var(--semantic-success);
+    font-size: 2rem;
+    font-weight: 800;
+  }
+
+  &__mensaje {
+    margin: 0;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+
+    &--error {
+      color: var(--semantic-danger);
+      background: color-mix(in srgb, var(--semantic-danger) 10%, var(--app-surface));
+      border: 1px solid color-mix(in srgb, var(--semantic-danger) 30%, transparent);
+    }
+  }
+
+  &__buscador {
+    display: grid;
+    gap: 0.35rem;
+
+    > label {
+      color: var(--app-text-soft);
+      font-weight: 700;
+    }
+
+    > div {
+      display: grid;
+      grid-template-columns: 1fr max-content;
+      gap: 0.75rem;
+    }
+
+    input {
+      min-height: 44px;
+      padding: 0.7rem 0.85rem;
+      color: var(--app-text);
+      background: var(--app-surface);
+      border: 1px solid var(--app-surface-border);
+      border-radius: 0.65rem;
+
+      &:focus-visible {
+        outline: 3px solid color-mix(in srgb, var(--app-accent) 35%, transparent);
+        outline-offset: 2px;
+      }
+    }
+  }
+
+  &__encabezado-paso {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 1rem;
+
+    p {
+      margin: 0.35rem 0 0;
+      color: var(--app-text-soft);
+    }
+  }
+
+  &__identidad-deuda {
+    min-width: 0;
+
+    p {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    strong {
+      flex: 0 0 auto;
+      color: var(--semantic-success);
+      font-size: 1.1rem;
+    }
+  }
+
+  &__total {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1rem;
+    color: var(--app-text);
+    background: var(--app-surface-strong);
+    border: 1px solid var(--app-surface-border);
+    border-radius: 0.75rem;
+
+    strong {
+      color: var(--app-accent);
+      font-size: 1.25rem;
+    }
+
+    &--final {
+      justify-content: space-between;
+    }
+  }
+
+  &__importe-cuota {
+    display: inline-flex;
+    align-items: baseline;
+    justify-content: flex-end;
+    gap: 0.45rem;
+    white-space: nowrap;
+
+    del {
+      color: var(--app-text-soft);
+      font-size: 0.85em;
+    }
+  }
+
+  &__resumen {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+    gap: 1rem;
+
+    article {
+      padding: 1rem;
+      background: var(--app-surface);
+      border: 1px solid var(--app-surface-border);
+      border-radius: 0.8rem;
+    }
+
+    header,
+    li {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    h4,
+    ul {
+      margin: 0;
+    }
+
+    ul {
+      display: grid;
+      gap: 0.5rem;
+      max-height: 11.75rem;
+      margin-top: 0.75rem;
+      padding: 0 0.35rem 0 0;
+      overflow-y: auto;
+      color: var(--app-text-soft);
+      list-style: none;
+    }
+
+    li > span {
+      display: grid;
+      gap: 0.2rem;
+    }
+
+    li > .wizard-cobro__importe-cuota {
+      display: inline-flex;
+    }
+
+    small {
+      color: var(--semantic-danger);
+    }
+  }
+
+  &__medios-cuota {
+    display: grid;
+    gap: 0.75rem;
+    max-height: 23rem;
+    padding-right: 0.35rem;
+    overflow-y: auto;
+
+    article {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(13rem, 18rem);
+      align-items: center;
+      gap: 1rem;
+      padding: 0.8rem 1rem;
+      background: var(--app-surface);
+      border: 1px solid var(--app-surface-border);
+      border-radius: 0.75rem;
+    }
+
+    article > div {
+      display: grid;
+      gap: 0.25rem;
+    }
+
+    > article > div > span {
+      color: var(--app-text-soft);
+    }
+
+    .wizard-cobro__detalle-cuota {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0.35rem;
+    }
+
+    .wizard-cobro__importe-cuota {
+      color: var(--app-text);
+    }
+  }
+}
+
+@media (max-width: 48rem) {
+  .wizard-cobro {
+    &__buscador > div,
+    &__medios-cuota article {
+      grid-template-columns: 1fr;
+    }
+
+    &__encabezado-paso,
+    &__seleccion-total {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    &__identidad-deuda p {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    &__total {
+      justify-content: space-between;
+    }
+  }
+}
+
+.wizard-cobro__otros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin: .75rem 0 0;
+  padding: .75rem .9rem;
+  border: 1px solid var(--app-surface-border);
+  border-radius: .85rem;
+
+  legend { padding: 0 .3rem; font-weight: 700; }
+}
+
+.wizard-cobro__otro {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  min-height: 2.75rem;
+  padding: 0 .9rem;
+  border: 1px solid var(--app-surface-border);
+  border-radius: 999px;
+  cursor: pointer;
+
+  input { width: 1.1rem; height: 1.1rem; accent-color: var(--app-accent); }
+
+  &--elegido {
+    border-color: var(--app-accent);
+    background: color-mix(in srgb, var(--app-accent) 12%, transparent);
+    font-weight: 600;
+  }
+}

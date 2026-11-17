@@ -1,0 +1,30 @@
+@if (factura(); as facturaActual) {
+  @if (checkout(); as checkoutActual) {
+    <app-checkout-mercado-pago
+      [abierto]="true"
+      [enlace]="checkoutActual.enlace"
+      [qr]="checkoutActual.qr"
+      [resumen]="'Factura ' + (facturaActual.codigoPlan || 'CRM')"
+      [monto]="formatearImporte(facturaActual)"
+      subtitulo="El estado se actualizará cuando el CRM confirme el pago."
+      [mensaje]="mensaje()"
+      [mensajeError]="error()"
+      [copiando]="copiando()"
+      (abrirCheckout)="abrirCheckout()"
+      (copiarEnlace)="copiarEnlace()"
+      (cerrar)="cerrar.emit()"
+    />
+  } @else {
+    <app-popup [abierto]="true" titulo="Preparar pago" [mostrarCancelar]="true" (cancelar)="cerrar.emit()">
+      <section class="checkout-factura" aria-live="polite">
+        @if (preparando()) {
+          <app-load-spinner-blue ariaLabel="Generando enlace de pago" />
+          <p>Generando el enlace seguro de Mercado Pago...</p>
+        } @else if (error()) {
+          <p class="checkout-factura__error" role="alert">{{ error() }}</p>
+          <app-boton (accion)="reintentar()">Reintentar</app-boton>
+        }
+      </section>
+    </app-popup>
+  }
+}

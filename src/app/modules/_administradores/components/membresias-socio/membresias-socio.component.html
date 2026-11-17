@@ -1,0 +1,121 @@
+<section class="legajo" aria-label="Membresías del socio">
+  @if (cargando() && !legajo()) {
+    <p class="legajo__vacio">Cargando membresías…</p>
+  } @else if (legajo(); as l) {
+    @switch (modo()) {
+      @case ('lista') {
+        <div class="legajo__cabecera">
+          <div>
+            @if (l.vigente) {
+              <p class="legajo__estado legajo__estado--ok">Pase vigente: <strong>{{ l.vigente.pase.nombre }}</strong> hasta el {{ fecha(l.vigente.fechaFin) }}</p>
+            } @else {
+              <p class="legajo__estado">Sin pase vigente.{{ l.exigirPaseParaIngresar ? ' El gimnasio exige pase para ingresar con el QR.' : '' }}</p>
+            }
+          </div>
+          <app-boton (accion)="abrirContratar()">Contratar pase</app-boton>
+        </div>
+
+        @if (l.vigente) {
+          <app-tarjeta-membresia [membresia]="l.vigente" (accion)="accion(l.vigente, $event)" (anularCongelamiento)="anularCongelamiento($event)" />
+        }
+        @if (historial().length) {
+          <h4 class="legajo__titulo">{{ l.vigente ? 'Otras membresías e historial' : 'Membresías' }} ({{ historial().length }})</h4>
+          <div class="legajo__lista">
+            @for (m of historial(); track m.uuid) {
+              <app-tarjeta-membresia [membresia]="m" (accion)="accion(m, $event)" (anularCongelamiento)="anularCongelamiento($event)" />
+            }
+          </div>
+        } @else if (!l.vigente) {
+          <p class="legajo__vacio">Todavía no contrató ningún pase.</p>
+        }
+      }
+
+      @case ('congelar') {
+        @let m = objetivo()!;
+        <form class="legajo__formulario" (submit)="$event.preventDefault(); guardarCongelamiento()">
+          <h4 class="legajo__ancho">Congelar "{{ m.pase.nombre }}"</h4>
+          <p class="legajo__nota legajo__ancho">
+            Vigente del {{ fecha(m.fechaInicio) }} al {{ fecha(m.fechaFin) }}.
+            {{ m.pase.congelamientoExtiende ? 'Los días congelados corren el vencimiento.' : 'Este pase no corre el vencimiento al congelarse.' }}
+          </p>
+          <app-input-fecha etiqueta="Desde *" [valorInicial]="desde()" [minimo]="m.fechaInicio" [maximo]="m.fechaFin" (valorCambiado)="desde.set($event)" />
+          <app-input-fecha etiqueta="Hasta *" [valorInicial]="hasta()" [minimo]="desde() || m.fechaInicio" (valorCambiado)="hasta.set($event)" />
+          <label class="legajo__campo legajo__ancho"><span>Motivo *</span><input maxlength="255" placeholder="Ej. lesión, viaje" [value]="motivo()" (input)="motivo.set($any($event.target).value)" /></label>
+          @if (diasCongelamiento()) { <p class="legajo__nota legajo__ancho">{{ diasCongelamiento() }} días congelados.</p> }
+          @if (error()) { <p class="legajo__error legajo__ancho" role="alert">{{ error() }}</p> }
+          <div class="legajo__pie legajo__ancho">
+            <app-boton apariencia="texto" (accion)="volver()">Volver</app-boton>
+            <app-boton tipo="submit" [cargando]="guardando()">Congelar</app-boton>
+          </div>
+        </form>
+      }
+
+      @case ('baja') {
+        @let m = objetivo()!;
+        <form class="legajo__formulario" (submit)="$event.preventDefault(); guardarBaja()">
+          <h4 class="legajo__ancho">Dar de baja "{{ m.pase.nombre }}"</h4>
+          <p class="legajo__nota legajo__ancho">
+            Queda en el historial.
+            {{ m.cobro?.estado === 'PAGADA' ? 'La cuota ya está paga: si corresponde un reintegro, registralo en Cobros.' : 'La cuota pendiente se anula.' }}
+          </p>
+          <label class="legajo__campo legajo__ancho"><span>Motivo *</span><input maxlength="255" [value]="motivo()" (input)="motivo.set($any($event.target).value)" /></label>
+          @if (error()) { <p class="legajo__error legajo__ancho" role="alert">{{ error() }}</p> }
+          <div class="legajo__pie legajo__ancho">
+            <app-boton apariencia="texto" (accion)="volver()">Volver</app-boton>
+            <app-boton tipo="submit" [cargando]="guardando()">Dar de baja</app-boton>
+          </div>
+        </form>
+      }
+
+      @default {
+        <form class="legajo__formulario" (submit)="$event.preventDefault(); guardarPlan()">
+          <h4 class="legajo__ancho">{{ modo() === 'cambiar' ? 'Cambiar "' + objetivo()!.pase.nombre + '" por otro plan' : 'Contratar pase para ' + l.socio.nombre }}</h4>
+          @if (modo() === 'cambiar') {
+            <p class="legajo__nota legajo__ancho">
+              La membresía actual queda reemplazada.
+              {{ objetivo()!.cobro?.estado === 'PAGADA' ? 'Ya está paga: si corresponde, descontalo en el nuevo cobro o registrá el reintegro en Cobros.' : 'Su cuota pendiente se anula.' }}
+            </p>
+          }
+          <app-select etiqueta="Pase *" placeholder="Elegí un pase" [opciones]="opcionesPase()" [value]="paseUuid()" (valueChange)="elegirPase($event)" />
+          <app-input-fecha etiqueta="Empieza el *" [valorInicial]="fechaInicio()" [minimo]="modo() === 'cambiar' ? hoy : ''" (valorCambiado)="fechaInicio.set($event)" />
+          @if (!pases().length) { <p class="legajo__nota legajo__ancho">No hay pases a la venta. Se configuran en Membresías › Pases.</p> }
+
+          @if (paseElegido(); as p) {
+            <div class="legajo__pase legajo__ancho">
+              <strong>{{ p.nombre }} · {{ precio(p) }}</strong>
+              <span>{{ resumenPase(p) }}</span>
+              @if (p.restricciones) { <small>{{ p.restricciones }}</small> }
+            </div>
+            @if (p.familiar) {
+              <fieldset class="legajo__opciones legajo__ancho">
+                <legend>Integrantes cubiertos (además de {{ l.socio.nombre }}, hasta {{ p.maxIntegrantes }} personas)</legend>
+                @if (!l.titular) { <p class="legajo__error">Un pase familiar se contrata a nombre del titular del grupo.</p> }
+                @for (g of candidatos(); track g.uuid) {
+                  <label class="legajo__check"><input type="checkbox" [checked]="integrantes().has(g.uuid)" (change)="alternar('integrantes', g.uuid, $any($event.target).checked)" />{{ g.nombre }}</label>
+                } @empty {
+                  <p class="legajo__nota">El grupo no tiene otros integrantes.</p>
+                }
+              </fieldset>
+            }
+            @if (p.descuentos.length) {
+              <fieldset class="legajo__opciones legajo__ancho">
+                <legend>Descuentos</legend>
+                @for (d of p.descuentos; track d.uuid) {
+                  <label class="legajo__check"><input type="checkbox" [checked]="descuentos().has(d.uuid)" (change)="alternar('descuentos', d.uuid, $any($event.target).checked)" />{{ d.nombre }}</label>
+                }
+              </fieldset>
+            }
+            <p class="legajo__nota legajo__ancho">Se genera una cuota que se cobra en Cobros › Cuotas (o el socio la paga desde el portal). El pase habilita el ingreso cuando está pago.</p>
+          }
+          @if (error()) { <p class="legajo__error legajo__ancho" role="alert">{{ error() }}</p> }
+          <div class="legajo__pie legajo__ancho">
+            <app-boton apariencia="texto" (accion)="volver()">Volver</app-boton>
+            <app-boton tipo="submit" [cargando]="guardando()">{{ modo() === 'cambiar' ? 'Cambiar de plan' : 'Contratar' }}</app-boton>
+          </div>
+        </form>
+      }
+    }
+  }
+</section>
+
+<app-popup-cobro-cuotas [abierto]="cobrando()" (cerrar)="cerrarCobro()" (cobrosActualizados)="cargar()" />

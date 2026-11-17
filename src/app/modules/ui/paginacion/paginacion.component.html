@@ -1,0 +1,72 @@
+<nav class="paginacion" [class.paginacion--alto-rendimiento]="altoRendimiento()" aria-label="Paginacion">
+  @if (mostrarResumen()) {
+    <p class="paginacion__resumen">
+      <span class="paginacion__resumen-texto">Pagina {{ paginaNormalizada() }} de {{ totalPaginas() }}</span>
+      <span class="paginacion__resumen-compacto">{{ paginaNormalizada() }}/{{ totalPaginas() }}</span>
+    </p>
+  }
+
+  <div class="paginacion__botones">
+    <button
+      class="paginacion__boton"
+      type="button"
+      aria-label="Primera pagina"
+      [disabled]="!puedeRetroceder()"
+      (click)="irAPagina(1)"
+    >
+      <span class="paginacion__boton-texto">Primera</span>
+      <span class="paginacion__boton-icono" aria-hidden="true">«</span>
+    </button>
+
+    <button
+      class="paginacion__boton"
+      type="button"
+      aria-label="Pagina anterior"
+      [disabled]="!puedeRetroceder()"
+      (click)="irAPagina(paginaNormalizada() - 1)"
+    >
+      <span class="paginacion__boton-texto">Anterior</span>
+      <span class="paginacion__boton-icono" aria-hidden="true">‹</span>
+    </button>
+
+    @for (pagina of paginas(); track $index) {
+      @if (pagina === 'ellipsis') {
+        <span class="paginacion__ellipsis" aria-hidden="true">...</span>
+      } @else {
+        <button
+          class="paginacion__boton paginacion__boton--numero"
+          type="button"
+          [class.paginacion__boton--activa]="pagina === paginaNormalizada()"
+          [attr.aria-current]="pagina === paginaNormalizada() ? 'page' : null"
+          [attr.aria-label]="'Ir a pagina ' + pagina"
+          [disabled]="deshabilitado()"
+          (click)="irAPagina(pagina)"
+        >
+          {{ pagina }}
+        </button>
+      }
+    }
+
+    <button
+      class="paginacion__boton"
+      type="button"
+      aria-label="Pagina siguiente"
+      [disabled]="!puedeAvanzar()"
+      (click)="irAPagina(paginaNormalizada() + 1)"
+    >
+      <span class="paginacion__boton-texto">Siguiente</span>
+      <span class="paginacion__boton-icono" aria-hidden="true">›</span>
+    </button>
+
+    <button
+      class="paginacion__boton"
+      type="button"
+      aria-label="Ultima pagina"
+      [disabled]="!puedeAvanzar()"
+      (click)="irAPagina(totalPaginas())"
+    >
+      <span class="paginacion__boton-texto">Ultima</span>
+      <span class="paginacion__boton-icono" aria-hidden="true">»</span>
+    </button>
+  </div>
+</nav>

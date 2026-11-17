@@ -1,0 +1,291 @@
+<section class="seguimiento" aria-label="Seguimiento de asistencia">
+  <div class="seguimiento__filtros">
+    <div class="seguimiento__periodos" role="group" aria-label="Período">
+      @for (opcion of opcionesPeriodo; track opcion.id) {
+        <button
+          type="button"
+          class="seguimiento__periodo"
+          [class.seguimiento__periodo--activo]="periodo() === opcion.id"
+          [attr.aria-pressed]="periodo() === opcion.id"
+          (click)="elegirPeriodo(opcion.id)"
+        >
+          {{ opcion.etiqueta }}
+        </button>
+      }
+    </div>
+
+    @if (periodo() === 'personalizado') {
+      <div class="seguimiento__fechas">
+        <app-input-fecha
+          etiqueta="Desde"
+          [valorInicial]="desdePersonalizado()"
+          [maximo]="hastaPersonalizado()"
+          (valorCambiado)="cambiarFecha('desde', $event)"
+        />
+        <app-input-fecha
+          etiqueta="Hasta"
+          [valorInicial]="hastaPersonalizado()"
+          [minimo]="desdePersonalizado()"
+          (valorCambiado)="cambiarFecha('hasta', $event)"
+        />
+      </div>
+    }
+
+    <div class="seguimiento__selectores">
+      <label class="seguimiento__buscar">
+        <span>Buscar alumno</span>
+        <input
+          type="search"
+          placeholder="Nombre, apellido o DNI"
+          [value]="busqueda()"
+          (input)="buscar($any($event.target).value)"
+        />
+      </label>
+      <app-select etiqueta="Actividad" [opciones]="opcionesActividades()" [value]="actividadUuid()" (valueChange)="cambiarFiltro('actividad', $event)" />
+      @if (esAdmin()) {
+        <app-select etiqueta="Profesor" [opciones]="opcionesProfesores()" [value]="profesorUuid()" (valueChange)="cambiarFiltro('profesor', $event)" />
+      }
+      <app-select etiqueta="Nivel" [opciones]="opcionesNivel" [value]="nivel()" (valueChange)="cambiarFiltro('nivel', $event)" />
+      <app-select etiqueta="Inscripción" [opciones]="opcionesEstado" [value]="estadoInscripcion()" (valueChange)="cambiarFiltro('estado', $event)" />
+      <app-select etiqueta="Orden" [opciones]="opcionesOrden" [value]="orden()" (valueChange)="cambiarFiltro('orden', $event)" />
+    </div>
+
+    <div class="seguimiento__acciones-filtro">
+      <label class="seguimiento__check">
+        <input type="checkbox" [checked]="soloAlertas()" (change)="alternarAlertas($any($event.target).checked)" />
+        Solo alumnos con alertas
+      </label>
+      @if (hayFiltros()) {
+        <app-boton apariencia="texto" (accion)="limpiarFiltros()">Limpiar filtros</app-boton>
+      }
+      @if (esAdmin() && umbrales()) {
+        <app-boton apariencia="texto" (accion)="abrirUmbrales()">Configurar umbrales</app-boton>
+      }
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="seguimiento__error" role="alert">
+      <span>{{ error() }}</span>
+      <app-boton apariencia="texto" (accion)="reintentar()">Reintentar</app-boton>
+    </div>
+  }
+
+  @if (resumen(); as resumen) {
+    <div class="seguimiento__kpis" [class.seguimiento__kpis--cargando]="cargando()">
+      <article class="seguimiento__kpi">
+        <span>Alumnos activos</span>
+        <strong>{{ resumen.alumnosActivos }}</strong>
+        <small>{{ resumen.sociosInscriptos }} socios en el período</small>
+      </article>
+      <article class="seguimiento__kpi">
+        <span>Asistencia promedio</span>
+        <strong [style.color]="color(resumen.promedioAsistencia === null ? 'SIN_DATOS' : resumen.promedioAsistencia >= (umbrales()?.verde ?? 80) ? 'VERDE' : resumen.promedioAsistencia >= (umbrales()?.amarillo ?? 60) ? 'AMARILLO' : 'ROJO')">
+          {{ porcentaje(resumen.promedioAsistencia) }}
+        </strong>
+        <small>{{ resumen.presentes }} presentes · {{ resumen.ausentes }} ausentes · {{ resumen.justificadas }} justificadas</small>
+      </article>
+      <article class="seguimiento__kpi">
+        <span>Clases realizadas</span>
+        <strong>{{ resumen.clasesRealizadas }}</strong>
+        <small>Con planilla cargada</small>
+      </article>
+      <article class="seguimiento__kpi seguimiento__kpi--alerta" [class.seguimiento__kpi--ok]="!resumen.bajaAsistencia">
+        <span>Baja asistencia</span>
+        <strong>{{ resumen.bajaAsistencia }}</strong>
+        <small>Menos de {{ umbrales()?.amarillo }}%</small>
+      </article>
+      <article class="seguimiento__kpi seguimiento__kpi--alerta" [class.seguimiento__kpi--ok]="!resumen.dejaronDeAsistir">
+        <span>Dejaron de asistir</span>
+        <strong>{{ resumen.dejaronDeAsistir }}</strong>
+        <small>{{ umbrales()?.diasSinAsistencia }} días o más sin venir</small>
+      </article>
+    </div>
+
+    @if (alertas().length) {
+      <section class="seguimiento__panel seguimiento__alertas" aria-label="Alertas de inasistencia">
+        <h3>Alertas de inasistencia <span>{{ resumen.conAlertas }}</span></h3>
+        <ul role="list">
+          @for (alumno of alertas(); track alumno.inscripcionUuid) {
+            <li>
+              <button type="button" (click)="abrirDetalle(alumno)">
+                <strong>{{ alumno.nombre }} {{ alumno.apellido }}</strong>
+                <span>{{ alumno.actividadNombre }}</span>
+                <em>{{ alumno.alertas.join(' · ') }}</em>
+              </button>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+
+    <div class="seguimiento__graficos">
+      <section class="seguimiento__panel" aria-label="Evolución mensual">
+        <h3>Evolución mensual</h3>
+        @if (barrasMensuales().length) {
+          <app-grafico-barras class="grafico-vertical" [barras]="barrasMensuales()" estilo="compacto" orientacion="vertical" />
+        } @else {
+          <p class="seguimiento__vacio">Todavía no hay clases con asistencia en el período.</p>
+        }
+      </section>
+      <section class="seguimiento__panel" aria-label="Asistencia por actividad">
+        <h3>Por actividad</h3>
+        @if (barrasActividades().length) {
+          <app-grafico-barras [barras]="barrasActividades()" estilo="compacto" orientacion="lateral" />
+        } @else {
+          <p class="seguimiento__vacio">Sin datos por actividad.</p>
+        }
+      </section>
+      @if (esAdmin() && barrasProfesores().length) {
+        <section class="seguimiento__panel" aria-label="Asistencia por profesor">
+          <h3>Por profesor</h3>
+          <app-grafico-barras [barras]="barrasProfesores()" estilo="compacto" orientacion="lateral" />
+        </section>
+      }
+    </div>
+  }
+
+  <section class="seguimiento__panel" aria-label="Alumnos">
+    <h3>Alumnos <span>{{ totalAlumnos() }}</span></h3>
+    <ng-template #celdaAsistencia let-fila>
+      <span class="seguimiento__nivel" [class]="'seguimiento__nivel seguimiento__nivel--' + fila.nivel.toLowerCase()">
+        {{ fila.asistenciaTexto }}
+      </span>
+      @if (fila.alertas.length) {
+        <span class="seguimiento__alerta-icono" [attr.title]="fila.alertas.join(' · ')" aria-label="Tiene alertas">!</span>
+      }
+    </ng-template>
+    <app-tabla-responsive
+      [columnas]="columnas"
+      [filas]="filas()"
+      idFila="inscripcionUuid"
+      [acciones]="acciones"
+      [cargando]="cargando()"
+      [plantillasCeldas]="{ asistenciaTexto: celdaAsistencia }"
+      [mensajeVacio]="hayFiltros() ? 'No hay alumnos para los filtros elegidos.' : 'Todavía no hay alumnos inscriptos.'"
+      (accionFila)="manejarAccion($event)"
+      (verFila)="abrirDetalle($event)"
+    />
+    @if (totalPaginas() > 1) {
+      <app-paginacion [paginaActual]="pagina()" [totalPaginas]="totalPaginas()" (paginaCambiada)="cambiarPagina($event)" />
+    }
+  </section>
+</section>
+
+<app-popup
+  [abierto]="detalleAbierto()"
+  [titulo]="detalle() ? (detalle()!.alumno.nombre + ' ' + detalle()!.alumno.apellido) : 'Detalle del alumno'"
+  [descripcion]="detalle() ? detalle()!.alumno.actividadNombre : ''"
+  ancho="grande"
+  textoCancelar="Cerrar"
+  (cancelar)="cerrarDetalle()"
+>
+  @if (cargandoDetalle()) {
+    <p class="seguimiento__vacio">Cargando asistencia…</p>
+  } @else if (detalle(); as detalle) {
+    <div class="seguimiento__detalle">
+      <div class="seguimiento__vistas" role="tablist" aria-label="Detalle del alumno">
+        <button type="button" role="tab" [attr.aria-selected]="vistaDetalle() === 'asistencia'" [class.seguimiento__vista--activa]="vistaDetalle() === 'asistencia'" (click)="vistaDetalle.set('asistencia')">Asistencia</button>
+        <button type="button" role="tab" [attr.aria-selected]="vistaDetalle() === 'trayectoria'" [class.seguimiento__vista--activa]="vistaDetalle() === 'trayectoria'" (click)="verTrayectoria()">Trayectoria deportiva</button>
+      </div>
+
+      @if (vistaDetalle() === 'asistencia') {
+        @let alumno = detalle.alumno;
+        <dl class="seguimiento__ficha">
+          <div><dt>Asistencia</dt><dd><span [class]="'seguimiento__nivel seguimiento__nivel--' + alumno.nivel.toLowerCase()">{{ porcentaje(alumno.porcentaje) }}</span></dd></div>
+          <div><dt>Clases</dt><dd>{{ alumno.clases }}</dd></div>
+          <div><dt>Presentes</dt><dd>{{ alumno.presentes }}</dd></div>
+          <div><dt>Ausentes</dt><dd>{{ alumno.ausentes }}</dd></div>
+          <div><dt>Justificadas</dt><dd>{{ alumno.justificadas }}</dd></div>
+          <div><dt>Inscripción</dt><dd>{{ fecha(alumno.fechaInscripcion) }}</dd></div>
+          <div><dt>Antigüedad</dt><dd>{{ alumno.antiguedad }}</dd></div>
+          <div><dt>Última asistencia</dt><dd>{{ fecha(alumno.ultimaAsistencia) }}</dd></div>
+          @if (alumno.fechaBaja) {
+            <div><dt>Baja</dt><dd>{{ fecha(alumno.fechaBaja) }}{{ alumno.motivoBaja ? ' · ' + alumno.motivoBaja : '' }}</dd></div>
+          }
+          @if (alumno.profesores.length) {
+            <div><dt>Profesores</dt><dd>{{ alumno.profesores.join(', ') }}</dd></div>
+          }
+        </dl>
+
+        @if (alumno.alertas.length) {
+          <ul class="seguimiento__chips-alerta" role="list" aria-label="Alertas">
+            @for (alerta of alumno.alertas; track alerta) {
+              <li>{{ alerta }}</li>
+            }
+          </ul>
+        }
+
+        @if (barrasDetalle().length) {
+          <section aria-label="Evolución mensual del alumno">
+            <h4>Evolución mensual</h4>
+            <app-grafico-barras class="grafico-vertical" [barras]="barrasDetalle()" estilo="compacto" orientacion="vertical" />
+            <table class="seguimiento__tabla-mes">
+              <thead><tr><th>Mes</th><th>Clases</th><th>Presentes</th><th>Ausentes</th><th>Asistencia</th></tr></thead>
+              <tbody>
+                @for (fila of detalle.evolucionMensual; track fila.periodo) {
+                  <tr>
+                    <td>{{ mes(fila.periodo) }}</td>
+                    <td>{{ fila.clases }}</td>
+                    <td>{{ fila.presentes }}</td>
+                    <td>{{ fila.ausentes + fila.justificadas }}</td>
+                    <td>{{ porcentaje(fila.porcentaje) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </section>
+        }
+
+        <section aria-label="Historial de clases">
+          <h4>Historial de clases</h4>
+          @if (detalle.clases.length) {
+            <ol class="seguimiento__clases">
+              @for (clase of detalle.clases.slice(0, clasesVisibles()); track clase.inicio) {
+                <li [class]="'seguimiento__clase seguimiento__clase--' + clase.estado.toLowerCase()">
+                  <time>{{ textoInicioClase(clase.inicio) }}</time>
+                  <span>{{ textoEstadoClase(clase.estado) }}</span>
+                </li>
+              }
+            </ol>
+            @if (detalle.clases.length > clasesVisibles()) {
+              <app-boton apariencia="texto" (accion)="verMasClases()">Ver más clases</app-boton>
+            }
+          } @else {
+            <p class="seguimiento__vacio">Todavía no hubo clases con asistencia en el período.</p>
+          }
+        </section>
+      } @else {
+        @if (cargandoTrayectoria()) {
+          <p class="seguimiento__vacio">Cargando trayectoria…</p>
+        } @else if (trayectoria(); as trayectoria) {
+          <app-trayectoria-deportiva [trayectoria]="trayectoria" />
+        }
+      }
+    </div>
+  }
+</app-popup>
+
+@if (esAdmin()) {
+  <app-popup
+    [abierto]="umbralesAbierto()"
+    titulo="Umbrales de asistencia"
+    descripcion="Definen los colores de la tabla y cuándo se marca una alerta. Aplican a todo el gimnasio, también para los profesores."
+    ancho="pequeno"
+    (cancelar)="umbralesAbierto.set(false)"
+  >
+    @if (borradorUmbrales(); as borrador) {
+      <form class="seguimiento__umbrales" (submit)="$event.preventDefault(); guardarUmbrales()">
+        <label><span>Buena asistencia (verde) desde %</span><input type="number" min="1" max="100" [value]="borrador.verde" (input)="cambiarUmbral('verde', $any($event.target).value)" /></label>
+        <label><span>Regular (amarillo) desde %</span><input type="number" min="0" max="99" [value]="borrador.amarillo" (input)="cambiarUmbral('amarillo', $any($event.target).value)" /></label>
+        <label><span>Alerta si la asistencia baja del %</span><input type="number" min="0" max="100" [value]="borrador.porcentajeAlerta" (input)="cambiarUmbral('porcentajeAlerta', $any($event.target).value)" /></label>
+        <label><span>Alerta tras días sin asistir</span><input type="number" min="1" max="365" [value]="borrador.diasSinAsistencia" (input)="cambiarUmbral('diasSinAsistencia', $any($event.target).value)" /></label>
+        <label><span>Alerta tras ausencias seguidas</span><input type="number" min="1" max="50" [value]="borrador.ausenciasConsecutivas" (input)="cambiarUmbral('ausenciasConsecutivas', $any($event.target).value)" /></label>
+        @if (errorUmbrales()) {
+          <p class="seguimiento__error" role="alert">{{ errorUmbrales() }}</p>
+        }
+        <app-boton tipo="submit" [cargando]="guardandoUmbrales()">Guardar</app-boton>
+      </form>
+    }
+  </app-popup>
+}

@@ -1,0 +1,14 @@
+<section class="tesoreria-resumen">
+  @if (error()) {
+    <p class="tesoreria-resumen__error" role="alert">{{ error() }}</p>
+  }
+
+  @if (cargando() && !balance()) {
+    <app-cards-hero [cargando]="true" [columnas]="4" [cantidadCarga]="4" />
+  } @else if (balance()) {
+    <app-cards-hero [items]="cards()" [columnas]="4" />
+  } @else {
+    <app-boton tipo="button" (accion)="cargarBalance()">Reintentar balance</app-boton>
+  }
+
+</section>

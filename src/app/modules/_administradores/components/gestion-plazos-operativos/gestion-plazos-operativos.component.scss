@@ -1,0 +1,21 @@
+.gestion-plazos-operativos {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.gestion-plazos-operativos h2 {
+  margin: 0;
+}
+
+.gestion-plazos-operativos__carga,
+.gestion-plazos-operativos__estado-error {
+  display: grid;
+  min-height: 8rem;
+  place-content: center;
+  justify-items: center;
+  gap: 1rem;
+}
+
+.gestion-plazos-operativos__error {
+  color: var(--semantic-danger);
+}

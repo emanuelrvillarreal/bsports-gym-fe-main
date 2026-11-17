@@ -1,0 +1,22 @@
+:host {
+  display: block;
+}
+
+.menu-solapas__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.menu-solapas__ayuda,
+.menu-solapas__estado {
+  color: var(--app-text-soft);
+  font-size: 0.9rem;
+}
+
+.menu-solapas__ayuda {
+  margin-top: 0.75rem;
+  text-align: right;
+}

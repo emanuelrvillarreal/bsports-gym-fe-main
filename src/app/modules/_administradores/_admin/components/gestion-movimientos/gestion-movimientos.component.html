@@ -1,0 +1,106 @@
+@if (altaInline()) {
+  <app-card class="gestion-movimientos gestion-movimientos--ingresos" [compacto]="true">
+    <ng-container [ngTemplateOutlet]="contenidoMovimientos" />
+  </app-card>
+} @else {
+  <app-card [titulo]="titulo()" descripcion="Caja manual, cobros y movimientos originados por otros módulos.">
+    <ng-container [ngTemplateOutlet]="contenidoMovimientos" />
+  </app-card>
+}
+
+<ng-template #contenidoMovimientos>
+  <div [class.cabecera-ingresos]="altaInline()">
+    <div class="filtros" aria-label="Filtros de movimientos">
+      <app-input-periodo
+        etiqueta="Período"
+        ariaLabel="Filtrar movimientos por período"
+        [ngModel]="periodo()"
+        [ngModelOptions]="{ standalone: true }"
+        (valorCambiado)="actualizarPeriodo($event)"
+      />
+      <div class="filtros__tipo-anulados">
+        @if (!tipoFijo()) {
+          <app-select etiqueta="Tipo" [opciones]="opcionesTipo" [value]="tipo()" (valueChange)="actualizarTipoFiltro($any($event))" />
+        }
+        @if (altaInline()) {
+          <label class="check">
+            <input type="checkbox" [checked]="incluirAnulados()" (change)="actualizarIncluirAnulados($event)" />
+            <span class="check__control" aria-hidden="true"><span class="check__luz"></span></span>
+            <span>Incluir anulados</span>
+          </label>
+        } @else {
+          <label class="check check--legacy"><input type="checkbox" [checked]="incluirAnulados()" (change)="incluirAnulados.set($any($event.target).checked)" /> Incluir anulados</label>
+        }
+      </div>
+      @if (!altaInline()) {
+        <app-boton (accion)="filtrar()">Aplicar filtros</app-boton>
+      }
+    </div>
+    @if (altaInline()) {
+      <div class="cabecera-ingresos__alta">
+        <span class="cabecera-ingresos__texto">{{ tipoFijo() === 'INGRESO' ? 'Nuevo ingreso' : 'Nuevo movimiento' }}</span>
+        <app-boton tipo="button" [soloIcono]="true" class="cabecera-ingresos__boton" [aria-label]="tipoFijo() === 'INGRESO' ? 'Nuevo ingreso' : 'Nuevo movimiento'" (accion)="altaAbierta.set(true)">
+          <ng-icon name="heroPlus" aria-hidden="true" />
+        </app-boton>
+      </div>
+    }
+  </div>
+
+  @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
+
+  <app-tabla-responsive
+    [columnas]="columnas()"
+    [filas]="filas()"
+    [acciones]="acciones"
+    [cargando]="cargando()"
+    [maxFilasVisibles]="7"
+    idFila="movimientoUuid"
+    (accionFila)="manejarAccion($event)"
+  />
+  <app-paginacion [paginaActual]="pagina()" [totalPaginas]="totalPaginas()" [deshabilitado]="cargando() || procesando()" (paginaCambiada)="cambiarPagina($event)" />
+</ng-template>
+
+<app-popup [abierto]="altaAbierta()" titulo="Registrar movimiento" [cancelarDeshabilitado]="procesando()" (cancelar)="altaAbierta.set(false)">
+  @if (altaAbierta()) {
+    <app-formulario-movimiento [tipoFijo]="tipoFijo()" [enviando]="procesando()" (enviado)="crear($event)" />
+  }
+</app-popup>
+<app-popup [abierto]="!!movimientoAnular()" titulo="Anular movimiento" [mostrarEncabezado]="false" [cancelarDeshabilitado]="procesando()" (cancelar)="movimientoAnular.set(null)">
+  @if (movimientoAnular()) {
+    <app-titulo-hero
+      icono="ingresos"
+      titulo="Anular ingreso"
+      subtitulo="Indicá el motivo de la anulación."
+    />
+    <app-formulario-anulacion
+      [enviando]="procesando()"
+      [limiteMotivo]="500"
+      [mostrarContador]="true"
+      (enviado)="anular($event)"
+    />
+  }
+</app-popup>
+<app-popup [abierto]="!!detalle()" titulo="Detalle del movimiento" [mostrarEncabezado]="altaInline() ? false : true" [aparienciaCancelar]="altaInline() ? 'solido' : 'texto'" (cancelar)="detalle.set(null)">
+  @if (detalle(); as item) {
+    <section class="detalle" [class.detalle--legacy]="!altaInline()">
+      @if (altaInline()) {
+        <app-titulo-hero icono="tesoreria" titulo="Detalle del movimiento" [subtitulo]="tipoFijo() === 'INGRESO' ? 'Información del ingreso seleccionado.' : 'Información del movimiento seleccionado.'" />
+      }
+      <dl>
+        <div><dt>Concepto</dt><dd>{{ item.concepto }}</dd></div>
+        @if (item.personaNombre && item.personaApellido) {
+          <div><dt>Socio</dt><dd>{{ item.personaNombre }} {{ item.personaApellido }}</dd></div>
+        }
+        <div><dt>Importe</dt><dd>{{ altaInline() ? formatearMonto(item.monto) : item.monto }}</dd></div>
+        <div><dt>Origen</dt><dd>{{ altaInline() ? formatearOrigen(item.origen) : item.origen }}</dd></div>
+        <div><dt>Estado</dt><dd>@if (altaInline()) { <span class="detalle__estado" [class.detalle__estado--anulado]="item.estado === 'ANULADO'">{{ formatearEstado(item.estado) }}</span> } @else { {{ item.estado }} }</dd></div>
+        <div><dt>Registrado por</dt><dd>{{ item.registradoPorApellido }}, {{ item.registradoPorNombre }}</dd></div>
+        @if (item.anuladaMotivo && altaInline()) {
+          <div class="detalle__motivo"><dt>Motivo de anulación</dt><dd><textarea readonly [value]="item.anuladaMotivo" aria-label="Motivo de anulación"></textarea></dd></div>
+        } @else if (item.anuladaMotivo) {
+          <div><dt>Motivo de anulación</dt><dd>{{ item.anuladaMotivo }}</dd></div>
+        }
+      </dl>
+    </section>
+  }
+</app-popup>

@@ -1,0 +1,82 @@
+<section class="mis-actividades-profesor" aria-label="Mis actividades">
+  @if (error()) {
+    <p class="mis-actividades-profesor__error" role="alert">{{ error() }}</p>
+  }
+  <app-card>
+    <div class="mis-actividades-profesor__encabezado">
+      <div>
+        <span class="mis-actividades-profesor__eyebrow">Actividades</span>
+        <h2>Actividades asignadas</h2>
+      </div>
+    </div>
+    <app-tabla-responsive
+      [columnas]="columnas"
+      [filas]="actividades()"
+      idFila="actividadUuid"
+      [acciones]="acciones"
+      [cargando]="cargando()"
+      [tbody_rows]="6"
+      [vacio_reservar_filas]="false"
+      mensajeVacio="No hay actividades asignadas para mostrar."
+      (accionFila)="manejarAccion($event)"
+    />
+    <app-paginacion
+      [paginaActual]="paginaActual()"
+      [totalPaginas]="totalPaginas()"
+      [deshabilitado]="cargando()"
+      (paginaCambiada)="cambiarPagina($event)"
+    />
+  </app-card>
+
+  <app-popup
+    [abierto]="detalleAbierto()"
+    titulo="Detalle de actividad"
+    [mostrarEncabezado]="false"
+    ancho="extraGrande"
+    textoCancelar="Cerrar"
+    aparienciaCancelar="solido"
+    (cancelar)="cerrarDetalle()"
+  >
+    <div class="detalle-actividad" aria-live="polite">
+      @if (cargandoDetalle()) {
+        <p class="detalle-actividad__cargando" role="status">Cargando detalle de actividad…</p>
+      }
+      @if (errorDetalle()) {
+        <p class="mis-actividades-profesor__error" role="alert">{{ errorDetalle() }}</p>
+      }
+      @if (detalle(); as actividad) {
+        <app-titulo-hero icono="actividades" [titulo]="actividad.nombre" subtitulo="Datos habituales de la actividad" />
+        <section class="detalle-actividad__seccion" aria-labelledby="titulo-datos-actividad">
+          <div class="detalle-actividad__titulo-seccion">
+            <span class="detalle-actividad__eyebrow">Actividad</span>
+            <h2 id="titulo-datos-actividad">Datos habituales de la actividad</h2>
+          </div>
+          <dl class="detalle-actividad__datos">
+            <div class="detalle-actividad__dato--ancho-completo">
+              <dt>Días habituales</dt>
+              <dd>
+                @if (diasHabituales().length) {
+                  <ul class="detalle-actividad__chips" role="list">
+                    @for (dia of diasHabituales(); track dia) { <li class="detalle-actividad__chip">{{ dia }}</li> }
+                  </ul>
+                } @else { <span>-</span> }
+              </dd>
+            </div>
+            <div>
+              <dt>Horario habitual</dt>
+              <dd class="detalle-actividad__horario">
+                <span>{{ formatearHora(actividad.horaInicio) }}–{{ formatearHora(actividad.horaFin) }}</span>
+                <ng-icon name="heroClock" aria-hidden="true" />
+              </dd>
+            </div>
+            <div><dt>Cupo</dt><dd><span class="detalle-actividad__chip" [class.detalle-actividad__chip--exito]="!cupoCompleto()" [class.detalle-actividad__chip--peligro]="cupoCompleto()">{{ actividad.inscriptos.length }}/{{ actividad.cupoMaximo }}</span></dd></div>
+          </dl>
+        </section>
+        <section class="detalle-actividad__planilla" aria-labelledby="titulo-inscriptos">
+          <div class="detalle-actividad__titulo-planilla"><div><span class="detalle-actividad__eyebrow">Actividad</span><h2 id="titulo-inscriptos">Alumnos de la actividad</h2></div><span>{{ filasInscriptos().length }} alumnos</span></div>
+          <app-tabla-responsive [columnas]="columnasInscriptos" [filas]="filasInscriptos()" idFila="inscriptoUuid" [mostrarAcciones]="false" [tbody_rows]="5" [vacio_reservar_filas]="false" mensajeVacio="No hay alumnos inscriptos en esta actividad." />
+        </section>
+      }
+    </div>
+  </app-popup>
+</section>

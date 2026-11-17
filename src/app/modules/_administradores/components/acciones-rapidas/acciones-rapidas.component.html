@@ -1,0 +1,20 @@
+@if (tareas().length) {
+  <section class="acciones-rapidas" aria-labelledby="acciones-rapidas-titulo">
+    <h2 id="acciones-rapidas-titulo">¿Qué querés hacer?</h2>
+    <ul class="acciones-rapidas__lista">
+      @for (t of tareas(); track t.titulo) {
+        <li>
+          <a class="acciones-rapidas__tarea" [routerLink]="t.ruta" [queryParams]="t.params ?? null">
+            <span class="acciones-rapidas__icono" aria-hidden="true">
+              <ng-icon [name]="iconos.obtenerNombre(t.icono)" />
+            </span>
+            <span class="acciones-rapidas__texto">
+              <strong>{{ t.titulo }}</strong>
+              <span>{{ t.ayuda }}</span>
+            </span>
+          </a>
+        </li>
+      }
+    </ul>
+  </section>
+}

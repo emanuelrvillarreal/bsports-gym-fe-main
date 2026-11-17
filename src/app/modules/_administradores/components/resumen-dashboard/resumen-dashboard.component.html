@@ -1,0 +1,34 @@
+<section class="resumen-dashboard">
+  @if (cargando()) {
+    <p>Cargando indicadores…</p>
+  }
+  @if (error()) {
+    <div class="resumen-dashboard__estado" role="status">
+      <p>{{ error() }}</p>
+      <app-boton apariencia="texto" (accion)="cargar()">Reintentar</app-boton>
+    </div>
+  }
+  @if (resumen(); as datos) {
+    <div class="resumen-dashboard__metricas">
+      <app-card titulo="Socios activos"><strong>{{ datos.socios.activos }}</strong><span>Morosos: {{ datos.socios.morosos }} · Inhabilitados: {{ datos.socios.inhabilitados }}</span></app-card>
+      <app-card titulo="Actividades"><strong>{{ datos.actividades.activas }}</strong><span>{{ datos.actividades.inscripciones }} inscripciones · {{ datos.actividades.proximosEventos }} eventos</span></app-card>
+      <app-card titulo="Presentes"><strong>{{ datos.accesos.presentes }}</strong><span>personas dentro del gimnasio</span></app-card>
+      <app-card titulo="Reservas próximas"><strong>{{ datos.reservas.proximas }}</strong><span>reservas programadas</span></app-card>
+      @if (mostrarFinanzas() && datos.financiero; as financiero) {
+        <app-card titulo="Balance mensual"><strong>{{ financiero.balance }}</strong><span>Ingresos: {{ financiero.ingresos }} · Egresos: {{ financiero.egresos }}</span></app-card>
+        <app-card titulo="Deuda vencida"><strong>{{ financiero.deudaVencida }}</strong><span>importe consolidado</span></app-card>
+      }
+    </div>
+  }
+  <app-card titulo="Accesos rápidos">
+    <nav class="resumen-dashboard__atajos" aria-label="Accesos rápidos">
+      <a [routerLink]="prefijoRuta() + '/socios'">Gestionar socios</a>
+      <a [routerLink]="prefijoRuta() + '/actividades'">Gestionar actividades</a>
+      <a [routerLink]="prefijoRuta() + '/amenities'">Gestionar reservas</a>
+      <a [routerLink]="prefijoRuta() + '/accesos'">Registrar acceso</a>
+      @if (mostrarFinanzas()) {
+        <a routerLink="/admin/tesoreria">Abrir Cobros</a>
+      }
+    </nav>
+  </app-card>
+</section>

@@ -1,0 +1,21 @@
+:host {
+  display: block;
+}
+
+.formulario-asignacion-descuento {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  gap: 0.8rem;
+  align-items: end;
+  margin: 0;
+
+  &__error {
+    grid-column: 1 / -1;
+    min-height: 1.1rem;
+    color: var(--semantic-danger, #ef4444);
+    visibility: hidden;
+  }
+  &__error--visible {
+    visibility: visible;
+  }
+}

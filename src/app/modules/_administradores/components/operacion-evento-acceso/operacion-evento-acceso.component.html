@@ -1,0 +1,121 @@
+<app-popup
+  [abierto]="abierto()"
+  titulo="Ingresar al evento"
+  [mostrarEncabezado]="false"
+  ancho="extraGrande"
+  [mostrarCancelar]="false"
+  [cancelarDeshabilitado]="procesando() || cobroAbierto()"
+  (cancelar)="solicitarCierre()"
+>
+  <app-titulo-hero
+    icono="entradasEventos"
+    titulo="Ingresar al evento"
+    [subtitulo]="evento().titulo + ' · Escaneá el QR o usá el lector USB.'"
+  />
+  <section class="operacion-evento" [attr.aria-busy]="procesando()">
+    <app-lector-qr
+      [activo]="lectorActivo()"
+      [intervaloDuplicadosMs]="3000"
+      (contenidoLeido)="procesarCodigo($event)"
+      (contenidoManualEnviado)="buscarSocioPorDni($event)"
+      manualEtiqueta="DNI del socio"
+      manualAyuda="Ingresá el número de documento para buscar al socio."
+      manualPlaceholder="Ingresar DNI"
+      manualFormato="dni"
+      [manualCargando]="buscandoSocio()"
+    />
+    <div class="operacion-evento__precio">
+      <span>Valor de entrada de socio al día</span>
+      <strong>{{ formatearMonto(evento().monto) }}</strong>
+    </div>
+    @if (!evento().permiteInvitados) {
+      <p class="operacion-evento__aviso">Este evento no admite el ingreso de invitados.</p>
+    }
+    @if (procesando()) {
+      <p class="operacion-evento__estado" role="status">Validando el acceso…</p>
+    }
+    @if (false && mensaje()) {
+      <div
+        class="operacion-evento__estado"
+        [class.operacion-evento__estado--exito]="estado() === 'exito'"
+        [class.operacion-evento__estado--rechazo]="estado() === 'rechazado'"
+        [class.operacion-evento__estado--error]="estado() === 'error'"
+        [class.operacion-evento__estado--pago]="estado() === 'pago'"
+        [attr.role]="estado() === 'exito' ? 'status' : 'alert'"
+        aria-live="polite"
+      >
+        <strong>
+          @switch (estado()) {
+            @case ('exito') {
+              Acceso procesado
+            }
+            @case ('pago') {
+              Cobro requerido
+            }
+            @case ('rechazado') {
+              Acceso rechazado
+            }
+            @default {
+              No se pudo procesar
+            }
+          }
+        </strong>
+        <span>{{ mensaje() }}</span>
+        @if (resultado()) {
+          <span>
+            {{ resultado()?.nombre }} {{ resultado()?.apellido }} · Socio
+            {{ resultado()?.numeroSocio }}
+          </span>
+        }
+        @if (estado() === 'pago') {
+          @if ((resultado()?.montoAPagar ?? 0) > 0) {
+            <strong class="operacion-evento__monto-pendiente">
+              {{ formatearMonto(resultado()!.montoAPagar!) }}
+            </strong>
+          } @else {
+            <span class="operacion-evento__importe-error">
+              No se recibió un importe válido. Cancelá el cobro y volvé a escanear.
+            </span>
+          }
+          <div class="operacion-evento__acciones-pago">
+            <app-boton
+              tipo="button"
+              [deshabilitado]="(resultado()?.montoAPagar ?? 0) <= 0"
+              (accion)="abrirCobroSocio()"
+              >Cobrar</app-boton
+            >
+            <app-boton tipo="button" apariencia="texto" (accion)="omitirCobroSocio()">
+              Cancelar y volver a escanear
+            </app-boton>
+          </div>
+        }
+      </div>
+    }
+  </section>
+  <app-boton
+    popupAcciones
+    apariencia="texto"
+    [deshabilitado]="procesando() || cobroAbierto()"
+    (accion)="solicitarCierre()"
+    >Cerrar</app-boton
+  >
+  <app-boton
+    popupAcciones
+    colorPaleta="secundario"
+    [deshabilitado]="procesando() || cobroAbierto() || !evento().permiteInvitados"
+    aria-label="Registrar ingreso de invitado"
+    (accion)="abrirCobroInvitado()"
+    >Invitado</app-boton
+  >
+</app-popup>
+
+<app-formulario-cobro-evento-acceso
+  [abierto]="cobroAbierto()"
+  [evento]="evento()"
+  [modo]="modoCobro()"
+  [userUuid]="userUuidSocio()"
+  [montoUnitario]="montoUnitarioCobro()"
+  [estadoOperacion]="estadoOperacionCobro()"
+  (cerrar)="cerrarCobro()"
+  (solicitudCobro)="solicitarCobro($event)"
+/>

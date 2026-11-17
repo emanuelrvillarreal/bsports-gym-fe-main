@@ -1,0 +1,71 @@
+<ng-template #cardTemplate let-item let-index="index">
+  <article class="cards-hero__item" [ngClass]="'cards-hero__item--' + (item.estado ?? 'info')">
+    <span class="cards-hero__shine" aria-hidden="true"></span>
+    <span class="cards-hero__grid" aria-hidden="true"></span>
+
+    <div class="cards-hero__head">
+      <span class="cards-hero__icono">
+        <ng-icon [name]="item.icono" aria-hidden="true" />
+      </span>
+      <h3>{{ item.titulo }}</h3>
+    </div>
+
+    @if (valorEsLista(item)) {
+      <strong class="cards-hero__valor-lista">{{ obtenerValorLista(item) }}</strong>
+    } @else {
+      <strong [innerHTML]="obtenerValorHtml(index, item)"></strong>
+    }
+    <p>{{ item.subtitulo }}</p>
+  </article>
+</ng-template>
+
+@if (cargando()) {
+  <section
+    class="cards-hero cards-hero--grid cards-hero--cargando"
+    [style.--cards-hero-columns]="columnasGrid()"
+    aria-label="Cargando resumen"
+    aria-busy="true"
+  >
+    @for (indice of indicesCarga(); track indice) {
+      <article class="cards-hero__item cards-hero__item--cargando">
+        <app-load-spinner-blue class="cards-hero__spinner" ariaLabel="Cargando resumen" />
+      </article>
+    }
+  </section>
+} @else {
+  <section
+    class="cards-hero cards-hero--grid"
+    [class.cards-hero--alto-rendimiento]="altoRendimiento()"
+    [style.--cards-hero-columns]="columnasGrid()"
+  >
+    @for (item of items(); track obtenerTrack($index, item)) {
+      <ng-container
+        [ngTemplateOutlet]="cardTemplate"
+        [ngTemplateOutletContext]="{ $implicit: item, index: $index }"
+      />
+    }
+  </section>
+
+  <section class="cards-hero cards-hero--carousel" [class.cards-hero--alto-rendimiento]="altoRendimiento()">
+    <div class="cards-hero__carrusel" aria-live="polite">
+      <app-carrusel-3d
+        [items]="items()"
+        ariaLabel="Resumen destacado"
+        altura="31rem"
+        radio="26rem"
+        anchoSlide="min(22rem, 92vw)"
+        perspectiva="2400px"
+        [mostrarControles]="false"
+        [altoRendimiento]="altoRendimiento()"
+        modoMovil="three-d"
+      >
+        <ng-template appCarrusel3dItem let-item let-index="index">
+          <ng-container
+            [ngTemplateOutlet]="cardTemplate"
+            [ngTemplateOutletContext]="{ $implicit: item, index: index }"
+          />
+        </ng-template>
+      </app-carrusel-3d>
+    </div>
+  </section>
+}

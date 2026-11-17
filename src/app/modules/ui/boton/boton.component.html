@@ -1,0 +1,31 @@
+<button
+  #botonNativo
+  class="app-boton"
+  [class.app-boton--cargando]="cargando()"
+  [type]="tipo()"
+  [attr.form]="formulario()"
+  [disabled]="bloqueado()"
+  [attr.aria-busy]="cargando() ? 'true' : null"
+  [attr.aria-label]="cargando() ? ariaLabelCarga() : ariaLabel()"
+  [attr.aria-expanded]="ariaExpanded()"
+  [attr.aria-haspopup]="ariaHaspopup()"
+  [attr.aria-checked]="ariaChecked()"
+  [attr.aria-selected]="ariaSelected()"
+  [attr.role]="rol()"
+  (click)="manejarAccion($event)"
+  (blur)="perdioFoco.emit($event)"
+>
+  <span class="app-boton__contenido" [class.app-boton__contenido--oculto]="cargando()">
+    <ng-content />
+  </span>
+
+  @if (cargando()) {
+    <span class="app-boton__spinner">
+      <app-load-spinner-blue
+        colorInicio="currentColor"
+        colorFin="currentColor"
+        [ariaLabel]="ariaLabelCarga()"
+      />
+    </span>
+  }
+</button>

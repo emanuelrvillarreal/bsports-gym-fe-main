@@ -1,0 +1,144 @@
+<main class="completar-perfil" aria-labelledby="completar-perfil-titulo">
+  <header class="completar-perfil__encabezado">
+    <h1 id="completar-perfil-titulo">Completá el perfil de tu gimnasio</h1>
+    <p>Sirve para gimnasios (gyms), estudios y centros de entrenamiento. Necesitamos estos datos para habilitar la administración.</p>
+  </header>
+
+  @if (cargando()) {
+    <div class="completar-perfil__carga" role="status" aria-label="Cargando perfil del gimnasio">
+      <app-load-spinner-blue />
+    </div>
+  } @else if (!perfil()) {
+    <p class="completar-perfil__error" role="alert">{{ error() }}</p>
+    <app-boton (accion)="cargar()">Reintentar</app-boton>
+  } @else {
+    <app-wizard-pasos [pasos]="pasos" [pasoActual]="pasoActual()" etiquetaProgreso="Configuración del club">
+      @if (error()) {
+        <p class="completar-perfil__error" role="alert">{{ error() }}</p>
+      }
+
+      @if (paso() === 0) {
+        <form class="completar-perfil__formulario" appValidacionFormulario novalidate (submit)="$event.preventDefault(); avanzar()">
+          <h2>Domicilios y contacto</h2>
+          <p>Ingresá los datos de contacto y ambos domicilios del gimnasio.</p>
+          <div class="completar-perfil__grupos">
+            <fieldset>
+              <legend>Domicilio del gimnasio</legend>
+              <label for="club-direccion">Dirección
+                <input id="club-direccion" type="text" required [value]="contacto().domicilio.direccion" (input)="actualizarDomicilio('domicilio', 'direccion', $event)" />
+              </label>
+              <label for="club-codigo-postal">Código postal
+                <input id="club-codigo-postal" type="text" required maxlength="6" [value]="contacto().domicilio.codigoPostal" (input)="actualizarDomicilio('domicilio', 'codigoPostal', $event)" />
+              </label>
+              <label for="club-localidad">Localidad
+                <input id="club-localidad" type="text" required [value]="contacto().domicilio.localidad" (input)="actualizarDomicilio('domicilio', 'localidad', $event)" />
+              </label>
+            </fieldset>
+            <fieldset>
+              <legend>Domicilio de facturación</legend>
+              <label for="factura-direccion">Dirección
+                <input id="factura-direccion" type="text" required [value]="contacto().domicilioFacturacion.direccion" (input)="actualizarDomicilio('domicilioFacturacion', 'direccion', $event)" />
+              </label>
+              <label for="factura-codigo-postal">Código postal
+                <input id="factura-codigo-postal" type="text" required maxlength="6" [value]="contacto().domicilioFacturacion.codigoPostal" (input)="actualizarDomicilio('domicilioFacturacion', 'codigoPostal', $event)" />
+              </label>
+              <label for="factura-localidad">Localidad
+                <input id="factura-localidad" type="text" required [value]="contacto().domicilioFacturacion.localidad" (input)="actualizarDomicilio('domicilioFacturacion', 'localidad', $event)" />
+              </label>
+            </fieldset>
+          </div>
+          <div class="completar-perfil__grupos">
+            <label for="club-telefono">Teléfono
+              <input id="club-telefono" type="tel" autocomplete="tel" required [value]="contacto().telefono" (input)="actualizarContacto('telefono', $event)" />
+            </label>
+            <label for="club-email">Email institucional
+              <input id="club-email" type="email" autocomplete="email" required [value]="contacto().emailInstitucional" (input)="actualizarContacto('emailInstitucional', $event)" />
+            </label>
+          </div>
+          <div class="completar-perfil__acciones"><app-boton tipo="submit">Siguiente</app-boton></div>
+        </form>
+      }
+
+      @if (paso() === 1) {
+        <form class="completar-perfil__formulario" appValidacionFormulario novalidate (submit)="$event.preventDefault(); avanzar()">
+          <h2>Plazos de cuotas</h2>
+          <p>Podés conservar los valores iniciales o adaptarlos a la operatoria del gimnasio. Todos se expresan en días.</p>
+          <p class="completar-perfil__nota" role="note">
+            <strong>Estos plazos son los generales de toda la aplicación.</strong>
+            Cada actividad (por ejemplo, musculación, yoga o natación) puede tener su propia cuota y su propio día
+            de vencimiento: eso se configura después, al crear la actividad.
+          </p>
+          <div class="completar-perfil__plazos">
+<label for="dias-vencimiento-cuota">Días de vencimiento de cuota
+              <input id="dias-vencimiento-cuota" type="number" inputmode="numeric" min="0" step="1" required [value]="plazos().diasVencimientoCuota" (input)="actualizarPlazo('diasVencimientoCuota', $event)" />
+              <small>Valor inicial: 10 días. Plazo hasta el primer vencimiento.</small>
+            </label>
+            <label for="dias-moroso">Días para pasar a moroso
+              <input id="dias-moroso" type="number" inputmode="numeric" min="0" step="1" required [value]="plazos().diasVencimientoMoroso" (input)="actualizarPlazo('diasVencimientoMoroso', $event)" />
+              <small>Valor inicial: 31 días. Tiempo hasta clasificar la deuda como morosa.</small>
+            </label>
+            <label for="dias-inhabilitacion">Días de inhabilitación
+              <input id="dias-inhabilitacion" type="number" inputmode="numeric" min="0" step="1" required [value]="plazos().diasInhabilitacion" (input)="actualizarPlazo('diasInhabilitacion', $event)" />
+              <small>Valor inicial: 91 días. Tiempo hasta la inhabilitación por deuda.</small>
+            </label>
+          </div>
+          <div class="completar-perfil__acciones">
+            <app-boton tipo="button" apariencia="texto" (accion)="volver()">Anterior</app-boton>
+            <app-boton tipo="submit">Siguiente</app-boton>
+          </div>
+        </form>
+      }
+
+      @if (paso() === 2) {
+        <section class="completar-perfil__identidad" aria-labelledby="identidad-titulo">
+          <h2 id="identidad-titulo">Identidad y cuota social</h2>
+          <fieldset class="completar-perfil__cuota">
+            <legend>¿El gimnasio cobrará cuota social?</legend>
+            <label><input type="radio" name="cuota-social" [checked]="cuotaSocialHabilitada() === true" (change)="actualizarCuota($event)" /> Sí</label>
+            <label><input type="radio" name="cuota-social" [checked]="cuotaSocialHabilitada() === false" (change)="cuotaSocialHabilitada.set(false)" /> No</label>
+          </fieldset>
+          <p>El logo y los colores son opcionales. Podés configurarlos ahora o más adelante.</p>
+          <div class="completar-perfil__branding">
+            <div>
+              <h3>Logo del gimnasio</h3>
+              <app-formulario-registro-foto modo="logo-club" [fotoInicial]="perfil()?.logoUrl || null" textoBotonConfirmar="Usar este logo" [mostrarBotonRestablecer]="false" (submitted)="prepararLogo($event)" />
+              @if (logo()) { <p role="status">Logo listo para subir: {{ logo()?.name }}</p> }
+            </div>
+            <div>
+              <app-color-mod [paletaPersistida]="paleta()" (guardarSolicitado)="prepararPaleta($event)" (restablecerSolicitado)="prepararPaleta($event)" />
+              <p>La paleta seleccionada se enviará al confirmar el perfil.</p>
+            </div>
+          </div>
+          <div class="completar-perfil__acciones">
+            <app-boton apariencia="texto" (accion)="volver()">Anterior</app-boton>
+            <app-boton (accion)="avanzar()">Siguiente</app-boton>
+          </div>
+        </section>
+      }
+
+      @if (paso() === 3) {
+        <section class="completar-perfil__menu" aria-labelledby="menu-titulo">
+          <h2 id="menu-titulo">¿Qué pantallas va a usar tu gimnasio?</h2>
+          <p>
+            Dejá tildado solo lo que vas a usar: el menú queda más simple para vos y tu equipo. Lo que destildes
+            no se borra, solo se oculta, y lo podés volver a mostrar cuando quieras desde
+            <strong>Configuración › Menú y solapas</strong>.
+          </p>
+          @if (cuotaSocialHabilitada() === false) {
+            <p class="completar-perfil__nota" role="note">
+              Como indicaste que no cobrás cuota social, dejamos destildada la pantalla <strong>Cuota social</strong>.
+            </p>
+          }
+          <app-selector-solapas [ocultas]="ocultasMenu()" (ocultasChange)="ocultasMenu.set($event)" />
+          <div class="completar-perfil__acciones">
+            <app-boton apariencia="texto" [deshabilitado]="guardando()" (accion)="volver()">Anterior</app-boton>
+            <app-boton [cargando]="guardando()" ariaLabelCarga="Guardando perfil" (accion)="enviar()">Enviar perfil</app-boton>
+            @if (perfilGuardado() && !guardando()) {
+              <app-boton apariencia="texto" (accion)="continuarSinLogo()">Continuar sin logo</app-boton>
+            }
+          </div>
+        </section>
+      }
+    </app-wizard-pasos>
+  }
+</main>

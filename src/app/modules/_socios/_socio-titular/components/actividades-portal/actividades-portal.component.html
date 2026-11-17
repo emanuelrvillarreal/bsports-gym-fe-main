@@ -1,0 +1,95 @@
+<section class="actividades-portal" aria-label="Actividades disponibles">
+  <app-card titulo="Actividades disponibles" descripcion="Elegí una actividad y anotate vos o un integrante de tu grupo familiar.">
+    <div class="actividades-portal__filtros">
+      <label for="actividades-busqueda">Buscar actividad</label>
+      <div class="actividades-portal__busqueda">
+      <input
+        id="actividades-busqueda"
+        type="search"
+        [value]="busqueda()"
+        placeholder="Nombre o ubicación"
+        (input)="actualizarBusqueda($event)"
+        (keyup.enter)="buscar()"
+      />
+      <app-boton tipo="button" (accion)="buscar()">Buscar</app-boton>
+      </div>
+      <app-select
+        etiqueta="Disponibilidad"
+        [opciones]="opcionesCompleta"
+        [value]="filtroCompleta()"
+        (valueChange)="cambiarFiltroCompleta($event)"
+      />
+    </div>
+
+    @if (error()) {
+      <div class="actividades-portal__estado">
+        <p role="alert">{{ error() }}</p>
+        <app-boton tipo="button" (accion)="cargarActividades()">Reintentar</app-boton>
+      </div>
+    } @else {
+      <app-tabla-responsive
+        [columnas]="columnas"
+        [filas]="filas()"
+        idFila="actividadUuid"
+        [acciones]="acciones"
+        [cargando]="cargando()"
+        [tbody_rows]="6"
+        mensajeVacio="No hay actividades disponibles con los filtros elegidos."
+        (accionFila)="manejarAccion($event)"
+      />
+      <app-paginacion
+        [paginaActual]="paginaActual()"
+        [totalPaginas]="totalPaginas()"
+        [deshabilitado]="cargando()"
+        (paginaCambiada)="cambiarPagina($event)"
+      />
+    }
+  </app-card>
+</section>
+
+<app-popup
+  [abierto]="actividadSeleccionada() !== null"
+  titulo="Inscribirse a una actividad"
+  [mostrarEncabezado]="false"
+  [mostrarCancelar]="false"
+  [cancelarDeshabilitado]="inscribiendo()"
+  (cancelar)="cerrarInscripcion()"
+>
+  @if (actividadSeleccionada(); as actividad) {
+    <app-titulo-hero
+      [titulo]="'Inscribirse a ' + actividad.nombre"
+      subtitulo="Elegí quién participa y a qué horarios va."
+      icono="actividades"
+    />
+    <div class="actividades-portal__inscripcion">
+      <app-selector-horarios-actividad
+        [horarios]="actividad.horarios"
+        [seleccionados]="horariosSeleccionados()"
+        [deshabilitado]="inscribiendo()"
+        (seleccionCambiada)="horariosSeleccionados.set($event)"
+      />
+      @if (cargandoIntegrantes()) {
+        <p aria-live="polite">Cargando integrantes del grupo familiar…</p>
+      } @else if (errorIntegrantes()) {
+        <p role="alert">{{ errorIntegrantes() }}</p>
+      } @else {
+        <app-select
+          etiqueta="Inscribir a"
+          [opciones]="opcionesIntegrantes()"
+          [value]="integranteSeleccionado()"
+          (valueChange)="cambiarIntegrante($event)"
+        />
+      }
+    </div>
+  }
+  <app-boton popupAcciones tipo="button" apariencia="texto" [deshabilitado]="inscribiendo()" (accion)="cerrarInscripcion()">Cancelar</app-boton>
+  <app-boton
+    popupAcciones
+    tipo="button"
+    [cargando]="inscribiendo()"
+    [deshabilitado]="cargandoIntegrantes() || !!errorIntegrantes() || !horariosSeleccionados().length"
+    (accion)="confirmarInscripcion()"
+  >
+    Confirmar inscripción
+  </app-boton>
+</app-popup>

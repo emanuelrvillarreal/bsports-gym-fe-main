@@ -1,0 +1,89 @@
+:host {
+  display: block;
+}
+
+:host-context(.config-page--alto-rendimiento) {
+  .performance-panel__toggle,
+  .performance-panel__toggle-ui,
+  .performance-panel__toggle-ui::after {
+    transition: none;
+  }
+}
+
+.performance-panel__toggle {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.9rem;
+  width: 100%;
+  padding: 0.7rem 0.8rem;
+  color: inherit;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: 0.9rem;
+  cursor: pointer;
+  transition:
+    background-color 180ms ease,
+    box-shadow 220ms ease;
+}
+
+.performance-panel__toggle--activa {
+  background: color-mix(in srgb, var(--app-accent) 12%, transparent);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--app-accent) 20%, transparent),
+    inset 0 0 26px color-mix(in srgb, var(--app-warning) 12%, transparent);
+}
+
+.performance-panel__toggle-ui {
+  position: relative;
+  width: 2.9rem;
+  height: 1.6rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--app-surface-border) 78%, transparent);
+  background: color-mix(in srgb, var(--app-surface-strong) 82%, transparent);
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.performance-panel__toggle-ui--activa {
+  background: color-mix(in srgb, var(--app-warning) 30%, var(--app-surface));
+  border-color: color-mix(in srgb, var(--app-warning) 55%, var(--app-surface-border));
+}
+
+.performance-panel__toggle-ui::after {
+  content: '';
+  position: absolute;
+  top: 0.14rem;
+  left: 0.16rem;
+  width: 1.04rem;
+  height: 1.04rem;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 18%);
+  transition: transform 160ms ease;
+}
+
+.performance-panel__toggle-ui--activa::after {
+  transform: translateX(1.22rem);
+}
+
+.performance-panel__toggle:focus-visible .performance-panel__toggle-ui {
+  outline: 3px solid color-mix(in srgb, var(--app-accent) 28%, white);
+  outline-offset: 2px;
+}
+
+.performance-panel__toggle-copy {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.performance-panel__toggle-copy strong {
+  color: var(--app-text);
+  font-size: 0.9rem;
+}
+
+.performance-panel__toggle-copy small {
+  color: var(--app-text-soft);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}

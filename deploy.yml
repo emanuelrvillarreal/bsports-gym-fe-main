@@ -1,0 +1,143 @@
+version: 1.1
+
+local:
+  bsports-club-fe:
+    port: 6036
+    stack: angular_ssr
+
+    environment: production
+    composer_file: angular-21-node-22-ssr/docker-compose.yml
+
+    env:
+      RESTART_POLICY: "no"
+      NG_ALLOWED_HOSTS: "localhost,127.0.0.1"
+
+st7:
+  bsports-club-fe:
+    branch: develop
+    port: 6036
+    path: bsports-club
+    stack: angular_ssr
+    
+    env:
+      RESTART_POLICY: "no"
+
+    environment: st7
+    composer_file: angular-21-node-22-ssr/docker-compose.yml
+    nginx_config: angular-21-node-22-ssr/nginx.host-reverse-proxy.conf
+
+st8:
+  bsports-club-fe:
+    branch: main
+    port: 6036
+    path: bsports-club
+    stack: angular_ssr
+    
+    env:
+      RESTART_POLICY: "no"
+
+    environment: st8
+    composer_file: angular-21-node-22-ssr/docker-compose.yml
+    nginx_config: angular-21-node-22-ssr/nginx.host-reverse-proxy.conf
+
+
+  # NOMBRE_REMPLAZAR:
+  #   branch: develop
+  #   port: PUERTO_REMPLAZAR
+  #   path: NOMBRE_REMPLAZAR
+
+  #   stack: spring_maria
+
+  #   mysql_user: NOMBRE_REMPLAZAR
+  #   mysql_db: NOMBRE_REMPLAZAR
+  #   mysql_pass: NOMBRE_REMPLAZAR
+  #   mysql_external_port: PUERTO_MARIADB_REMPLAZAR
+
+  #   composer_file: spring-3.9-java-17-maria-11/docker-compose.yml
+  #   nginx_config: spring-3.9-java-17-maria-11/nginx.spring-boot-api.conf
+  #   application_properties: src/main/resources/application.st7.properties
+
+  # Ejemplo spring (Spring sin MariaDB en Docker; BD externa):
+  # NOMBRE_REMPLAZAR:
+  #   branch: develop
+  #   port: PUERTO_REMPLAZAR
+  #   path: NOMBRE_REMPLAZAR
+  
+  #   stack: spring
+  #
+  #   composer_file: spring-3.9-java-17/docker-compose.yml
+  #   nginx_config: spring-3.9-java-17/nginx.spring-boot-api.conf
+  #   application_properties: src/main/resources/application.st7.properties
+
+  # Ejemplo spring_postgres (Spring + PostgreSQL 18.4 en Docker):
+  # NOMBRE_REMPLAZAR:
+  #   branch: develop
+  #   port: PUERTO_REMPLAZAR
+  #   path: NOMBRE_REMPLAZAR
+
+  #   stack: spring_postgres
+  #
+  #   postgres_user: NOMBRE_REMPLAZAR
+  #   postgres_db: NOMBRE_REMPLAZAR
+  #   postgres_pass: NOMBRE_REMPLAZAR
+  #   postgres_external_port: PUERTO_POSTGRES_REMPLAZAR
+  #
+  #   composer_file: spring-3.9-java-17-postgres-18-4/docker-compose.yml
+  #   nginx_config: spring-3.9-java-17-postgres-18-4/nginx.spring-boot-api.conf
+  #   application_properties: src/main/resources/application.st7.properties
+
+  # NOMBRE_REMPLAZAR:
+  #   branch: develop
+  #   port: 9051
+  #   path: convenios
+
+  #   stack: angular
+  #
+  #   environment: st7
+  #   composer_file: angular-21-node-22/docker-compose.yml
+  #   nginx_config: angular-21-node-22/nginx.host-reverse-proxy.conf
+
+  # Ejemplo angular_ssr (Angular SSR, Node 22):
+  # NOMBRE_REMPLAZAR:
+  #   branch: develop
+  #   port: PUERTO_REMPLAZAR
+  #   path: NOMBRE_REMPLAZAR
+
+  #   stack: angular_ssr
+  #
+  #   environment: production
+  #   composer_file: angular-21-node-22-ssr/docker-compose.yml
+  #   nginx_config: angular-21-node-22-ssr/nginx.host-reverse-proxy.conf
+
+  # Ejemplo tanstack (TanStack Start SSR, Node 22):
+  # NOMBRE_REMPLAZAR:
+  #   branch: main
+  #   port: PUERTO_REMPLAZAR
+  #   path: NOMBRE_REMPLAZAR
+
+  #   stack: tanstack
+  #
+  #   environment: production
+  #   composer_file: tanstack-start-node-22/docker-compose.yml
+  #   nginx_config: tanstack-start-node-22/nginx.host-reverse-proxy.conf
+
+  # Ejemplo nginx estatico (HTML/CSS/JS en public/ del repo, subruta):
+  # NOMBRE_REMPLAZAR:
+  #   branch: main
+  #   port: PUERTO_REMPLAZAR
+  #   path: NOMBRE_REMPLAZAR
+
+  #   stack: nginx-1.27
+  #
+  #   composer_file: nginx-1.27/docker-compose.yml
+  #   nginx_config: nginx-1.27/nginx.host-reverse-proxy.conf
+
+  # Ejemplo nginx estatico (raiz / del dominio, sin path):
+  # NOMBRE_REMPLAZAR:
+  #   branch: main
+  #   port: PUERTO_REMPLAZAR
+
+  #   stack: nginx-1.27
+  #
+  #   composer_file: nginx-1.27/docker-compose.yml
+  #   nginx_config: nginx-1.27/nginx.host-reverse-proxy-root.conf

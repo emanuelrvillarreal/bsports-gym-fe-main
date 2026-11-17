@@ -1,0 +1,250 @@
+:host {
+  display: block;
+}
+
+/*
+ * Login: a la izquierda el club (logo, nombre y saludo) sobre su color; a la derecha el formulario sobre blanco.
+ * En el celular el club queda arriba, compacto, y el formulario abajo.
+ */
+.auth-page {
+  --login-primary: var(--color-primario, var(--app-accent));
+  --login-secondary: var(--color-secundario, var(--login-primary));
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(22rem, 0.9fr);
+  background: var(--app-bg);
+
+  &__visual {
+    position: relative;
+    display: grid;
+    place-items: center;
+    padding: clamp(2rem, 5vw, 4rem);
+    overflow: hidden;
+    color: #fff;
+    /* Color del club oscurecido para que el texto blanco siempre se lea. */
+    background: linear-gradient(
+      150deg,
+      color-mix(in srgb, var(--login-primary) 62%, #000) 0%,
+      color-mix(in srgb, var(--login-secondary) 50%, #000) 100%
+    );
+
+    /* Dos "luces" grandes y difusas con los colores del club que se mueven despacio de fondo. */
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      width: 75%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      filter: blur(10px);
+      pointer-events: none;
+      will-change: transform;
+    }
+
+    &::before {
+      top: -25%;
+      right: -20%;
+      background: radial-gradient(circle, color-mix(in srgb, var(--login-primary) 55%, #fff 10%), transparent 65%);
+      opacity: .55;
+      animation: login-luz-a 18s ease-in-out infinite alternate;
+    }
+
+    &::after {
+      bottom: -30%;
+      left: -20%;
+      background: radial-gradient(circle, color-mix(in srgb, var(--login-secondary) 60%, #fff 5%), transparent 65%);
+      opacity: .45;
+      animation: login-luz-b 22s ease-in-out infinite alternate;
+    }
+  }
+
+  &__marca {
+    position: relative;
+    z-index: 1;
+    animation: login-entrada 700ms ease-out both;
+    display: grid;
+    justify-items: center;
+    gap: 1.75rem;
+    max-width: 30rem;
+    text-align: center;
+  }
+
+  &__brand {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: clamp(10rem, 20vw, 15rem);
+
+    img {
+      position: relative;
+      z-index: 1;
+      display: block;
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 10px 24px rgb(0 0 0 / 30%));
+      transition: opacity 140ms ease;
+      animation: login-flotar 6s ease-in-out infinite;
+    }
+
+    /* Resplandor suave detrás del logo (sin borde) que "respira" despacio. */
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -25%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgb(255 255 255 / 28%), transparent 62%);
+      animation: login-aro 5s ease-in-out infinite;
+      pointer-events: none;
+    }
+  }
+
+  &__brand-spinner {
+    position: absolute;
+    inset: 20%;
+    display: grid;
+    place-items: center;
+  }
+
+  &__brand-image--oculta {
+    opacity: 0;
+  }
+
+  &__bienvenida {
+    display: grid;
+    gap: .35rem;
+
+    p { margin: 0; }
+  }
+
+  &__saludo {
+    font-size: 1.1rem;
+    opacity: .9;
+  }
+
+  &__brand-text {
+    font-size: clamp(2rem, 1.4rem + 2.2vw, 3.1rem);
+    font-weight: 800;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+  }
+
+  &__bajada {
+    margin-top: .5rem !important;
+    font-size: 1.05rem;
+    opacity: .9;
+  }
+
+  &__form-shell {
+    animation: login-entrada 700ms 150ms ease-out both;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 1.5rem;
+    padding: clamp(1.5rem, 4vw, 3rem) 1rem;
+    min-width: 0;
+  }
+
+  &__powered-by {
+    a {
+      display: inline-flex;
+      align-items: center;
+      gap: .45rem;
+      color: var(--app-text-soft);
+      font-size: .9rem;
+      font-weight: 600;
+      text-decoration: none;
+
+      &:hover { color: var(--app-text); }
+    }
+
+    img {
+      display: block;
+      width: auto;
+      height: 1.1rem;
+    }
+  }
+}
+
+@media (max-width: 61.25rem) {
+  .auth-page {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+
+    &__visual {
+      padding: 1.5rem 1rem 1.75rem;
+    }
+
+    &__marca {
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: center;
+      justify-items: start;
+      gap: 1rem;
+      text-align: left;
+    }
+
+    &__brand {
+      width: 5rem;
+    }
+
+    &__saludo { font-size: .95rem; }
+
+    &__brand-text { font-size: 1.6rem; }
+
+    &__bajada { display: none; }
+
+    &__form-shell {
+      align-content: start;
+      padding: 1.25rem .75rem 1.5rem;
+    }
+  }
+}
+
+@keyframes login-luz-a {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(-18%, 22%) scale(1.15); }
+}
+
+@keyframes login-luz-b {
+  from { transform: translate(0, 0) scale(1.1); }
+  to { transform: translate(20%, -18%) scale(.95); }
+}
+
+@keyframes login-flotar {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(-1.5deg); }
+}
+
+@keyframes login-entrada {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes login-aro {
+  0%, 100% { transform: scale(.92); opacity: .7; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+/* Sin animaciones si la persona lo pidió en su sistema o si está activo el modo de alto rendimiento. */
+@media (prefers-reduced-motion: reduce) {
+  .auth-page__visual::before,
+  .auth-page__visual::after,
+  .auth-page__brand::after,
+  .auth-page__brand img,
+  .auth-page__marca,
+  .auth-page__form-shell {
+    animation: none;
+  }
+}
+
+.auth-page--alto-rendimiento {
+  .auth-page__visual::before,
+  .auth-page__visual::after,
+  .auth-page__brand::after,
+  .auth-page__brand img,
+  .auth-page__marca,
+  .auth-page__form-shell {
+    animation: none;
+  }
+}

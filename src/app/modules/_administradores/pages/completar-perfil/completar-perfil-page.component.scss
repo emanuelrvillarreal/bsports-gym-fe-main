@@ -1,0 +1,90 @@
+.completar-perfil {
+  width: min(100%, 72rem);
+  margin: 0 auto;
+  padding: clamp(1rem, 3vw, 2rem);
+  color: var(--app-text);
+
+  &__encabezado {
+    margin-bottom: 2rem;
+
+    h1 { margin: 0 0 .5rem; }
+    p { margin: 0; }
+  }
+
+  &__carga { display: flex; justify-content: center; padding: 3rem; }
+  &__error { color: var(--semantic-danger); font-weight: 600; }
+  &__formulario, &__identidad { padding: 1.5rem 0; }
+
+  &__grupos, &__plazos, &__branding {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+    gap: 1.5rem;
+    margin-block: 1.5rem;
+  }
+
+  fieldset {
+    display: grid;
+    gap: .875rem;
+    min-width: 0;
+    margin: 0;
+    padding: 1.25rem;
+    border: 1px solid var(--app-border, #aaa);
+    border-radius: .75rem;
+  }
+
+  legend { padding: 0 .4rem; font-weight: 700; }
+
+  label {
+    display: grid;
+    gap: .35rem;
+    font-weight: 600;
+  }
+
+  input:not([type='radio']) {
+    width: 100%;
+    min-height: 2.75rem;
+    padding: .55rem .75rem;
+    color: inherit;
+    background: var(--app-background, transparent);
+    border: 1px solid var(--app-border, #888);
+    border-radius: .5rem;
+  }
+
+  input[type='radio'] { accent-color: var(--app-primary, #2563eb); }
+
+  small { font-weight: 400; line-height: 1.4; }
+
+  &__cuota {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    margin-block: 1.5rem;
+
+    label { display: flex; align-items: center; gap: .4rem; }
+  }
+
+  &__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: .75rem;
+    margin-top: 2rem;
+  }
+}
+
+.completar-perfil__nota {
+  padding: .75rem 1rem;
+  border-left: 4px solid var(--app-accent);
+  border-radius: .6rem;
+  background: color-mix(in srgb, var(--app-accent) 8%, var(--app-surface));
+  line-height: 1.45;
+
+  strong { display: block; margin-bottom: .15rem; }
+}
+
+.completar-perfil__menu {
+  display: grid;
+  gap: 1rem;
+
+  h2, p { margin: 0; }
+}

@@ -1,0 +1,58 @@
+<app-popup
+  [abierto]="abierto()"
+  titulo="Historial del evento"
+  [mostrarEncabezado]="false"
+  ancho="extraGrande"
+  [mostrarCancelar]="false"
+  [cancelarDeshabilitado]="cargando()"
+  (cancelar)="solicitarCierre()"
+>
+  <app-titulo-hero
+    icono="entradasEventos"
+    titulo="Historial del evento"
+    [subtitulo]="evento().titulo + ' · Scans y cobros registrados.'"
+  />
+
+  <section class="historial-evento-acceso">
+    <div class="historial-evento-acceso__toolbar">
+      <label>
+        <span>Buscar por nombre</span>
+        <input
+          type="search"
+          placeholder="Nombre del socio o invitado"
+          [value]="busqueda()"
+          [disabled]="cargando()"
+          (input)="actualizarBusqueda($event)"
+          (keydown.enter)="buscar()"
+        />
+      </label>
+      <app-boton tipo="button" [cargando]="cargando()" (accion)="buscar()">Buscar</app-boton>
+    </div>
+
+    @if (error()) {
+      <p class="historial-evento-acceso__error" role="alert">{{ error() }}</p>
+    }
+
+    <app-tabla-responsive
+      [columnas]="columnas"
+      [filas]="filas()"
+      idFila="uuid"
+      [cargando]="cargando()"
+      [mostrarAcciones]="false"
+      [tbody_rows]="7"
+      mensajeVacio="No hay movimientos registrados para este evento."
+    />
+
+    <app-paginacion
+      [cantidadBotonesVisibles]="3"
+      [paginaActual]="paginaActual()"
+      [totalPaginas]="totalPaginas()"
+      [deshabilitado]="cargando()"
+      (paginaCambiada)="cambiarPagina($event)"
+    />
+  </section>
+
+  <app-boton popupAcciones [deshabilitado]="cargando()" (accion)="solicitarCierre()">
+    Cerrar
+  </app-boton>
+</app-popup>

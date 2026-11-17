@@ -1,0 +1,54 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.finish-login {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 1rem;
+  color: var(--app-text);
+  background: var(--app-bg);
+
+  &__card {
+    display: grid;
+    justify-items: center;
+    gap: 0.8rem;
+    width: min(100%, 28rem);
+    padding: clamp(1.5rem, 5vw, 2.5rem);
+    text-align: center;
+    background: var(--app-surface);
+    border: 1px solid var(--app-surface-border);
+    border-radius: 1rem;
+  }
+
+  h1,
+  p {
+    margin: 0;
+  }
+
+  h1 {
+    color: var(--app-accent);
+    font-size: clamp(1.4rem, 5vw, 2rem);
+  }
+
+  p {
+    color: var(--app-text-soft);
+    line-height: 1.5;
+  }
+
+  &__link {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.5rem;
+    padding: 0.65rem 1rem;
+    color: var(--app-text);
+    font-weight: 700;
+    text-decoration: none;
+    background: var(--app-accent);
+    border-radius: 0.5rem;
+  }
+}

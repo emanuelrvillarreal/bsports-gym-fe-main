@@ -1,0 +1,128 @@
+<section class="pases" aria-label="Pases del gimnasio">
+  <div class="pases__barra">
+    <label class="pases__check pases__check--destacado">
+      <input type="checkbox" [checked]="exigirPase()" [disabled]="guardandoConfig()" (change)="cambiarExigir($any($event.target).checked)" />
+      <span>
+        Exigir un pase vigente para ingresar con el QR
+        <small>{{ exigirPase() ? 'Un socio sin pase pago y vigente no puede entrar.' : 'Los socios sin pase entran igual; recepción ve un aviso si su pase no habilita.' }}</small>
+      </span>
+    </label>
+    <app-boton (accion)="nuevo()">Nuevo pase</app-boton>
+  </div>
+
+  @if (cargando() && !pases().length) {
+    <p class="pases__vacio">Cargando pases…</p>
+  } @else if (!pases().length) {
+    <p class="pases__vacio">Todavía no hay pases. Creá el primero, por ejemplo un "Pase libre mensual".</p>
+  } @else {
+    <p class="pases__vacio">{{ activos() }} de {{ pases().length }} pases a la venta.</p>
+    <div class="pases__lista">
+      @for (p of pases(); track p.uuid) {
+        <article class="pases__item" [class.pases__item--inactivo]="!p.activo">
+          <header>
+            <div>
+              <h4>{{ p.nombre }}</h4>
+              <span class="pases__etiqueta">{{ categoria(p.categoria) }}</span>
+              @if (!p.activo) { <span class="pases__etiqueta pases__etiqueta--off">Desactivado</span> }
+              @else if (!p.disponible) { <span class="pases__etiqueta pases__etiqueta--off">Fuera de fecha de venta</span> }
+              @if (p.ventaPortal) { <span class="pases__etiqueta">Se vende en el portal</span> }
+            </div>
+            <strong class="pases__precio">{{ precio(p) }}</strong>
+          </header>
+          <p class="pases__resumen">{{ resumen(p) }}</p>
+          @if (p.descripcion) { <p class="pases__texto">{{ p.descripcion }}</p> }
+          <small class="pases__meta">
+            {{ p.membresiasVigentes }} vigentes
+            {{ p.renovacionAutomatica ? ' · renovación automática' : '' }}
+            {{ p.congelamientoExtiende ? ' · congelar corre el vencimiento' : '' }}{{ p.incluyeCuotaActividades ? ' · incluye la cuota de las actividades' : '' }}
+            {{ p.ventaDesde || p.ventaHasta ? ' · venta ' + (p.ventaDesde ? 'desde ' + fecha(p.ventaDesde) : '') + (p.ventaHasta ? ' hasta ' + fecha(p.ventaHasta) : '') : '' }}
+          </small>
+          <div class="pases__acciones">
+            <app-boton apariencia="texto" (accion)="editar(p)">Editar</app-boton>
+            <app-boton apariencia="texto" (accion)="eliminar(p)">Eliminar</app-boton>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>
+
+<app-popup [abierto]="formularioAbierto()" [titulo]="editandoUuid() ? 'Editar pase' : 'Nuevo pase'" ancho="grande" [cancelarDeshabilitado]="guardando()" (cancelar)="formularioAbierto.set(false)">
+  @let b = borrador();
+  <form class="pases__formulario" (submit)="$event.preventDefault(); guardar()">
+    <label class="pases__campo pases__ancho"><span>Nombre *</span><input required maxlength="120" placeholder="Ej. Pase libre mensual" [value]="b.nombre" (input)="cambiar('nombre', $any($event.target).value)" /></label>
+    <app-select etiqueta="Tipo *" [opciones]="opcionesCategoria" [value]="b.categoria" (valueChange)="cambiar('categoria', $any($event))" />
+    <app-select etiqueta="Duración *" [opciones]="opcionesModalidad" [value]="b.modalidad" (valueChange)="cambiar('modalidad', $any($event))" />
+    @if (requiereDias()) {
+      <label class="pases__campo"><span>Días de vigencia *</span><input type="number" min="1" max="3660" inputmode="numeric" [value]="b.duracionDias" (input)="cambiar('duracionDias', $any($event.target).value)" /></label>
+    }
+    <label class="pases__campo"><span>Precio ($) *</span><input type="number" min="0" step="0.01" inputmode="decimal" [value]="b.precio" (input)="cambiar('precio', $any($event.target).value)" /></label>
+
+    <fieldset class="pases__grupo pases__ancho">
+      <legend>Uso</legend>
+      @if (b.modalidad !== 'POR_INGRESOS') {
+        <label class="pases__check"><input type="checkbox" [checked]="b.limitarIngresos" (change)="cambiar('limitarIngresos', $any($event.target).checked)" />Limitar la cantidad de ingresos</label>
+      }
+      @if (b.limitarIngresos || b.modalidad === 'POR_INGRESOS') {
+        <label class="pases__campo pases__campo--corto"><span>Cantidad de ingresos *</span><input type="number" min="1" inputmode="numeric" [value]="b.cantidadIngresos" (input)="cambiar('cantidadIngresos', $any($event.target).value)" /></label>
+      } @else {
+        <small>Ingresos ilimitados mientras esté vigente.</small>
+      }
+      <div class="pases__dias" role="group" aria-label="Días permitidos">
+        <span>Días permitidos <small>(ninguno marcado = todos)</small></span>
+        @for (d of dias; track d.id) {
+          <label class="pases__chip"><input type="checkbox" [checked]="b.dias.has(d.id)" (change)="alternar('dias', d.id, $any($event.target).checked)" />{{ d.corto }}</label>
+        }
+      </div>
+      <div class="pases__horario">
+        <label class="pases__campo"><span>Desde</span><input type="time" [value]="b.horaDesde" (input)="cambiar('horaDesde', $any($event.target).value)" /></label>
+        <label class="pases__campo"><span>Hasta</span><input type="time" [value]="b.horaHasta" (input)="cambiar('horaHasta', $any($event.target).value)" /></label>
+        <small>Vacío = a cualquier hora.</small>
+      </div>
+    </fieldset>
+
+    <fieldset class="pases__grupo pases__ancho">
+      <legend>Qué incluye <small>(nada marcado = acceso general al gimnasio)</small></legend>
+      <div class="pases__columnas">
+        <div>
+          <strong>Actividades</strong>
+          @for (a of actividades(); track a.uuid) {
+            <label class="pases__check"><input type="checkbox" [checked]="b.actividades.has(a.uuid)" (change)="alternar('actividades', a.uuid, $any($event.target).checked)" />{{ a.nombre }}</label>
+          } @empty { <small>No hay actividades.</small> }
+        </div>
+        <div>
+          <strong>Instalaciones</strong>
+          @for (a of amenities(); track a.uuid) {
+            <label class="pases__check"><input type="checkbox" [checked]="b.amenities.has(a.uuid)" (change)="alternar('amenities', a.uuid, $any($event.target).checked)" />{{ a.nombre }}</label>
+          } @empty { <small>No hay instalaciones cargadas.</small> }
+        </div>
+        <div>
+          <strong>Descuentos aplicables</strong>
+          @for (d of descuentos(); track d.uuid) {
+            <label class="pases__check"><input type="checkbox" [checked]="b.descuentos.has(d.uuid)" (change)="alternar('descuentos', d.uuid, $any($event.target).checked)" />{{ d.nombre }}</label>
+          } @empty { <small>No hay descuentos en el catálogo.</small> }
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="pases__grupo pases__ancho">
+      <legend>Condiciones</legend>
+      <label class="pases__check"><input type="checkbox" [checked]="b.familiar" (change)="cambiar('familiar', $any($event.target).checked)" />Pase familiar (cubre a varios integrantes del grupo)</label>
+      @if (b.familiar) {
+        <label class="pases__campo pases__campo--corto"><span>Personas que cubre *</span><input type="number" min="2" max="20" inputmode="numeric" [value]="b.maxIntegrantes" (input)="cambiar('maxIntegrantes', $any($event.target).value)" /></label>
+      }
+      <label class="pases__check"><input type="checkbox" [checked]="b.renovacionAutomatica" (change)="cambiar('renovacionAutomatica', $any($event.target).checked)" />Renovación automática (una semana antes del vencimiento se genera la siguiente)</label>
+      <label class="pases__check"><input type="checkbox" [checked]="b.congelamientoExtiende" (change)="cambiar('congelamientoExtiende', $any($event.target).checked)" />Los días congelados corren el vencimiento</label>
+      <label class="pases__check"><input type="checkbox" [checked]="b.incluyeCuotaActividades" (change)="cambiar('incluyeCuotaActividades', $any($event.target).checked)" />Incluye la cuota de las actividades (no se cobran las actividades que cubre mientras el pase esté vigente)</label>
+      <label class="pases__check"><input type="checkbox" [checked]="b.ventaPortal" (change)="cambiar('ventaPortal', $any($event.target).checked)" />El socio titular lo puede contratar y renovar desde el portal</label>
+      <label class="pases__check"><input type="checkbox" [checked]="b.activo" (change)="cambiar('activo', $any($event.target).checked)" />A la venta</label>
+    </fieldset>
+
+    <app-input-fecha etiqueta="Se vende desde" [valorInicial]="b.ventaDesde" (valorCambiado)="cambiar('ventaDesde', $event)" />
+    <app-input-fecha etiqueta="Se vende hasta" [valorInicial]="b.ventaHasta" [minimo]="b.ventaDesde" (valorCambiado)="cambiar('ventaHasta', $event)" />
+    <label class="pases__campo pases__ancho"><span>Descripción</span><textarea rows="2" maxlength="2000" [value]="b.descripcion" (input)="cambiar('descripcion', $any($event.target).value)"></textarea></label>
+    <label class="pases__campo pases__ancho"><span>Restricciones y condiciones</span><textarea rows="2" maxlength="2000" placeholder="Se muestran al socio. Ej. presentar apto médico." [value]="b.restricciones" (input)="cambiar('restricciones', $any($event.target).value)"></textarea></label>
+    @if (error()) { <p class="pases__error pases__ancho" role="alert">{{ error() }}</p> }
+    <div class="pases__pie pases__ancho"><app-boton tipo="submit" [cargando]="guardando()">{{ editandoUuid() ? 'Guardar cambios' : 'Crear pase' }}</app-boton></div>
+  </form>
+</app-popup>

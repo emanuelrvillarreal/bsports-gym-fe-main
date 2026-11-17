@@ -1,0 +1,24 @@
+<form
+  id="formulario-finalizacion-descuento"
+  class="formulario-finalizacion-descuento"
+  appValidacionFormulario
+  (submit)="$event.preventDefault(); enviar()"
+  novalidate
+>
+  <small
+    class="formulario-finalizacion-descuento__error"
+    [class.formulario-finalizacion-descuento__error--visible]="errorVisible()"
+    role="alert"
+    >{{ mensajeError() }}</small
+  >
+
+  <app-input-fecha
+    id="finalizacion-descuento-fecha"
+    etiqueta="Fecha de finalización *"
+    modo="fecha"
+    [requerido]="true"
+    [minimo]="fechaDesde()"
+    [valorInicial]="fecha()"
+    (valorCambiado)="fecha.set($event)"
+  />
+</form>

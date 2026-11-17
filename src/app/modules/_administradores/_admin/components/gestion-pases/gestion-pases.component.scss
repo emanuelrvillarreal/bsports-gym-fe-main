@@ -1,0 +1,167 @@
+:host { display: block; }
+
+.pases {
+  display: grid;
+  gap: 1rem;
+
+  &__vacio { margin: 0; color: var(--app-text-soft); }
+  &__error { margin: 0; color: var(--semantic-danger); }
+  &__texto { margin: 0; white-space: pre-line; font-size: .9rem; }
+
+  &__barra {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+  }
+
+  &__lista {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+    gap: .85rem;
+  }
+
+  &__item {
+    display: grid;
+    align-content: start;
+    gap: .5rem;
+    padding: 1rem;
+    border: 1px solid var(--app-surface-border);
+    border-radius: .85rem;
+    background: var(--app-surface);
+
+    header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: .5rem;
+
+      h4 { margin: 0 0 .3rem; font-size: 1rem; }
+    }
+
+    &--inactivo { opacity: .7; }
+  }
+
+  &__precio { font-size: 1.15rem; white-space: nowrap; }
+  &__resumen { margin: 0; color: var(--app-text-soft); font-size: .85rem; }
+  &__meta { color: var(--app-text-soft); font-size: 0.85rem; }
+  &__acciones { display: flex; flex-wrap: wrap; gap: .25rem; }
+
+  &__etiqueta {
+    display: inline-block;
+    margin: 0 .3rem .2rem 0;
+    padding: .1rem .5rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--app-accent) 16%, transparent);
+    color: var(--app-text);
+    font-size: 0.85rem;
+    font-weight: 600;
+
+    &--off { background: color-mix(in srgb, var(--app-warning) 20%, transparent); }
+  }
+
+  &__formulario {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr));
+    align-items: end;
+    gap: .8rem;
+  }
+
+  &__ancho { grid-column: 1 / -1; }
+
+  &__campo {
+    display: grid;
+    gap: .3rem;
+    min-width: 0;
+
+    span { font-size: .85rem; font-weight: 600; }
+
+    input, textarea {
+      box-sizing: border-box;
+      width: 100%;
+      min-height: 2.75rem;
+      padding: .6rem;
+      border: 1px solid var(--app-surface-border);
+      border-radius: .5rem;
+      background: var(--app-surface);
+      color: var(--app-text);
+      font: inherit;
+    }
+
+    textarea { resize: vertical; }
+
+    &--corto { max-width: 14rem; }
+  }
+
+  &__grupo {
+    display: grid;
+    gap: .4rem;
+    margin: 0;
+    padding: .75rem .9rem;
+    border: 1px solid var(--app-surface-border);
+    border-radius: .6rem;
+
+    legend { padding: 0 .3rem; font-size: .9rem; font-weight: 700; }
+    small { color: var(--app-text-soft); font-size: 0.85rem; font-weight: 400; }
+  }
+
+  &__check {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    min-height: 2.5rem;
+    font-size: .9rem;
+    cursor: pointer;
+
+    input { flex: none; width: 1.15rem; height: 1.15rem; accent-color: var(--app-accent); }
+
+    &--destacado span { display: grid; gap: .1rem; font-weight: 600; }
+    &--destacado small { color: var(--app-text-soft); font-size: 0.85rem; font-weight: 400; }
+  }
+
+  &__dias {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .4rem;
+
+    > span { flex-basis: 100%; font-size: .85rem; font-weight: 600; }
+  }
+
+  &__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    min-height: 2.5rem;
+    padding: 0 .7rem;
+    border: 1px solid var(--app-surface-border);
+    border-radius: 999px;
+    cursor: pointer;
+
+    input { accent-color: var(--app-accent); }
+    &:has(input:checked) { border-color: var(--app-accent); background: color-mix(in srgb, var(--app-accent) 14%, transparent); }
+  }
+
+  &__horario {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 10rem)) 1fr;
+    align-items: end;
+    gap: .6rem;
+  }
+
+  &__columnas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+    gap: .75rem;
+
+    > div { display: grid; align-content: start; gap: .1rem; }
+    strong { font-size: .85rem; }
+  }
+
+  &__pie { display: flex; justify-content: flex-end; }
+}
+
+@media (max-width: 40rem) {
+  .pases__horario { grid-template-columns: 1fr 1fr; }
+}

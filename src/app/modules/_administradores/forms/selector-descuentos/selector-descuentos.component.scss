@@ -1,0 +1,51 @@
+:host { display: block; container-type: inline-size; }
+.selector-descuentos { display: grid; gap: .85rem; min-width: 0; margin: 0; padding: 1rem; border: 1px solid var(--app-surface-border); border-radius: .75rem; }
+.selector-descuentos legend { padding: 0 .35rem; color: var(--app-text); font-weight: 700; }
+.selector-descuentos p, .selector-descuentos small { margin: 0; color: var(--app-text-soft); }
+.selector-descuentos__grilla {
+  --selector-descuentos-altura-control: 2.75rem;
+  --selector-descuentos-altura-etiqueta: 0.865rem;
+  display: grid;
+  grid-template-columns: minmax(12rem, 1fr) minmax(8.5rem, 10.5rem) minmax(9.5rem, 11.5rem) max-content;
+  gap: .75rem;
+  align-items: end;
+}
+
+// Select y fecha son componentes reutilizables con escalas propias. En este formulario
+// comparten la misma referencia visual para que sus controles queden perfectamente alineados.
+:host ::ng-deep .selector-descuentos__grilla app-select .app-select__etiqueta,
+:host ::ng-deep .selector-descuentos__grilla app-input-fecha .input-fecha__etiqueta {
+  box-sizing: border-box;
+  height: var(--selector-descuentos-altura-etiqueta);
+  display: flex;
+  align-items: center;
+  margin-bottom: .4rem;
+  font-size: 0.85rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-transform: none;
+}
+
+:host ::ng-deep .selector-descuentos__grilla app-input-fecha .input-fecha {
+  gap: 0;
+}
+
+:host ::ng-deep .selector-descuentos__grilla app-input-fecha .input-fecha__segmentos {
+  min-height: var(--selector-descuentos-altura-control);
+}
+
+:host-context(.theme-mode-dark) ::ng-deep .selector-descuentos__grilla app-select .app-select__control {
+  --app-boton-fondo-texto: #000;
+  --app-boton-fondo-texto-interaccion: #000;
+}
+
+:host-context(.theme-mode-dark) ::ng-deep .selector-descuentos__grilla app-select .app-select__panel {
+  background: #000;
+}
+.selector-descuentos__grilla app-boton { min-width: max-content; }
+.selector-descuentos__error { color: var(--app-danger) !important; font-weight: 650; }
+.selector-descuentos__seleccionados { display: grid; gap: .5rem; margin: 0; padding: 0; list-style: none; }
+.selector-descuentos__seleccionados li { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .55rem .7rem; border: 1px solid var(--app-surface-border); border-radius: .6rem; color: var(--app-text); background: var(--app-surface); }
+.selector-descuentos__quitar { --app-boton-color-texto-texto: var(--color-secundario); }
+@container (max-width: 45rem) { .selector-descuentos__grilla { grid-template-columns: minmax(12rem, 1fr) minmax(8.5rem, 10.5rem) minmax(9.5rem, 11.5rem); } .selector-descuentos__grilla app-boton { grid-column: 1; justify-self: start; } }
+@media (max-width: 48rem) { .selector-descuentos__grilla { grid-template-columns: 1fr; } .selector-descuentos__grilla app-boton { grid-column: auto; justify-self: stretch; width: 100%; } .selector-descuentos__seleccionados li { align-items: flex-start; flex-direction: column; } }

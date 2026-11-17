@@ -1,0 +1,151 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.titulo-hero {
+  padding-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.titulo-hero__contenido {
+  min-width: 0;
+}
+
+.titulo-hero__fila {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.titulo-hero__icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(2.3rem, 2rem + 1vw, 2.5rem);
+  height: clamp(2.3rem, 2rem + 1vw, 2.5rem);
+  color: var(--titulo-hero-color, var(--app-accent));
+  animation: titulo-hero-icono-enter 420ms ease-out both;
+}
+
+.titulo-hero__icono ng-icon {
+  font-size: clamp(1.25rem, 1rem + 0.75vw, 1.7rem);
+}
+
+.titulo-hero__icono--logo {
+  flex: 0 0 auto;
+  overflow: hidden;
+}
+
+.titulo-hero__icono--logo-circular {
+  border: 2px solid var(--app-accent);
+  border-radius: 50%;
+}
+
+.titulo-hero__icono--logo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.titulo-hero__icono--logo-circular img {
+  object-fit: cover;
+}
+
+.titulo-hero__titulo {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--titulo-hero-color, var(--app-accent));
+  font-size: clamp(1.45rem, 1.3rem + 0.6vw, 1.75rem);
+  line-height: 1.2;
+  text-transform: none;
+  text-rendering: geometricPrecision;
+  animation: titulo-hero-enter 620ms ease-out 80ms both;
+}
+
+.titulo-hero__subtitulo {
+  margin: 0.25rem 0 0;
+  color: var(--app-text-soft);
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+  animation: titulo-hero-subtitulo-enter 760ms ease-out 120ms both;
+}
+
+.titulo-hero__contenido-extra:empty {
+  display: none;
+}
+
+.titulo-hero__acciones {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.titulo-hero__acciones:empty {
+  display: none;
+}
+
+.titulo-hero--alto-rendimiento {
+  .titulo-hero__icono,
+  .titulo-hero__titulo,
+  .titulo-hero__subtitulo {
+    animation: none;
+  }
+}
+
+@keyframes titulo-hero-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.35rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes titulo-hero-icono-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-1.2rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes titulo-hero-subtitulo-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-0.45rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 48rem) {
+  .titulo-hero {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .titulo-hero__acciones {
+    justify-content: stretch;
+  }
+}

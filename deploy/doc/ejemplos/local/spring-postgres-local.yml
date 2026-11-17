@@ -1,0 +1,18 @@
+# Ejemplo: Spring Boot + PostgreSQL en local
+
+local:
+  mi-api:
+    port: 9080
+    stack: spring_postgres
+
+    env:
+      RESTART_POLICY: "no"
+      EXTERNAL_API_URL: "http://localhost:8081"
+
+    postgres_user: mi-api
+    postgres_db: mi-api
+    postgres_pass: mi-api
+    postgres_external_port: 5433
+
+    composer_file: plantillas/spring-3.9-java-17-postgres-18-4/docker-compose.yml
+    application_properties: src/main/resources/application.server.properties

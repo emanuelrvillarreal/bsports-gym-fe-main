@@ -1,0 +1,36 @@
+# Ejemplo completo: Spring Boot + PostgreSQL 18.4
+# Servidor + bloque local
+
+st7:
+  mi-api:
+    branch: develop
+    port: 9080
+    path: mi-api
+    domain: stg.blueopendata.com
+
+    stack: spring_postgres
+
+    postgres_user: mi-api
+    postgres_db: mi-api
+    postgres_pass: mi-api
+    postgres_external_port: 9084
+
+    composer_file: plantillas/spring-3.9-java-17-postgres-18-4/docker-compose.yml
+    nginx_config: plantillas/spring-3.9-java-17-postgres-18-4/nginx.spring-boot-api.conf
+    application_properties: src/main/resources/application.st7.properties
+
+local:
+  mi-api:
+    port: 9080
+    stack: spring_postgres
+
+    env:
+      RESTART_POLICY: "no"
+
+    postgres_user: mi-api
+    postgres_db: mi-api
+    postgres_pass: mi-api
+    postgres_external_port: 5433
+
+    composer_file: plantillas/spring-3.9-java-17-postgres-18-4/docker-compose.yml
+    application_properties: src/main/resources/application.server.properties

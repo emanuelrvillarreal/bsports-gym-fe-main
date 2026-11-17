@@ -1,0 +1,401 @@
+:host {
+  display: contents;
+}
+
+.toast-alert {
+  --toast-danger: var(--semantic-danger, #ef4444);
+  --toast-success: var(--semantic-success, #22c55e);
+
+  position: fixed;
+  // El navegador agrega inset: 0 a los elementos con popover. Lo anulamos
+  // para que las variantes inferior, lateral y centrada mantengan su lugar.
+  inset: auto;
+  // También reseteamos el estilo visual nativo del Popover API: el contenido
+  // interno del toast es quien define fondo, borde, radio y sombra.
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  left: 50%;
+  // Respaldo para navegadores sin Popover API; en navegadores actuales el
+  // atributo popover lo ubica en la top layer, por encima de los diálogos.
+  z-index: 1000000;
+  width: min(34rem, calc(100vw - 2rem));
+  pointer-events: none;
+
+  &[open]::backdrop {
+    background: transparent;
+  }
+
+  &--peligro.toast-alert--confirmacion[open]::backdrop {
+    background: rgb(0 0 0 / 70%);
+    backdrop-filter: blur(1px);
+    box-shadow: inset 0 0 4rem rgba(148, 26, 26, 0.15);
+  }
+
+  &--inferior {
+    bottom: 1rem;
+    transform: translateX(-50%);
+  }
+
+  &--lateral {
+    right: 1rem;
+    bottom: 1rem;
+    left: auto;
+    transform: none;
+  }
+
+  &--centrada {
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  &__contenido {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 0.85rem;
+    min-width: 0;
+    overflow: hidden;
+    padding: 1rem;
+    color: var(--app-text);
+    background: color-mix(in srgb, var(--app-surface) 94%, #ffffff 6%);
+    border: 1px solid color-mix(in srgb, var(--app-surface-border) 78%, transparent);
+    border-radius: 8px;
+    box-shadow: 0 20px 58px rgb(0 0 0 / 42%);
+    pointer-events: auto;
+    animation: toast-alert-entrada 220ms ease-out both;
+  }
+
+  &__icono {
+    width: 2.35rem;
+    height: 2.35rem;
+    display: grid;
+    place-items: center;
+    color: #05140f;
+    background: var(--app-accent);
+    border-radius: 8px;
+
+    ng-icon {
+      width: 1.35rem;
+      height: 1.35rem;
+    }
+  }
+
+  &__cuerpo {
+    display: grid;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+
+  &__subtitulo {
+    color: var(--app-text-soft);
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: none;
+  }
+
+  &__titulo {
+    margin: 0;
+    color: var(--app-text);
+    font-size: 1rem;
+    line-height: 1.2;
+  }
+
+  &__texto {
+    margin: 0;
+    color: var(--app-text-soft);
+    font-size: 0.86rem;
+    line-height: 1.35;
+  }
+
+  &__cerrar {
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    place-items: center;
+    color: var(--app-text-soft);
+    background: transparent;
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+
+    ng-icon {
+      width: 1.05rem;
+      height: 1.05rem;
+    }
+  }
+
+  &__acciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.6rem;
+  }
+
+  &__boton {
+    min-height: 2.25rem;
+    padding: 0.45rem 0.75rem;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: none;
+    cursor: pointer;
+  }
+
+  &__boton--primario {
+    color: #05140f;
+    background: var(--app-accent);
+    border: 1px solid var(--app-accent);
+  }
+
+  &__boton--secundario {
+    color: var(--app-text);
+    background: color-mix(in srgb, var(--app-surface-strong) 86%, #ffffff 14%);
+    border: 1px solid color-mix(in srgb, var(--app-surface-border) 74%, transparent);
+  }
+
+  &__progreso {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 0.2rem;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--app-surface-border) 55%, transparent);
+
+    span {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: var(--app-accent);
+      transform-origin: left center;
+      animation: toast-alert-progreso var(--toast-alert-duracion, 5000ms) linear forwards;
+    }
+  }
+
+  &--compacto {
+    width: min(25rem, calc(100vw - 2rem));
+
+    .toast-alert__contenido {
+      gap: 0.65rem;
+      padding: 0.75rem 0.85rem;
+    }
+
+    .toast-alert__icono {
+      width: 1.9rem;
+      height: 1.9rem;
+    }
+
+    .toast-alert__texto {
+      font-size: 0.8rem;
+    }
+  }
+
+  &--cerrando .toast-alert__contenido {
+    animation: toast-alert-salida 180ms ease-in both;
+  }
+
+  &--lateral .toast-alert__contenido {
+    animation-name: toast-alert-entrada-lateral;
+  }
+
+  &--lateral.toast-alert--cerrando .toast-alert__contenido {
+    animation-name: toast-alert-salida-lateral;
+  }
+
+  &--sin-animacion .toast-alert__contenido,
+  &--sin-animacion .toast-alert__progreso span {
+    animation: none;
+  }
+
+  &--sin-animacion .toast-alert__progreso span {
+    transform: scaleX(calc(var(--toast-alert-progreso, 100) / 100));
+  }
+
+  &--alto-rendimiento {
+    .toast-alert__contenido {
+      box-shadow: none;
+    }
+  }
+
+  &__cerrar:focus-visible,
+  &__boton:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--app-accent) 36%, white);
+    outline-offset: 2px;
+  }
+
+  &--peligro {
+    .toast-alert__contenido {
+      color: #fee2e2;
+      background: color-mix(in srgb, #2a0909 88%, var(--app-surface) 12%);
+      border-color: color-mix(in srgb, var(--toast-danger) 42%, transparent);
+      box-shadow: 0 20px 58px rgb(56 10 10 / 52%);
+    }
+
+    .toast-alert__icono {
+      color: #fff1f2;
+      background: #b91c1c;
+    }
+
+    .toast-alert__subtitulo {
+      color: #fecaca;
+    }
+
+    .toast-alert__titulo {
+      color: #fff1f2;
+    }
+
+    .toast-alert__texto {
+      color: #fca5a5;
+    }
+
+    .toast-alert__cerrar {
+      color: #fecaca;
+    }
+
+    .toast-alert__progreso {
+      background: rgb(248 113 113 / 18%);
+
+      span {
+        background: var(--toast-danger);
+      }
+    }
+
+    .toast-alert__boton--primario {
+      color: #fff1f2;
+      background: #b91c1c;
+      border-color: #b91c1c;
+    }
+
+    .toast-alert__boton--secundario {
+      color: #fee2e2;
+      background: rgb(127 29 29 / 38%);
+      border-color: rgb(248 113 113 / 32%);
+    }
+
+    .toast-alert__cerrar:focus-visible,
+    .toast-alert__boton:focus-visible {
+      outline-color: rgb(248 113 113 / 55%);
+    }
+  }
+
+  // La variante informativa conserva el fondo del tema (incluido dark mode).
+  // Solo ajustamos el texto sobre el acento para mantener contraste.
+  &--advertencia {
+    .toast-alert__icono {
+      color: var(--toast-alert-advertencia-texto);
+      background: #fbbf24;
+    }
+
+    .toast-alert__boton--primario {
+      color: var(--toast-alert-advertencia-texto);
+      background: #fbbf24;
+      border-color: #fbbf24;
+    }
+
+    .toast-alert__progreso span {
+      background: #fbbf24;
+    }
+  }
+}
+
+.toast-alert--alto-rendimiento.toast-alert--peligro {
+  .toast-alert__contenido {
+    box-shadow: none;
+  }
+
+  &[open]::backdrop {
+    backdrop-filter: none;
+    box-shadow: none;
+  }
+}
+
+@keyframes toast-alert-entrada {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toast-alert-salida {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(0.35rem) scale(0.98);
+  }
+}
+
+@keyframes toast-alert-entrada-lateral {
+  from {
+    opacity: 0;
+    transform: translateX(0.75rem) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes toast-alert-salida-lateral {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateX(0.55rem) scale(0.98);
+  }
+}
+
+@keyframes toast-alert-progreso {
+  from {
+    transform: scaleX(1);
+  }
+
+  to {
+    transform: scaleX(0);
+  }
+}
+
+@media (max-width: 36rem) {
+  .toast-alert {
+    width: calc(100vw - 1rem);
+
+    &--inferior,
+    &--lateral {
+      right: auto;
+      left: 50%;
+      bottom: 0.5rem;
+      transform: translateX(-50%);
+    }
+
+    &__contenido {
+      grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    &__cerrar {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+    }
+
+    &__acciones {
+      justify-content: stretch;
+      flex-direction: column-reverse;
+    }
+  }
+}

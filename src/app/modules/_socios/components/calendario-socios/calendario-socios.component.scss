@@ -1,0 +1,16 @@
+:host {
+  display: block;
+}
+
+.calendario-socios {
+  &__error {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--semantic-danger);
+
+    p {
+      margin: 0;
+    }
+  }
+}

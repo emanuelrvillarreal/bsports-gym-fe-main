@@ -1,0 +1,49 @@
+:host { display: block; }
+
+.amenities-portal {
+  display: grid;
+  gap: 1.5rem;
+
+  &__estado { display: grid; justify-items: center; gap: 1rem; padding: 2rem 1rem; }
+  &__estado p { margin: 0; color: var(--semantic-danger); }
+  &__qr {
+    display: grid;
+    justify-items: center;
+    align-items: center;
+    gap: .75rem;
+    min-height: 21.25rem;
+    margin-top: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--app-surface-border);
+    border-radius: .75rem;
+    color: var(--app-text-soft);
+
+    strong { color: var(--app-text); }
+  }
+
+  &__qr-visual {
+    display: grid;
+    width: min(100%, 18rem);
+    aspect-ratio: 1;
+    place-items: center;
+
+    app-load-spinner-blue { width: 100%; }
+    img { width: 100%; height: 100%; object-fit: contain; }
+  }
+}
+
+// El SVG de Mercado Pago se adapta al contraste del tema, como en Mis cuotas.
+:host ::ng-deep .tabla-responsive__action-image {
+  width: 1.8rem;
+  height: 1.8rem;
+  filter: brightness(0);
+}
+
+:host-context(body.theme-mode-dark),
+:host-context(html.theme-mode-dark body),
+:host-context(body.dark-mode-on),
+:host-context(html.dark-mode-on body) {
+  ::ng-deep .tabla-responsive__action-image {
+    filter: brightness(0) invert(1);
+  }
+}

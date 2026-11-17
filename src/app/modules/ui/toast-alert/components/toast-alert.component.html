@@ -1,0 +1,79 @@
+<ng-template #contenidoToast>
+  <article class="toast-alert__contenido" [style.--toast-alert-duracion]="duracionMs() + 'ms'">
+    @if (icono()) {
+      <span class="toast-alert__icono" aria-hidden="true">
+        <ng-icon [name]="icono()" />
+      </span>
+    }
+
+    <div class="toast-alert__cuerpo">
+      @if (subtitulo()) {
+        <small class="toast-alert__subtitulo">{{ subtitulo() }}</small>
+      }
+
+      @if (titulo()) {
+        <h2 class="toast-alert__titulo">{{ titulo() }}</h2>
+      }
+
+      @if (texto()) {
+        <p class="toast-alert__texto">{{ texto() }}</p>
+      }
+
+      @if (confirmacion()) {
+        <div class="toast-alert__acciones">
+          <button
+            class="toast-alert__boton toast-alert__boton--secundario"
+            type="button"
+            (click)="cancelar()"
+          >
+            {{ textoCancelar() }}
+          </button>
+          <button
+            class="toast-alert__boton toast-alert__boton--primario"
+            type="button"
+            (click)="confirmar()"
+          >
+            {{ textoConfirmar() }}
+          </button>
+        </div>
+      }
+    </div>
+
+    <button class="toast-alert__cerrar" type="button" aria-label="Cerrar alerta" (click)="cerrar()">
+      <ng-icon name="heroXMark" />
+    </button>
+
+    @if (duracionMs() > 0) {
+      <span class="toast-alert__progreso" aria-hidden="true">
+        <span [style.--toast-alert-progreso]="progreso()"></span>
+      </span>
+    }
+  </article>
+</ng-template>
+
+@if (visible()) {
+  @if (confirmacion() || fondoPeligro()) {
+    <dialog
+      #contenedorToast
+      class="toast-alert"
+      [ngClass]="clasesToast()"
+      aria-modal="true"
+      aria-live="assertive"
+      [attr.role]="confirmacion() ? 'alertdialog' : 'alert'"
+      (cancel)="$event.preventDefault(); confirmacion() ? cancelar() : cerrar()"
+    >
+      <ng-container [ngTemplateOutlet]="contenidoToast" />
+    </dialog>
+  } @else {
+    <section
+      #contenedorToast
+      class="toast-alert"
+      popover="manual"
+      [ngClass]="clasesToast()"
+      role="status"
+      aria-live="polite"
+    >
+      <ng-container [ngTemplateOutlet]="contenidoToast" />
+    </section>
+  }
+}

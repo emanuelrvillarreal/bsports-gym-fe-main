@@ -1,0 +1,340 @@
+:host {
+  --color-mod-focus: 3px solid color-mix(in srgb, var(--app-accent) 40%, transparent);
+  display: block;
+}
+
+.color-mod {
+  display: grid;
+  gap: 1rem;
+
+  &__header {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 1rem;
+
+    h2 {
+      margin: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--app-text);
+      font-size: 1.1rem;
+      text-transform: none;
+
+      ng-icon {
+        font-size: 1.15rem;
+        color: var(--app-accent);
+      }
+    }
+
+    p {
+      margin: 0.35rem 0 0;
+      color: var(--app-text-soft);
+      font-size: 0.85rem;
+    }
+
+  }
+
+  &__acciones {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    app-boton {
+      --app-boton-padding: 0.55rem 0.85rem;
+      --app-boton-radio: 8px;
+      --app-boton-font-size: 0.85rem;
+      --app-boton-font-weight: 800;
+      --app-boton-text-transform: none;
+      --app-boton-borde: 1px solid color-mix(in srgb, var(--app-surface-border) 78%, transparent);
+      --app-boton-fondo-texto: color-mix(in srgb, var(--app-surface) 86%, transparent);
+    }
+  }
+
+  &__header {
+    .color-mod__guardar {
+      --app-boton-padding: 0.55rem 0.85rem;
+      --app-boton-borde: 1px solid color-mix(in srgb, var(--app-accent) 70%, transparent);
+    }
+
+    .color-mod__random-principal {
+      --app-boton-color-texto-texto: var(--app-bg);
+      --app-boton-borde: 1px solid transparent;
+      --app-boton-fondo-texto:
+        linear-gradient(
+          120deg,
+          var(--random-a),
+          color-mix(in srgb, var(--random-a) 60%, var(--random-b)),
+          var(--random-b),
+          color-mix(in srgb, var(--random-b) 55%, var(--random-c)),
+          var(--random-c),
+          color-mix(in srgb, var(--random-c) 60%, var(--random-a)),
+          var(--random-a)
+        );
+      --app-boton-fondo-texto-interaccion: var(--app-boton-fondo-texto);
+      --app-boton-background-size: 260% 260%;
+      --app-boton-animacion: color-mod-random-gradient 3.4s ease infinite;
+    }
+  }
+
+  &__panel {
+    display: grid;
+    gap: 0.6rem;
+    padding: 0.9rem;
+    background: color-mix(in srgb, var(--app-surface) 84%, transparent);
+    border: 1px solid color-mix(in srgb, var(--app-surface-border) 74%, transparent);
+    border-radius: 8px;
+  }
+
+  &__tabs {
+    display: flex;
+    gap: 0.55rem;
+
+  }
+
+  &__tab {
+    --app-boton-padding: 0.5rem 0.8rem;
+    --app-boton-radio: 8px;
+    --app-boton-font-size: 0.85rem;
+    --app-boton-font-weight: 800;
+    --app-boton-text-transform: none;
+    --app-boton-color-texto-texto: var(--app-text-soft);
+    --app-boton-fondo-texto: color-mix(in srgb, var(--app-surface-strong) 80%, transparent);
+    --app-boton-fondo-texto-interaccion: var(--app-boton-fondo-texto);
+    --app-boton-borde: 1px solid color-mix(in srgb, var(--app-surface-border) 72%, transparent);
+    flex: 0 0 auto;
+    min-height: 2.75rem;
+    transition:
+      border-color 180ms ease,
+      color 180ms ease,
+      transform 180ms ease;
+
+    &--activa {
+      --app-boton-color-texto-texto: var(--app-bg);
+      --app-boton-borde: 1px solid color-mix(in srgb, var(--tab-color) 64%, transparent);
+      --app-boton-fondo-texto: color-mix(in srgb, var(--tab-color) 88%, white 12%);
+      transform: translateY(-1px);
+    }
+  }
+
+  &__ayuda {
+    margin: 0;
+    color: var(--app-text-soft);
+    font-size: 0.8rem;
+  }
+
+  &__editor {
+    display: grid;
+    grid-template-columns: minmax(12rem, 16rem);
+    gap: 0.85rem;
+    align-items: stretch;
+  }
+
+  &__picker {
+    display: grid;
+    gap: 0.55rem;
+    min-height: 10rem;
+    padding: 0.8rem;
+    color: var(--app-text);
+    background: color-mix(in srgb, var(--app-surface-strong) 82%, transparent);
+    border: 1px solid color-mix(in srgb, var(--app-surface-border) 68%, transparent);
+    border-radius: 8px;
+
+    span {
+      color: var(--app-text-soft);
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: none;
+      letter-spacing: normal;
+    }
+
+    input[type='color'] {
+      width: 100%;
+      min-height: 8rem;
+      padding: 0;
+      background: transparent;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+
+      &:focus-visible {
+        outline: var(--color-mod-focus);
+        outline-offset: 3px;
+      }
+
+      &:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+    }
+
+    output {
+      color: var(--app-text);
+      font-family: monospace;
+      font-size: 0.8rem;
+      text-transform: none;
+    }
+  }
+
+  &__presets {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+    gap: 0.7rem;
+
+  }
+
+  &__preset {
+    --app-boton-padding: 0.55rem 0.65rem;
+    --app-boton-radio: 8px;
+    --app-boton-font-size: 0.85rem;
+    --app-boton-font-weight: 400;
+    --app-boton-color-texto-texto: var(--app-text);
+    --app-boton-fondo-texto: color-mix(in srgb, var(--app-surface-strong) 82%, transparent);
+    --app-boton-fondo-texto-interaccion: var(--app-boton-fondo-texto);
+    --app-boton-borde: 1px solid color-mix(in srgb, var(--app-surface-border) 68%, transparent);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    transition:
+      border-color 180ms ease,
+      transform 180ms ease,
+      box-shadow 180ms ease;
+
+    &:hover {
+      --app-boton-borde: 1px solid color-mix(in srgb, var(--preset-color) 58%, var(--app-surface-border));
+    }
+
+    &--activo {
+      --app-boton-borde: 1px solid color-mix(in srgb, var(--preset-color) 72%, var(--app-text));
+      --app-boton-sombra: 0 0 0 2px color-mix(in srgb, var(--preset-color) 24%, transparent);
+      transform: translateY(-1px);
+    }
+  }
+
+  &__preset-muestra {
+    width: 1rem;
+    height: 1rem;
+    flex: 0 0 1rem;
+    background: var(--preset-color);
+    border: 1px solid color-mix(in srgb, var(--preset-color) 45%, var(--app-text));
+    border-radius: 4px;
+  }
+
+  &__modal-fondo {
+    position: fixed;
+    z-index: 1000;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: color-mix(in srgb, var(--app-bg) 72%, transparent);
+  }
+
+  &__dialogo {
+    width: min(100%, 28rem);
+    padding: 1.25rem;
+    color: var(--app-text);
+    background: var(--app-surface);
+    border: 1px solid var(--app-surface-border);
+    border-radius: 12px;
+    box-shadow: 0 1rem 3rem color-mix(in srgb, var(--app-text) 18%, transparent);
+
+    h3,
+    p {
+      margin: 0;
+    }
+
+    p {
+      margin-top: 0.5rem;
+      color: var(--app-text-soft);
+      line-height: 1.5;
+    }
+  }
+
+  &__dialogo-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+  }
+
+  &--alto-rendimiento {
+    .color-mod__random-principal {
+      --app-boton-animacion: none;
+      --app-boton-background-size: 100% 100%;
+    }
+
+    .color-mod__tab,
+    .color-mod__preset {
+      transition: none;
+    }
+
+    .color-mod__tab--activa,
+    .color-mod__preset--activo {
+      transform: none;
+    }
+  }
+
+}
+
+@media (max-width: 48rem) {
+  .color-mod {
+    &__header {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    &__acciones {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    &__tabs {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    &__tab {
+      width: 100%;
+    }
+
+    &__editor,
+    &__presets {
+      grid-template-columns: 1fr;
+    }
+
+    &__picker {
+      min-height: auto;
+
+      input[type='color'] {
+        min-height: 6rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 34rem) {
+  .color-mod {
+    &__tabs {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+@keyframes color-mod-random-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}

@@ -1,0 +1,269 @@
+:host {
+  /* Color del club oscurecido: se lee bien como texto sobre blanco y con texto blanco encima. */
+  --login-acento: color-mix(in srgb, var(--color-primario, var(--app-accent)) 55%, #000);
+  display: block;
+  width: min(100%, 28rem);
+}
+
+.reset-card {
+  padding: clamp(1.2rem, 2vw, 1.6rem);
+  border-radius: 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--app-surface-border) 74%, transparent);
+  background: var(--app-surface-strong);
+  box-shadow: 0 12px 32px rgb(15 23 42 / 8%);
+
+  &__header {
+    margin-bottom: 1.15rem;
+  }
+
+  &__heading {
+    p {
+      margin: 0;
+      color: var(--app-text-soft);
+      font-size: 0.85rem;
+      font-weight: 800;
+      text-transform: none;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--app-text);
+      font-size: 1.75rem;
+      line-height: 1.2;
+      font-weight: 700;
+    }
+  }
+
+  &__message {
+    display: block;
+    min-height: 1rem;
+    margin-top: 0.55rem;
+    color: var(--app-text-soft);
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+
+  &__message--error {
+    color: var(--semantic-danger);
+  }
+
+  &__identity {
+    display: grid;
+    gap: 0.16rem;
+    padding: 0.8rem 0.9rem;
+    border: 1px solid var(--app-surface-border);
+    border-radius: 0.95rem;
+    background: var(--app-surface);
+  }
+
+  &__identity-label {
+    color: var(--app-text-soft);
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+
+  &__identity-value {
+    color: var(--app-text);
+    font-size: 0.95rem;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  &__submit-content {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    width: 100%;
+    text-align: center;
+
+    app-load-spinner {
+      width: 1rem;
+      height: 1rem;
+      flex: 0 0 1rem;
+    }
+  }
+}
+
+form {
+  display: grid;
+  gap: 0.95rem;
+}
+
+.reset-field {
+  display: grid;
+  gap: 0.34rem;
+
+  &__error {
+    color: var(--semantic-danger);
+    font-size: 0.85rem;
+    line-height: 1.3;
+  }
+}
+
+.reset-password-input {
+  ::ng-deep .input-password__etiqueta {
+    color: var(--app-text-soft);
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: none;
+  }
+
+  ::ng-deep input {
+    min-height: 2.7rem;
+    padding: 0.7rem 3rem 0.7rem 0.85rem;
+    border-radius: 0.75rem;
+  }
+}
+
+.password-strength {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.85rem 0.95rem;
+  border-radius: 0.95rem;
+  border: 1px solid color-mix(in srgb, var(--app-surface-border) 74%, transparent);
+  background: color-mix(in srgb, var(--app-surface) 86%, transparent);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+
+    span {
+      color: var(--app-text-soft);
+      font-size: 0.85rem;
+      font-weight: 800;
+      text-transform: none;
+    }
+
+    strong {
+      font-size: 0.82rem;
+    }
+  }
+
+  &__meter {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.35rem;
+  }
+
+  &__segment {
+    height: 0.42rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--app-surface-border) 72%, transparent);
+    transition:
+      background-color 160ms ease,
+      transform 160ms ease;
+  }
+
+  &__segment--active {
+    transform: scaleY(1.05);
+  }
+
+  &__copy {
+    margin: 0;
+    color: var(--app-text-soft);
+    font-size: 0.85rem;
+    line-height: 1.45;
+  }
+
+  &--weak {
+    strong {
+      color: #dc2626;
+    }
+
+    .password-strength__segment--active {
+      background: #ef4444;
+    }
+  }
+
+  &--medium {
+    strong {
+      color: #b45309;
+    }
+
+    .password-strength__segment--active {
+      background: #f59e0b;
+    }
+  }
+
+  &--strong {
+    strong {
+      color: #15803d;
+    }
+
+    .password-strength__segment--active {
+      background: #22c55e;
+    }
+  }
+}
+
+.reset-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+
+  > button {
+    min-height: 2.85rem;
+    display: grid;
+    place-items: center;
+    border-radius: 0.75rem;
+    font: inherit;
+    font-weight: 800;
+    text-transform: none;
+    cursor: pointer;
+    transition:
+      opacity 160ms ease,
+      filter 160ms ease,
+      background-color 160ms ease,
+      border-color 160ms ease,
+      color 160ms ease;
+  }
+
+  > button:disabled {
+    cursor: not-allowed;
+    opacity: 0.72;
+    filter: saturate(0.6);
+  }
+
+  &__ghost {
+    color: var(--app-text);
+    background: color-mix(in srgb, var(--app-surface-strong) 84%, transparent);
+    border: 1px solid color-mix(in srgb, var(--app-surface-border) 72%, transparent);
+  }
+
+  &__primary {
+    --app-boton-color-fondo: var(--login-acento) !important;
+    --app-boton-color-interaccion: color-mix(in srgb, var(--login-acento) 85%, #000) !important;
+    --app-boton-color-texto: #fff !important;
+    --app-boton-color-texto-interaccion: #fff !important;
+  }
+}
+
+@media (max-width: 61.25rem) {
+  :host {
+    width: 100%;
+  }
+
+  .reset-card {
+
+  }
+}
+
+@media (max-width: 40rem) {
+  .reset-card {
+    padding: 1rem;
+    border-radius: 1rem;
+
+    &__heading h1 {
+      font-size: 1.5rem;
+    }
+  }
+
+  .reset-actions {
+    grid-template-columns: 1fr;
+  }
+}

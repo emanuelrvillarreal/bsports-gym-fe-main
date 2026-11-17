@@ -1,0 +1,275 @@
+<section class="reportes" aria-label="Reportes y exportaciones">
+  <div class="reportes__vistas" role="tablist" aria-label="Tipo de reporte">
+    <button type="button" role="tab" [attr.aria-selected]="vista() === 'movimientos'" [class.reportes__vista--activa]="vista() === 'movimientos'" (click)="elegirVista('movimientos')">Movimientos</button>
+    <button type="button" role="tab" [attr.aria-selected]="vista() === 'cuotas'" [class.reportes__vista--activa]="vista() === 'cuotas'" (click)="elegirVista('cuotas')">Cuotas</button>
+    <button type="button" role="tab" [attr.aria-selected]="vista() === 'comparar'" [class.reportes__vista--activa]="vista() === 'comparar'" (click)="elegirVista('comparar')">Comparar períodos</button>
+  </div>
+
+  @if (vista() !== 'cuotas') {
+    <div class="reportes__filtros">
+      @if (vista() === 'movimientos') {
+        <div class="reportes__chips" role="group" aria-label="Período">
+          @for (opcion of opcionesPeriodo; track opcion.id) {
+            <button type="button" class="reportes__chip" [class.reportes__chip--activo]="periodo() === opcion.id" [attr.aria-pressed]="periodo() === opcion.id" (click)="elegirPeriodo(opcion.id)">{{ opcion.etiqueta }}</button>
+          }
+        </div>
+        @if (periodo() === 'personalizado') {
+          <div class="reportes__fechas">
+            <app-input-fecha etiqueta="Desde" [valorInicial]="desde()" [maximo]="hasta()" (valorCambiado)="cambiarFecha('desde', $event)" />
+            <app-input-fecha etiqueta="Hasta" [valorInicial]="hasta()" [minimo]="desde()" (valorCambiado)="cambiarFecha('hasta', $event)" />
+          </div>
+        }
+      } @else {
+        <p class="reportes__ayuda">La comparación usa los filtros de abajo (tipo, concepto, actividad, medio de pago…); las fechas las define cada período.</p>
+      }
+
+      <div class="reportes__grilla">
+        <app-select etiqueta="Tipo" [opciones]="opcionesTipo" [value]="tipo()" (valueChange)="cambiarSelect('tipo', $event)" />
+        <app-select etiqueta="Actividad" [opciones]="opcionesActividades()" [value]="actividadUuid()" (valueChange)="cambiarSelect('actividad', $event)" />
+        <app-select etiqueta="Categoría del socio" [opciones]="opcionesCategoriasSocio()" [value]="categoriaSocioUuid()" (valueChange)="cambiarSelect('categoriaSocio', $event)" />
+        <label class="reportes__campo">
+          <span>Socio</span>
+          <input type="search" placeholder="Nombre, apellido o DNI" [value]="socio()" (input)="cambiarTexto('socio', $any($event.target).value)" />
+        </label>
+        <label class="reportes__campo">
+          <span>Concepto contiene</span>
+          <input type="search" placeholder="Ej. luz, inscripción" [value]="concepto()" (input)="cambiarTexto('concepto', $any($event.target).value)" />
+        </label>
+        <div class="reportes__importes">
+          <label class="reportes__campo">
+            <span>Importe mínimo</span>
+            <input type="number" min="0" inputmode="decimal" [value]="importeMinimo()" (input)="cambiarTexto('importeMinimo', $any($event.target).value)" />
+          </label>
+          <label class="reportes__campo">
+            <span>Importe máximo</span>
+            <input type="number" min="0" inputmode="decimal" [value]="importeMaximo()" (input)="cambiarTexto('importeMaximo', $any($event.target).value)" />
+          </label>
+        </div>
+      </div>
+
+      <div class="reportes__grupo-chips">
+        <span>Concepto</span>
+        <div class="reportes__chips" role="group" aria-label="Concepto o procedencia">
+          @for (opcion of opcionesCategoria; track opcion.id) {
+            <button type="button" class="reportes__chip" [class.reportes__chip--activo]="categorias().includes(opcion.id)" [attr.aria-pressed]="categorias().includes(opcion.id)" (click)="alternarCategoria(opcion.id)">{{ opcion.etiqueta }}</button>
+          }
+        </div>
+      </div>
+      <div class="reportes__grupo-chips">
+        <span>Medio de pago</span>
+        <div class="reportes__chips" role="group" aria-label="Medio de pago">
+          @for (opcion of opcionesMedio; track opcion.id) {
+            <button type="button" class="reportes__chip" [class.reportes__chip--activo]="medios().includes(opcion.id)" [attr.aria-pressed]="medios().includes(opcion.id)" (click)="alternarMedio(opcion.id)">{{ opcion.etiqueta }}</button>
+          }
+        </div>
+      </div>
+
+      <div class="reportes__acciones">
+        <label class="reportes__check">
+          <input type="checkbox" [checked]="incluirAnulados()" (change)="alternarAnulados($any($event.target).checked)" />
+          Incluir movimientos anulados
+        </label>
+        @if (hayFiltros()) {
+          <app-boton apariencia="texto" (accion)="limpiarFiltros()">Limpiar filtros</app-boton>
+        }
+        @if (vista() === 'movimientos') {
+          <app-boton class="reportes__excel" [cargando]="descargando()" [deshabilitado]="cargando()" ariaLabelCarga="Generando Excel" (accion)="descargarExcel()">
+            Descargar Excel
+          </app-boton>
+        }
+      </div>
+    </div>
+  }
+
+  @if (vista() === 'movimientos') {
+    @if (error()) {
+      <div class="reportes__error" role="alert">{{ error() }} <app-boton apariencia="texto" (accion)="reintentar()">Reintentar</app-boton></div>
+    }
+
+    @if (resumen(); as resumen) {
+      <div class="reportes__kpis" [class.reportes__kpis--cargando]="cargando()">
+        <article class="reportes__kpi reportes__kpi--ingreso"><span>Ingresos</span><strong>{{ moneda(resumen.totalIngresos) }}</strong><small>{{ resumen.cantidadIngresos }} operaciones · promedio {{ moneda(resumen.promedioIngreso) }}</small></article>
+        <article class="reportes__kpi reportes__kpi--egreso"><span>Egresos</span><strong>{{ moneda(resumen.totalEgresos) }}</strong><small>{{ resumen.cantidadEgresos }} operaciones · promedio {{ moneda(resumen.promedioEgreso) }}</small></article>
+        <article class="reportes__kpi" [class.reportes__kpi--negativo]="resumen.balance < 0"><span>Balance</span><strong>{{ moneda(resumen.balance) }}</strong><small>Ingresos − egresos</small></article>
+        <article class="reportes__kpi"><span>Cuotas cobradas</span><strong>{{ moneda(resumen.cuotasSociales + resumen.cuotasActividades + resumen.pases) }}</strong><small>Sociales {{ moneda(resumen.cuotasSociales) }} · actividades {{ moneda(resumen.cuotasActividades) }} · pases {{ moneda(resumen.pases) }}</small></article>
+        <article class="reportes__kpi"><span>Otros ingresos</span><strong>{{ moneda(resumen.amenities + resumen.eventos + resumen.otrosIngresos) }}</strong><small>Instalaciones {{ moneda(resumen.amenities) }} · eventos {{ moneda(resumen.eventos) }}</small></article>
+      </div>
+
+      @if (resumen.operaciones) {
+        <div class="reportes__graficos">
+          @if (barrasMensuales().length) {
+            <section class="reportes__panel reportes__panel--ancho" aria-label="Evolución mensual">
+              <h3>Evolución mensual <small>ingresos vs. egresos</small></h3>
+              <app-grafico-barras [barras]="barrasMensuales()" estilo="vs" [escala]="true" />
+            </section>
+          }
+          <section class="reportes__panel" aria-label="Por concepto">
+            <h3>Por concepto</h3>
+            <app-grafico-barras [barras]="barrasCategoria()" estilo="compacto" />
+          </section>
+          @if (barrasActividad().length) {
+            <section class="reportes__panel" aria-label="Ingresos por actividad">
+              <h3>Ingresos por actividad</h3>
+              <app-grafico-barras [barras]="barrasActividad()" estilo="compacto" />
+            </section>
+          }
+          <section class="reportes__panel" aria-label="Por medio de pago">
+            <h3>Por medio de pago</h3>
+            <app-grafico-barras [barras]="barrasMedio()" estilo="compacto" />
+          </section>
+        </div>
+      }
+    }
+
+    <section class="reportes__panel" aria-label="Movimientos">
+      <h3>Movimientos <span>{{ totalMovimientos() }}</span></h3>
+      <ng-template #celdaImporte let-fila>
+        <strong [class]="fila.tipo === 'Egreso' ? 'reportes__importe reportes__importe--egreso' : 'reportes__importe reportes__importe--ingreso'">
+          {{ fila.tipo === 'Egreso' ? '−' : '+' }} {{ moneda(fila.importe) }}
+        </strong>
+      </ng-template>
+      <ng-template #celdaEstado let-fila>
+        <span [class]="fila.estado === 'Anulado' ? 'reportes__estado reportes__estado--anulado' : 'reportes__estado'">{{ fila.estado }}</span>
+      </ng-template>
+      <app-tabla-responsive
+        [columnas]="columnas"
+        [filas]="filas()"
+        idFila="uuid"
+        [mostrarAcciones]="false"
+        [cargando]="cargando()"
+        [plantillasCeldas]="{ importe: celdaImporte, estado: celdaEstado }"
+        [mensajeVacio]="hayFiltros() ? 'No hay movimientos para los filtros elegidos.' : 'Todavía no hay movimientos este mes.'"
+      />
+      @if (totalPaginas() > 1) {
+        <app-paginacion [paginaActual]="pagina()" [totalPaginas]="totalPaginas()" (paginaCambiada)="cambiarPagina($event)" />
+      }
+    </section>
+  }
+
+  @if (vista() === 'cuotas') {
+    <div class="reportes__filtros">
+      <div class="reportes__chips" role="group" aria-label="Período">
+        @for (opcion of opcionesPeriodo; track opcion.id) {
+          <button type="button" class="reportes__chip" [class.reportes__chip--activo]="periodoCuotas() === opcion.id" [attr.aria-pressed]="periodoCuotas() === opcion.id" (click)="elegirPeriodoCuotas(opcion.id)">{{ opcion.etiqueta }}</button>
+        }
+      </div>
+      @if (periodoCuotas() === 'personalizado') {
+        <div class="reportes__fechas">
+          <app-input-fecha etiqueta="Desde" [valorInicial]="desdeCuotas()" (valorCambiado)="cambiarFechaCuotas('desde', $event)" />
+          <app-input-fecha etiqueta="Hasta" [valorInicial]="hastaCuotas()" (valorCambiado)="cambiarFechaCuotas('hasta', $event)" />
+        </div>
+      }
+      <div class="reportes__grilla">
+        <app-select etiqueta="Tipo de cuota" [opciones]="opcionesTipoCuota" [value]="tipoCuotas()" (valueChange)="cambiarFiltroCuotas('tipo', $event)" />
+        <app-select etiqueta="Actividad" [opciones]="opcionesActividades()" [value]="actividadCuotas()" (valueChange)="cambiarFiltroCuotas('actividad', $event)" />
+      </div>
+      <p class="reportes__ayuda">Las cuotas generadas se cuentan por fecha de emisión; lo recaudado, por fecha de cobro. Una cuota pendiente o vencida nunca suma como ingreso.</p>
+    </div>
+
+    @if (cuotas(); as cuotas) {
+      <div class="reportes__kpis" [class.reportes__kpis--cargando]="cargandoCuotas()">
+        <article class="reportes__kpi"><span>Generadas</span><strong>{{ cuotas.generadas.cantidad }}</strong><small>{{ moneda(cuotas.generadas.importe) }} a cobrar</small></article>
+        <article class="reportes__kpi reportes__kpi--ingreso"><span>Pagadas</span><strong>{{ cuotas.pagadas.cantidad }}</strong><small>{{ moneda(cuotas.pagadas.importe) }}</small></article>
+        <article class="reportes__kpi"><span>Pendientes</span><strong>{{ cuotas.pendientes.cantidad }}</strong><small>{{ moneda(cuotas.pendientes.importe) }}</small></article>
+        <article class="reportes__kpi reportes__kpi--egreso"><span>Vencidas</span><strong>{{ cuotas.vencidas.cantidad }}</strong><small>{{ moneda(cuotas.vencidas.importe) }}</small></article>
+        <article class="reportes__kpi"><span>Descuentos aplicados</span><strong>{{ moneda(cuotas.descuentosAplicados) }}</strong><small>{{ cuotas.anuladas.cantidad }} anuladas (no cuentan)</small></article>
+        <article class="reportes__kpi reportes__kpi--ingreso"><span>Recaudado</span><strong>{{ moneda(cuotas.recaudado) }}</strong><small>{{ cuotas.cobros }} cobros en el período</small></article>
+      </div>
+
+      <div class="reportes__graficos">
+        @for (bloque of [
+          { titulo: 'Recaudación mensual', grupos: cuotas.recaudacionMensual, mensual: true },
+          { titulo: 'Por actividad', grupos: cuotas.recaudacionPorActividad, mensual: false },
+          { titulo: 'Por categoría del socio', grupos: cuotas.recaudacionPorCategoriaSocio, mensual: false },
+          { titulo: 'Por medio de pago', grupos: cuotas.recaudacionPorMedioPago, mensual: false }
+        ]; track bloque.titulo) {
+          <section class="reportes__panel" [attr.aria-label]="bloque.titulo">
+            <h3>{{ bloque.titulo }}</h3>
+            @if (bloque.grupos.length) {
+              <table class="reportes__tabla">
+                <thead><tr><th scope="col">{{ bloque.mensual ? 'Mes' : 'Grupo' }}</th><th scope="col">Cobros</th><th scope="col">Recaudado</th></tr></thead>
+                <tbody>
+                  @for (grupo of bloque.grupos; track grupo.clave) {
+                    <tr><td>{{ bloque.mensual ? mes(grupo.clave) : grupo.nombre }}</td><td>{{ grupo.operaciones }}</td><td>{{ moneda(grupo.ingresos) }}</td></tr>
+                  }
+                </tbody>
+              </table>
+            } @else {
+              <p class="reportes__vacio">Sin cobros de cuotas en el período.</p>
+            }
+          </section>
+        }
+      </div>
+    } @else if (cargandoCuotas()) {
+      <p class="reportes__vacio">Cargando reporte de cuotas…</p>
+    }
+  }
+
+  @if (vista() === 'comparar') {
+    <section class="reportes__panel" aria-label="Comparar períodos">
+      <div class="reportes__chips" role="group" aria-label="Comparación">
+        @for (opcion of opcionesComparacion; track opcion.id) {
+          <button type="button" class="reportes__chip" [class.reportes__chip--activo]="comparacionRapida() === opcion.id" [attr.aria-pressed]="comparacionRapida() === opcion.id" (click)="elegirComparacion(opcion.id)">{{ opcion.etiqueta }}</button>
+        }
+      </div>
+      @if (comparacionRapida() === 'personalizada') {
+        <div class="reportes__periodos-comparar">
+          <fieldset>
+            <legend>Período A</legend>
+            <app-input-fecha etiqueta="Desde" [valorInicial]="periodoA().desde" (valorCambiado)="cambiarPeriodoComparacion('a', 'desde', $event)" />
+            <app-input-fecha etiqueta="Hasta" [valorInicial]="periodoA().hasta" (valorCambiado)="cambiarPeriodoComparacion('a', 'hasta', $event)" />
+          </fieldset>
+          <fieldset>
+            <legend>Período B</legend>
+            <app-input-fecha etiqueta="Desde" [valorInicial]="periodoB().desde" (valorCambiado)="cambiarPeriodoComparacion('b', 'desde', $event)" />
+            <app-input-fecha etiqueta="Hasta" [valorInicial]="periodoB().hasta" (valorCambiado)="cambiarPeriodoComparacion('b', 'hasta', $event)" />
+          </fieldset>
+        </div>
+      }
+
+      @if (errorComparacion()) {
+        <p class="reportes__error" role="alert">{{ errorComparacion() }}</p>
+      }
+      @if (comparacion(); as c) {
+        <table class="reportes__tabla reportes__tabla--comparar" [class.reportes__tabla--cargando]="cargandoComparacion()">
+          <thead>
+            <tr>
+              <th scope="col"></th>
+              <th scope="col">A · {{ fecha(c.periodoA.desde) }} al {{ fecha(c.periodoA.hasta) }}</th>
+              <th scope="col">B · {{ fecha(c.periodoB.desde) }} al {{ fecha(c.periodoB.hasta) }}</th>
+              <th scope="col">Diferencia</th>
+              <th scope="col">Variación</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Ingresos</th>
+              <td>{{ moneda(c.periodoA.ingresos) }}</td><td>{{ moneda(c.periodoB.ingresos) }}</td>
+              <td>{{ moneda(c.diferenciaIngresos) }}</td>
+              <td [class]="claseVariacion(c.variacionIngresos)">{{ variacion(c.variacionIngresos) }}</td>
+            </tr>
+            <tr>
+              <th scope="row">Egresos</th>
+              <td>{{ moneda(c.periodoA.egresos) }}</td><td>{{ moneda(c.periodoB.egresos) }}</td>
+              <td>{{ moneda(c.diferenciaEgresos) }}</td>
+              <td [class]="claseVariacion(c.variacionEgresos, true)">{{ variacion(c.variacionEgresos) }}</td>
+            </tr>
+            <tr>
+              <th scope="row">Balance</th>
+              <td>{{ moneda(c.periodoA.balance) }}</td><td>{{ moneda(c.periodoB.balance) }}</td>
+              <td>{{ moneda(c.diferenciaBalance) }}</td>
+              <td [class]="claseVariacion(c.variacionBalance)">{{ variacion(c.variacionBalance) }}</td>
+            </tr>
+            <tr>
+              <th scope="row">Operaciones</th>
+              <td>{{ c.periodoA.operaciones }}</td><td>{{ c.periodoB.operaciones }}</td>
+              <td>{{ c.periodoB.operaciones - c.periodoA.operaciones }}</td><td></td>
+            </tr>
+          </tbody>
+        </table>
+      } @else if (cargandoComparacion()) {
+        <p class="reportes__vacio">Comparando…</p>
+      }
+    </section>
+  }
+</section>

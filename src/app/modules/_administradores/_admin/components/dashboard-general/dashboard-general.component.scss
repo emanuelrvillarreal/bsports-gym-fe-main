@@ -1,0 +1,134 @@
+:host { display: block; }
+
+.panorama {
+  display: grid;
+  gap: 1rem;
+
+  &__cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+
+    h2 { margin: 0; font-size: 1.1rem; }
+  }
+
+  &__vacio { margin: 0; color: var(--app-text-soft); }
+  &__error { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; color: var(--semantic-danger); }
+  &__nota { margin: 0; color: var(--app-text-soft); font-size: .82rem; }
+
+  &__kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 12.5rem), 1fr));
+    gap: .75rem;
+  }
+
+  &__kpi {
+    display: grid;
+    align-content: start;
+    gap: .2rem;
+    padding: .9rem 1rem;
+    border: 1px solid var(--app-surface-border);
+    border-radius: .85rem;
+    background: var(--app-surface);
+    color: var(--app-text);
+    text-decoration: none;
+    transition: border-color 150ms ease, transform 150ms ease;
+
+    span { color: var(--app-text-soft); font-size: .8rem; font-weight: 600; }
+    strong { font-size: 1.45rem; line-height: 1.2; overflow-wrap: anywhere; }
+    small { color: var(--app-text-soft); font-size: 0.85rem; }
+
+    &:is(a):hover { border-color: var(--app-accent); transform: translateY(-1px); }
+    &:is(a):focus-visible { outline: 2px solid var(--app-accent); outline-offset: 2px; }
+
+    &--negativo strong { color: var(--semantic-danger); }
+    &--alertas strong { color: var(--app-warning); }
+    &--ok strong { color: var(--semantic-success); }
+  }
+
+  &__enlaces {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .2rem .6rem;
+
+    a { color: var(--app-accent); font-weight: 600; }
+  }
+
+  &__secciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .25rem;
+    border-bottom: 1px solid var(--app-surface-border);
+
+    button {
+      min-height: 2.75rem;
+      padding: 0 1rem;
+      border: 0;
+      border-bottom: 3px solid transparent;
+      background: transparent;
+      color: var(--app-text-soft);
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+
+      &:focus-visible { outline: 2px solid var(--app-accent); outline-offset: -2px; }
+    }
+  }
+
+  &__seccion--activa { border-bottom-color: var(--app-accent) !important; color: var(--app-text) !important; }
+
+  &__graficos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+    gap: 1rem;
+  }
+
+  &__panel {
+    display: grid;
+    align-content: start;
+    gap: .6rem;
+    min-width: 0;
+    padding: 1rem;
+    border: 1px solid var(--app-surface-border);
+    border-radius: .85rem;
+    background: var(--app-surface);
+
+    h3 {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: .4rem;
+      margin: 0;
+      font-size: .95rem;
+
+      a { color: var(--app-accent); font-size: .8rem; font-weight: 600; }
+    }
+
+    &--ancho { grid-column: 1 / -1; }
+  }
+
+  &__vertical {
+    display: block;
+    height: 13rem;
+
+    // La pista redondeada se vuelve una mancha si ocupa todo el ancho del mes.
+    ::ng-deep .grafico-barras__pista { max-width: 3rem; margin-inline: auto; }
+  }
+
+  &__datos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 9rem), 1fr));
+    gap: .75rem;
+    margin: 0;
+
+    div { display: grid; gap: .1rem; }
+    dt { color: var(--app-text-soft); font-size: 0.85rem; }
+    dd { margin: 0; font-size: 1.1rem; font-weight: 800; }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panorama__kpi { transition: none; }
+}

@@ -1,0 +1,50 @@
+:host {
+  display: contents;
+}
+
+.historial-evento-acceso {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+  margin-top: 1.25rem;
+
+  &__toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.8rem;
+    align-items: end;
+
+    label {
+      display: grid;
+      gap: 0.4rem;
+      color: var(--app-text);
+      font-weight: 700;
+    }
+
+    input {
+      width: 100%;
+      min-height: 2.75rem;
+      box-sizing: border-box;
+      padding: 0.6rem 0.72rem;
+      color: var(--app-text);
+      background: var(--app-surface);
+      border: 1px solid var(--app-surface-border);
+      border-radius: 0.6rem;
+      font: inherit;
+    }
+  }
+
+  &__error {
+    margin: 0;
+    padding: 0.75rem;
+    color: var(--semantic-danger);
+    background: color-mix(in srgb, var(--semantic-danger) 10%, transparent);
+    border-radius: 0.6rem;
+  }
+}
+
+@media (max-width: 42rem) {
+  .historial-evento-acceso__toolbar {
+    grid-template-columns: 1fr;
+  }
+}

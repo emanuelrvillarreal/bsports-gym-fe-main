@@ -1,0 +1,161 @@
+<form
+  class="formulario-registro"
+  appValidacionFormulario
+  (submit)="registrar(); $event.preventDefault()"
+  novalidate
+>
+  <small
+    class="formulario-registro__error-formulario"
+    [class.formulario-registro__error-formulario--visible]="!!mensajeErrorVisible()"
+    role="alert"
+    >{{ mensajeErrorVisible() || ' ' }}</small
+  >
+
+  <fieldset class="formulario-registro__modos">
+    <legend>Como queres registrarte?</legend>
+    <label [class.formulario-registro__modo--activo]="modo() === 'usuario-nuevo'">
+      <input
+        type="radio"
+        name="modo-registro"
+        value="usuario-nuevo"
+        [checked]="modo() === 'usuario-nuevo'"
+        (change)="seleccionarModo('usuario-nuevo')"
+      />
+      <span>
+        <strong>Usuario nuevo</strong>
+        Voy a crear mi cuenta de acceso.
+      </span>
+    </label>
+    <label [class.formulario-registro__modo--activo]="modo() === 'usuario-existente'">
+      <input
+        type="radio"
+        name="modo-registro"
+        value="usuario-existente"
+        [checked]="modo() === 'usuario-existente'"
+        (change)="seleccionarModo('usuario-existente')"
+      />
+      <span>
+        <strong>Ya tengo cuenta</strong>
+        Voy a usar el mismo email en este gimnasio.
+      </span>
+    </label>
+  </fieldset>
+
+  <div class="formulario-registro__grid">
+    <div class="formulario-registro__field">
+      <label for="registro-nombre">Nombre *</label>
+      <input
+        id="registro-nombre"
+        type="text"
+        required
+        [attr.data-app-invalido]="nombreInvalido() ? 'true' : null"
+        autocomplete="given-name"
+        maxlength="30"
+        [value]="nombre()"
+        (input)="actualizarNombre($event)"
+      />
+    </div>
+
+    <div class="formulario-registro__field">
+      <label for="registro-apellido">Apellido *</label>
+      <input
+        id="registro-apellido"
+        type="text"
+        required
+        [attr.data-app-invalido]="apellidoInvalido() ? 'true' : null"
+        autocomplete="family-name"
+        maxlength="30"
+        [value]="apellido()"
+        (input)="actualizarApellido($event)"
+      />
+    </div>
+
+    <div class="formulario-registro__field">
+      <label for="registro-email">Email *</label>
+      <input
+        id="registro-email"
+        type="email"
+        required
+        [attr.data-app-invalido]="emailInvalido() ? 'true' : null"
+        autocomplete="email"
+        maxlength="80"
+        [value]="email()"
+        (input)="actualizarEmail($event)"
+      />
+    </div>
+
+    <div class="formulario-registro__field">
+      <label for="registro-dni">DNI</label>
+      <input
+        id="registro-dni"
+        type="text"
+        inputmode="numeric"
+        autocomplete="off"
+        [value]="dni()"
+        (input)="actualizarDni($event)"
+      />
+    </div>
+
+    <div class="formulario-registro__field">
+      <label for="registro-telefono">Telefono</label>
+      <input
+        id="registro-telefono"
+        type="tel"
+        autocomplete="tel"
+        [value]="telefono()"
+        (input)="actualizarTelefono($event)"
+      />
+    </div>
+
+    <div class="formulario-registro__field">
+      <app-input-fecha
+        id="registro-fecha-nacimiento"
+        etiqueta="Fecha de nacimiento"
+        [valorInicial]="fechaNacimiento()"
+        colorPrimario="var(--app-accent)"
+        (valorCambiado)="actualizarFechaNacimiento($event)"
+      />
+    </div>
+
+    @if (modo() === 'usuario-nuevo') {
+      <div class="formulario-registro__field formulario-registro__field--ancho-completo">
+        <label for="registro-password">contraseña *</label>
+        <div class="formulario-registro__password-field">
+          <input
+            id="registro-password"
+            [type]="mostrarPassword() ? 'text' : 'password'"
+            required
+            [attr.data-app-invalido]="passwordInvalida() ? 'true' : null"
+            autocomplete="new-password"
+            placeholder="Ej: Club2026"
+            [value]="password()"
+            (input)="actualizarPassword($event)"
+          />
+          <app-boton
+            class="formulario-registro__password-toggle"
+            [class.formulario-registro__password-toggle--activa]="mostrarPassword()"
+            tipo="button"
+            apariencia="texto"
+            [soloIcono]="true"
+            [aria-label]="mostrarPassword() ? 'Ocultar contrasena' : 'Mostrar contrasena'"
+            (accion)="alternarPassword()"
+          >
+            <ng-icon [name]="mostrarPassword() ? 'heroEyeSlash' : 'heroEye'" />
+          </app-boton>
+        </div>
+      </div>
+    }
+  </div>
+
+  <app-boton
+    class="formulario-registro__submit"
+    [class.formulario-registro__submit--error]="submitInvalido()"
+    tipo="submit"
+    [cargando]="cargando()"
+    ariaLabelCarga="Enviando solicitud"
+  >
+    {{ textoBoton() }}
+  </app-boton>
+
+  <p class="formulario-registro__required">(*) campos obligatorios.</p>
+</form>

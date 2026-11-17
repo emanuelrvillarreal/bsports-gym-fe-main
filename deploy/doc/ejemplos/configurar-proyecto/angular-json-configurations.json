@@ -1,0 +1,43 @@
+{
+  "_comment": "Fragmento de angular.json mostrando cómo configurar environments por entorno de deploy",
+  "projects": {
+    "mi-app": {
+      "architect": {
+        "build": {
+          "configurations": {
+            "production": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
+              "optimization": true,
+              "outputHashing": "all"
+            },
+            "st7": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.st7.ts"
+                }
+              ],
+              "optimization": true,
+              "outputHashing": "all"
+            },
+            "local": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.local.ts"
+                }
+              ],
+              "optimization": false,
+              "outputHashing": "none"
+            }
+          }
+        }
+      }
+    }
+  }
+}

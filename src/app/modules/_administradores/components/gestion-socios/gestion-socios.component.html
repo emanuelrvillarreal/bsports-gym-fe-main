@@ -1,0 +1,516 @@
+<div class="gestion-socios">
+  <app-card>
+    <app-formulario-filtro-socios [cargando]="cargando()" (enviado)="aplicarFiltros($event)" />
+
+    <app-tabla-responsive
+      [columnas]="columnas"
+      [filas]="filas()"
+      [filaClase]="claseFilaSocio"
+      [cargando]="cargando()"
+      idFila="memberUuid"
+      [acciones]="accionesSocios"
+      [accionesCabecera]="accionesCabecera"
+      [filtrosCabecera]="filtrosCabecera()"
+      [tbody_rows]="6"
+      [tr_input]="true"
+      [tr_input_conmutador]="false"
+      [tr_input_boton_agregar]="true"
+      tr_input_boton_agregar_modo="emitir"
+      tr_input_boton_agregar_texto="Nuevo titular"
+      mensajeVacio="No hay socios para los filtros seleccionados."
+      [filaClickeable]="true"
+      (filaSeleccionada)="socioFicha.set($event)"
+      (accionFila)="manejarAccionSocio($event)"
+      (accionCabecera)="manejarAccionCabecera($event)"
+      (filtroCabeceraCambiado)="manejarFiltroCabecera($event)"
+      (trInputNuevo)="abrirAltaTitular()"
+    />
+
+    <app-paginacion
+      [paginaActual]="paginaActual()"
+      [totalPaginas]="totalPaginas()"
+      [deshabilitado]="cargando()"
+      (paginaCambiada)="cambiarPagina($event)"
+    />
+  </app-card>
+
+  <app-grupo-familiar-socio
+    [titular]="titularGrupoFamiliar()"
+    [procesandoMemberUuid]="procesandoUuid()"
+    [cargandoCertificadosMemberUuid]="socioCertificadosCargandoUuid()"
+    [versionRecarga]="versionGrupoFamiliar()"
+    (cerrar)="cerrarGrupoFamiliar()"
+    (editar)="editarFamiliarDesdeGrupo($event)"
+    (verCertificados)="abrirCertificados($event)"
+    (cambiarEstado)="abrirCambioEstado($event)"
+  />
+
+  <app-popup
+    [abierto]="!!socioCertificados()"
+    titulo="Certificados médicos"
+    [descripcion]="
+      socioCertificados() ? socioCertificados()!.nombre + ' ' + socioCertificados()!.apellido : ''
+    "
+    [mostrarEncabezado]="false"
+    ancho="grande"
+    textoCancelar="Cerrar"
+    aparienciaCancelar="solido"
+    [cancelarDeshabilitado]="!!procesandoCertificadoUuid()"
+    (cancelar)="cerrarCertificados()"
+  >
+    @if (socioCertificados()) {
+      <app-titulo-hero
+        titulo="Certificados médicos"
+        [subtitulo]="socioCertificados()!.nombre + ' ' + socioCertificados()!.apellido"
+        icono="socios"
+      />
+      <div class="gestion-socios__contenido-certificados">
+        <app-tabla-responsive
+          [columnas]="columnasCertificados"
+          [filas]="certificados()"
+          [cargando]="cargandoCertificados()"
+          idFila="certificadoUuid"
+          [acciones]="accionesCertificados"
+          [tbody_rows]="4"
+          [vacio_reservar_filas]="true"
+          mensajeVacio="El socio no tiene certificados cargados."
+          (accionFila)="manejarAccionCertificado($event)"
+        />
+      </div>
+    }
+  </app-popup>
+
+  <app-popup
+    [abierto]="!!socioFicha()"
+    titulo="Ficha del socio"
+    [descripcion]="socioFicha() ? socioFicha()!.nombre + ' ' + socioFicha()!.apellido : ''"
+    ancho="grande"
+    textoCancelar="Cerrar"
+    (cancelar)="socioFicha.set(null)"
+  >
+    @if (socioFicha(); as socio) {
+      <app-ficha-socio [socio]="socio" (socioActualizado)="recargarListado()" />
+    }
+  </app-popup>
+
+  <app-popup
+    [abierto]="!!socioMembresias()"
+    titulo="Pases del socio"
+    [descripcion]="socioMembresias() ? socioMembresias()!.nombre + ' ' + socioMembresias()!.apellido : ''"
+    ancho="grande"
+    textoCancelar="Cerrar"
+    (cancelar)="socioMembresias.set(null)"
+  >
+    @if (socioMembresias(); as socio) {
+      <app-membresias-socio [memberUuid]="socio.memberUuid" />
+    }
+  </app-popup>
+
+  <app-popup
+    [abierto]="!!socioCambioEstado()"
+    titulo="Dar de baja al socio"
+    [descripcion]="
+      socioCambioEstado() ? socioCambioEstado()!.nombre + ' ' + socioCambioEstado()!.apellido : ''
+    "
+    [mostrarEncabezado]="false"
+    [cancelarDeshabilitado]="!!procesandoUuid()"
+    (cancelar)="cerrarCambioEstado()"
+  >
+    @if (socioCambioEstado()) {
+      <app-titulo-hero
+        titulo="Dar de baja al socio"
+        [subtitulo]="socioCambioEstado()!.nombre + ' ' + socioCambioEstado()!.apellido"
+        icono="socios"
+      />
+      <div class="gestion-socios__cambio-estado">
+        <p>Confirmá el nuevo estado que se aplicará al socio.</p>
+        <app-select
+          etiqueta="Nuevo estado"
+          placeholder="Seleccionar estado"
+          [opciones]="opcionesEstadoSocio"
+          [value]="estadoSeleccionado()"
+          (valueChange)="seleccionarEstado($event)"
+        />
+      </div>
+    }
+
+    <app-boton
+      popupAcciones
+      tipo="button"
+      [deshabilitado]="socioCambioEstado()?.estado === estadoSeleccionado()"
+      [cargando]="!!procesandoUuid()"
+      ariaLabelCarga="Actualizando estado"
+      (accion)="cambiarEstadoSocio()"
+    >
+      Confirmar baja
+    </app-boton>
+  </app-popup>
+
+  <app-popup
+    [abierto]="!!modoFormulario()"
+    [titulo]="tituloFormulario()"
+    [descripcion]="
+      titularFamiliar()
+        ? 'Titular: ' + titularFamiliar()!.nombre + ' ' + titularFamiliar()!.apellido
+        : ''
+    "
+    [mostrarEncabezado]="false"
+    ancho="grande"
+    [cancelarDeshabilitado]="enviandoFormulario()"
+    (cancelar)="cerrarFormulario()"
+  >
+    @if (modoFormulario()) {
+      <app-titulo-hero
+        [titulo]="tituloFormulario()"
+        [subtitulo]="
+          titularFamiliar()
+            ? 'Titular: ' + titularFamiliar()!.nombre + ' ' + titularFamiliar()!.apellido
+            : ''
+        "
+        icono="socios"
+      />
+      <app-formulario-gestion-socio
+        [modo]="modoFormulario()!"
+        [socio]="socioEditando()"
+        [descuentosDisponibles]="descuentosDisponibles()"
+        [cargandoDescuentos]="cargandoDescuentos()"
+        [siguienteNumeroSocio]="siguienteNumeroSocio()"
+        (enviado)="guardar($event)"
+      />
+    }
+
+    <app-boton
+      popupAcciones
+      tipo="submit"
+      form="formulario-socio"
+      [cargando]="enviandoFormulario() || cargandoDescuentos()"
+      [ariaLabelCarga]="cargandoDescuentos() ? 'Cargando formulario' : 'Guardando socio'"
+    >
+      Guardar
+    </app-boton>
+  </app-popup>
+
+  <app-popup
+    [abierto]="importacionAbierta()"
+    titulo="Importar socios"
+    descripcion="Carga socios titulares y familiares desde un archivo Excel."
+    [mostrarEncabezado]="false"
+    ancho="extraGrande"
+    textoCancelar="Cancelar"
+    [mostrarCancelar]="estadoImportacion() === 'seleccionando'"
+    (cancelar)="cerrarImportacion()"
+  >
+    @if (importacionAbierta()) {
+      <div class="gestion-socios__importacion">
+        <app-titulo-hero
+          titulo="Importar socios"
+          subtitulo="Carga socios titulares y familiares desde un archivo Excel."
+          icono="socios"
+        />
+        <small
+          class="gestion-socios__error-formulario"
+          [class.gestion-socios__error-formulario--visible]="errorImportacionVisible()"
+          role="alert"
+          >{{ mensajeErrorImportacion() }}</small
+        >
+
+        @if (estadoImportacion() === 'seleccionando') {
+          <div class="gestion-socios__recursos-importacion">
+            <aside class="gestion-socios__advertencia-importacion" role="note">
+              <strong>Requisitos del archivo</strong>
+              <p>Las columnas no distinguen entre mayúsculas y minúsculas:</p>
+              <ul>
+                <li>Nombre</li>
+                <li>Apellido</li>
+                <li>DNI</li>
+                <li>Email</li>
+                <li>Contraseña</li>
+                <li>Teléfono</li>
+                <li>Fecha de nacimiento</li>
+                <li>Sexo (Masculino, Femenino u Otro)</li>
+                <li>Número de socio</li>
+                <li>Fecha de alta</li>
+                <li>Parentesco</li>
+                <li>Titular DNI</li>
+              </ul>
+            </aside>
+
+            <app-boton
+              class="gestion-socios__boton-plantilla"
+              tipo="button"
+              [colorFondo]="fondoBotonPlantilla()"
+              aria-label="Descargar plantilla de importación de socios"
+              (accion)="descargarPlantillaImportacion()"
+            >
+              <span
+                class="gestion-socios__boton-plantilla-contenido"
+                [style.color]="colorTextoBotonPlantilla()"
+              >
+                <span class="gestion-socios__iconos-plantilla" aria-hidden="true">
+                  <ng-icon
+                    class="gestion-socios__icono-plantilla gestion-socios__icono-plantilla--documento"
+                    name="heroDocumentText"
+                  />
+                  <ng-icon
+                    class="gestion-socios__icono-plantilla gestion-socios__icono-plantilla--descarga"
+                    name="heroArrowDownTray"
+                  />
+                </span>
+                <span>Descargar</span>
+                <span>Plantilla</span>
+              </span>
+            </app-boton>
+          </div>
+
+          <label
+            class="gestion-socios__selector-archivo"
+            [class.gestion-socios__selector-archivo--arrastrando]="arrastrandoArchivo()"
+            [class.gestion-socios__selector-archivo--seleccionado]="!!archivoImportacion()"
+            [style.--gestion-socios-color-secundario]="
+              archivoImportacion() ? colorSecundario() : null
+            "
+            for="socios-archivo"
+            (dragenter)="iniciarArrastreArchivo($event)"
+            (dragover)="iniciarArrastreArchivo($event)"
+            (dragleave)="finalizarArrastreArchivo($event)"
+            (drop)="soltarArchivo($event)"
+          >
+            <input
+              id="socios-archivo"
+              type="file"
+              accept=".xls,.xlsx"
+              [disabled]="importando()"
+              (change)="seleccionarArchivo($event)"
+            />
+            <span class="gestion-socios__tipo-archivo" aria-hidden="true">XLS</span>
+            <span class="gestion-socios__archivo-texto">
+              <strong>{{ archivoImportacion()?.name || 'Seleccionar archivo Excel' }}</strong>
+              <small>
+                {{
+                  arrastrandoArchivo()
+                    ? 'Soltá el archivo para seleccionarlo'
+                    : archivoImportacion()
+                      ? 'Archivo listo para importar'
+                      : 'Arrastrá el archivo acá o elegilo · Formatos: .xls y .xlsx'
+                }}
+              </small>
+            </span>
+            <span class="gestion-socios__elegir-archivo">Elegir archivo</span>
+          </label>
+        } @else if (estadoImportacion() === 'iniciando') {
+          <p class="gestion-socios__fase-importacion" aria-live="polite" aria-atomic="true">
+            Preparando el archivo para iniciar la importación…
+          </p>
+        } @else if (
+          estadoImportacion() === 'procesando' || estadoImportacion() === 'reconectando'
+        ) {
+          @if (progresoImportacion(); as progreso) {
+            <section
+              class="gestion-socios__progreso-carga"
+              aria-labelledby="progreso-importacion-titulo"
+            >
+              <div class="gestion-socios__progreso-encabezado">
+                <strong id="progreso-importacion-titulo">
+                  {{
+                    estadoImportacion() === 'reconectando'
+                      ? 'Reconectando el seguimiento…'
+                      : 'Procesando socios'
+                  }}
+                </strong>
+              </div>
+              <div class="gestion-socios__progreso-linea">
+                <div
+                  class="gestion-socios__barra-progreso"
+                  role="progressbar"
+                  aria-label="Progreso de importación de socios"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  [attr.aria-valuenow]="porcentajeImportacionMostrado()"
+                >
+                  <span
+                    class="gestion-socios__barra-progreso-valor"
+                    [style.width.%]="porcentajeImportacionMostrado()"
+                  ></span>
+                </div>
+                <strong
+                  class="gestion-socios__porcentaje-importacion"
+                  aria-live="polite"
+                  aria-atomic="true"
+                >
+                  {{ porcentajeImportacionMostrado() }}%
+                </strong>
+              </div>
+              <p class="gestion-socios__filas-procesadas">
+                {{ progreso.filasProcesadas }}/{{ progreso.filasTotales }} filas procesadas
+              </p>
+              @if (progreso.errorCount !== undefined || progreso.warningCount !== undefined) {
+                <div class="gestion-socios__progreso-contadores" aria-live="polite">
+                  <span class="gestion-socios__progreso-contador--error">
+                    {{ progreso.errorCount ?? 0 }} errores
+                  </span>
+                  <span class="gestion-socios__progreso-contador--advertencia">
+                    {{ progreso.warningCount ?? 0 }} advertencias
+                  </span>
+                </div>
+              }
+              @if (estadoImportacion() === 'reconectando') {
+                <small>Se perdió la conexión. El navegador intentará recuperarla.</small>
+              }
+            </section>
+          }
+        } @else if (estadoImportacion() === 'completada') {
+          @if (cargandoResultadoImportacion()) {
+            <p class="gestion-socios__fase-importacion" role="status" aria-live="polite">
+              Preparando el detalle de la importación…
+            </p>
+          } @else if (resultadoImportacion(); as resultado) {
+            <section
+              class="gestion-socios__resultado-importacion"
+              aria-labelledby="resultado-titulo"
+            >
+              <div class="gestion-socios__resultado-encabezado">
+                <div>
+                  <strong id="resultado-titulo">Resultado de la importación</strong>
+                  <small>{{ formatearFechaResultado(resultado.dateCreated) }}</small>
+                </div>
+                <span class="gestion-socios__resultado-finalizado">Finalizada</span>
+              </div>
+
+              <div class="gestion-socios__resultado-metricas" aria-label="Resumen de importación">
+                <article>
+                  <span>Total</span>
+                  <strong>{{ resultado.totalRows }}</strong>
+                </article>
+                <article class="gestion-socios__resultado-metrica--exito">
+                  <span>Correctas</span>
+                  <strong>{{ resultado.successCount }}</strong>
+                </article>
+                <article class="gestion-socios__resultado-metrica--error">
+                  <span>Con error</span>
+                  <strong>{{ resultado.errorCount }}</strong>
+                </article>
+                <article class="gestion-socios__resultado-metrica--advertencia">
+                  <span>Advertencias</span>
+                  <strong>{{ resultado.warningCount }}</strong>
+                </article>
+              </div>
+
+              @if (resultado.errorMessage) {
+                <p class="gestion-socios__resultado-mensaje-error" role="alert">
+                  {{ resultado.errorMessage }}
+                </p>
+              }
+
+              <section class="gestion-socios__resultado-filas" aria-labelledby="resultado-filas-titulo">
+                <h3 id="resultado-filas-titulo">Detalle por fila</h3>
+                @if (resultado.rows.length) {
+                  <div class="gestion-socios__resultado-lista">
+                    @for (fila of resultado.rows; track fila.rowNumber) {
+                      <article
+                        class="gestion-socios__resultado-fila"
+                        [class.gestion-socios__resultado-fila--exito]="fila.status === 'SUCCESS'"
+                        [class.gestion-socios__resultado-fila--error]="fila.status === 'ERROR'"
+                      >
+                        <header>
+                          <strong>Fila {{ fila.rowNumber }}</strong>
+                          <span>{{ etiquetaEstadoFila(fila) }}</span>
+                        </header>
+                        <dl>
+                          <div>
+                            <dt>Tipo</dt>
+                            <dd>{{ etiquetaTipoFila(fila) }}</dd>
+                          </div>
+                          @if (fila.numeroSocio) {
+                            <div>
+                              <dt>N.º de socio</dt>
+                              <dd>{{ fila.numeroSocio }}</dd>
+                            </div>
+                          }
+                          @if (fila.memberUuid) {
+                            <div>
+                              <dt>UUID</dt>
+                              <dd>{{ fila.memberUuid }}</dd>
+                            </div>
+                          }
+                        </dl>
+                        @if (fila.errorMessage) {
+                          <p class="gestion-socios__resultado-fila-error">{{ fila.errorMessage }}</p>
+                        }
+                        @if (fila.warnings.length) {
+                          <ul aria-label="Advertencias de la fila">
+                            @for (advertencia of fila.warnings; track $index) {
+                              <li>{{ advertencia }}</li>
+                            }
+                          </ul>
+                        }
+                      </article>
+                    }
+                  </div>
+                } @else {
+                  <p>No hay detalle de filas para mostrar.</p>
+                }
+              </section>
+            </section>
+          } @else if (progresoImportacion(); as progresoFinal) {
+            <section
+              class="gestion-socios__resultado-importacion"
+              aria-labelledby="resultado-titulo"
+            >
+              <div class="gestion-socios__resultado-encabezado">
+                <strong id="resultado-titulo">Resultado de la importación</strong>
+                <span class="gestion-socios__resultado-finalizado">Finalizada</span>
+              </div>
+              <p class="gestion-socios__filas-procesadas">
+                {{ progresoFinal.filasProcesadas }}/{{ progresoFinal.filasTotales }} filas procesadas
+              </p>
+              @if (errorResultadoImportacion()) {
+                <p class="gestion-socios__resultado-mensaje-error" role="alert">
+                  {{ errorResultadoImportacion() }}
+                </p>
+              }
+            </section>
+          }
+        } @else if (estadoImportacion() === 'error') {
+          <section
+            class="gestion-socios__resultado-importacion gestion-socios__resultado-importacion--error"
+            aria-labelledby="resultado-error-titulo"
+          >
+            <div class="gestion-socios__resultado-encabezado">
+              <div>
+                <strong id="resultado-error-titulo">No se completó el seguimiento</strong>
+                @if (progresoImportacion(); as progreso) {
+                  <span>
+                    {{ progreso.filasProcesadas }} de {{ progreso.filasTotales }} filas procesadas
+                  </span>
+                }
+              </div>
+              <span class="gestion-socios__resultado-error">Error</span>
+            </div>
+            <p>
+              No vuelvas a enviar el archivo automáticamente: algunas filas pudieron procesarse.
+            </p>
+          </section>
+        }
+      </div>
+    }
+
+    <app-boton
+      popupAcciones
+      tipo="button"
+      [cargando]="estadoImportacion() === 'iniciando'"
+      [deshabilitado]="
+        estadoImportacion() === 'procesando' || estadoImportacion() === 'reconectando'
+      "
+      ariaLabelCarga="Preparando importación de socios"
+      (accion)="manejarAccionImportacion()"
+    >
+      @if (estadoImportacion() === 'completada' || estadoImportacion() === 'error') {
+        Cerrar
+      } @else if (estadoImportacion() === 'procesando' || estadoImportacion() === 'reconectando') {
+        Procesando
+      } @else {
+        Importar
+      }
+    </app-boton>
+  </app-popup>
+</div>

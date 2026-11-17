@@ -1,0 +1,27 @@
+@use '../../../ui/formulario-secciones/formulario-secciones' as fs;
+
+:host {
+  display: block;
+}
+
+@include fs.estilos;
+
+.formulario-evento {
+  margin-top: 1rem;
+
+  &__error {
+    display: block;
+    min-height: 1.1rem;
+    color: var(--semantic-danger, #ef4444);
+    font-weight: 600;
+    visibility: hidden;
+
+    &--visible {
+      visibility: visible;
+    }
+  }
+
+  &__contador span {
+    color: var(--app-accent);
+  }
+}

@@ -1,0 +1,83 @@
+<app-card
+  titulo="Certificados médicos"
+  descripcion="Subí tu certificado para que el gimnasio lo revise. El gimnasio define hasta cuándo es válido."
+>
+  <div class="certificados-medicos__aviso" [attr.data-tono]="estadoActual().tono" role="status">
+    <strong>{{ estadoActual().titulo }}</strong>
+    <span>{{ estadoActual().detalle }}</span>
+  </div>
+
+  <app-formulario-certificado-medico [enviando]="enviando()" (seleccionado)="subir($event)" />
+
+  @if (enviando()) {
+    <p class="certificados-medicos__estado" role="status">Subiendo certificado...</p>
+  }
+  @if (error()) {
+    <p class="certificados-medicos__error" role="alert">{{ error() }}</p>
+  }
+
+  <div class="certificados-medicos__historial">
+    <h3>Historial</h3>
+    @if (certificadosOrdenados().length) {
+      <app-carrusel-fade
+        [items]="certificadosOrdenados()"
+        titulo="Certificados cargados"
+        ariaLabel="Historial de certificados médicos"
+        altura="18rem"
+        [alturaAutomatica]="true"
+        [navegacionMovilPorDeslizamiento]="true"
+      >
+        <ng-template appCarruselFadeItem let-certificado let-indice="index">
+          <article
+            class="certificados-medicos__card"
+            [class.certificados-medicos__card--primaria]="indice % 2 === 0"
+            [class.certificados-medicos__card--secundaria]="indice % 2 !== 0"
+          >
+            <span class="certificados-medicos__card-fecha"
+              >Cargado: {{ certificado.fechaCarga }}</span
+            >
+            <h4>{{ certificado.nombreArchivo }}</h4>
+            <span
+              class="certificados-medicos__chip-estado"
+              [class.certificados-medicos__chip-estado--pendiente]="
+                certificado.estado === 'PENDIENTE_VALIDACION'
+              "
+              [class.certificados-medicos__chip-estado--confirmado]="
+                certificado.estado === 'CONFIRMADO'
+              "
+              [class.certificados-medicos__chip-estado--denegado]="
+                certificado.estado === 'DENEGADO'
+              "
+              [class.certificados-medicos__chip-estado--vencido]="certificado.estado === 'VENCIDO'"
+            >
+              {{ etiquetaEstado(certificado.estado) }}
+            </span>
+            <dl>
+              <div>
+                <dt>Vencimiento</dt>
+                <dd>{{ certificado.fechaExpiracion }}</dd>
+              </div>
+            </dl>
+
+            @if (puedeVerArchivo(certificado)) {
+              <app-boton
+                tipo="button"
+                [colorPaleta]="indice % 2 === 0 ? 'secundario' : 'primario'"
+                [aria-label]="'Ver archivo ' + certificado.nombreArchivo"
+                (accion)="abrirArchivo(certificado)"
+              >
+                <ng-icon name="heroEyeSolid" aria-hidden="true" />
+              </app-boton>
+            } @else if (certificado.estado === 'VENCIDO') {
+              <p class="certificados-medicos__archivo-no-disponible">
+                El archivo vencido ya no está disponible.
+              </p>
+            }
+          </article>
+        </ng-template>
+      </app-carrusel-fade>
+    } @else {
+      <p>Aún no cargaste certificados médicos.</p>
+    }
+  </div>
+</app-card>

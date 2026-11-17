@@ -1,0 +1,23 @@
+# Ejemplo: stack spring_maria (MariaDB 11 embebida)
+# Por convención mysql_user, mysql_db y mysql_pass coinciden con el path.
+
+st7:
+  mi-api:
+    branch: develop
+    port: 9080
+    path: mi-api
+    domain: stg.blueopendata.com
+
+    stack: spring_maria
+
+    env:
+      MI_VARIABLE: "valor"
+
+    mysql_user: mi-api
+    mysql_db: mi-api
+    mysql_pass: mi-api
+    mysql_external_port: 9083
+
+    composer_file: plantillas/spring-3.9-java-17-maria-11/docker-compose.yml
+    nginx_config: plantillas/spring-3.9-java-17-maria-11/nginx.spring-boot-api.conf
+    application_properties: src/main/resources/application.st7.properties

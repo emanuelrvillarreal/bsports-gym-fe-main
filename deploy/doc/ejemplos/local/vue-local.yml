@@ -1,0 +1,13 @@
+# Ejemplo: Vue 3 en local
+
+local:
+  mi-vue-app:
+    port: 5173
+    path: mi-app
+    stack: vue
+
+    env:
+      RESTART_POLICY: "no"
+
+    environment: local
+    composer_file: plantillas/vue-3-node-20/docker-compose.yml

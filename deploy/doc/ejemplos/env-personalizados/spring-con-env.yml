@@ -1,0 +1,32 @@
+# Ejemplo: Spring Boot con variables de entorno personalizadas
+# Las variables en env: llegan al contenedor y Spring las lee
+# desde application.properties via ${NOMBRE_VARIABLE}
+
+st7:
+  convenios-be:
+    branch: develop
+    port: 9050
+    path: convenios
+    domain: stg.blueopendata.com
+
+    stack: spring
+
+    env:
+      # Feature flags
+      FEATURE_EXPORT_ENABLED: true
+      FEATURE_BETA_UI: false
+
+      # URLs de servicios externos
+      EXTERNAL_API_URL: "https://api.staging.ejemplo.com/v1"
+      NOTIFICATION_SERVICE_URL: "https://notif.staging.ejemplo.com"
+
+      # Configuración de la app
+      HTTP_READ_TIMEOUT_SECONDS: 45
+      MAX_UPLOAD_MB: 20
+
+      # Cron jobs
+      SYNC_CRON: "0 0 2 * * *"
+
+    composer_file: plantillas/spring-3.9-java-17/docker-compose.yml
+    nginx_config: plantillas/spring-3.9-java-17/nginx.spring-boot-api.conf
+    application_properties: src/main/resources/application.st7.properties

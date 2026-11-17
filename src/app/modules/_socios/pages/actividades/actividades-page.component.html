@@ -1,0 +1,13 @@
+<app-titulo-hero
+  icono="actividades"
+  titulo="Actividades"
+  [subtitulo]="
+    puedeInscribir
+      ? 'Consultá tus inscripciones e inscribite junto a tu grupo familiar.'
+      : 'Consultá las actividades en las que estás inscripto.'
+  "
+/>
+@if (puedeInscribir) {
+  <app-actividades-portal (inscripcionConfirmada)="recargarMisActividades()" />
+}
+<app-mis-actividades-portal />

@@ -1,0 +1,147 @@
+<article
+  class="carnet"
+  [class.carnet--girado]="mostrandoDorso()"
+  [class.carnet--girando]="animandoGiro()"
+  [class.carnet--alto-rendimiento]="altoRendimiento()"
+  aria-label="Carnet digital"
+>
+  <div class="carnet__inner">
+    <section class="carnet__cara carnet__cara--frente">
+      <span class="carnet__fondo-orbita carnet__fondo-orbita--uno" aria-hidden="true"></span>
+      <span class="carnet__fondo-orbita carnet__fondo-orbita--dos" aria-hidden="true"></span>
+      <span class="carnet__fondo-linea carnet__fondo-linea--uno" aria-hidden="true"></span>
+      <span class="carnet__fondo-linea carnet__fondo-linea--dos" aria-hidden="true"></span>
+      <span class="carnet__brillo" aria-hidden="true"></span>
+
+      <header class="carnet__header carnet__header--frente">
+        <strong class="carnet__titulo">Carnet</strong>
+        <div class="carnet__header-actions">
+          <span class="carnet__logo-shell">
+            @if (!cargando() && (!logoCargado() || logoConError())) {
+              <span class="carnet__spinner carnet__spinner--logo" aria-hidden="true">
+                <app-load-spinner tipo="imagen" [altoRendimiento]="altoRendimiento()" />
+              </span>
+            }
+            <img
+              class="carnet__logo"
+              [src]="logoSrc()"
+              [alt]="logoAlt()"
+              [class.carnet__media--cargando]="!logoCargado() || logoConError()"
+              (load)="manejarLogoCargado()"
+              (error)="manejarLogoError()"
+            />
+          </span>
+        </div>
+      </header>
+
+      <section class="carnet__cuerpo">
+        <figure class="carnet__foto-bloque">
+          @if (fotoDisponible()) {
+            @if (!cargando() && !fotoCargada()) {
+              <span class="carnet__spinner">
+                <app-load-spinner tipo="imagen" [altoRendimiento]="altoRendimiento()" />
+              </span>
+            }
+            <img
+              [src]="fotoSrc()"
+              [alt]="'Foto de ' + nombreCompleto()"
+              [class.carnet__media--cargando]="!fotoCargada()"
+              (load)="manejarFotoCargada()"
+              (error)="manejarFotoError()"
+            />
+          } @else {
+            <span>{{ iniciales() }}</span>
+          }
+        </figure>
+
+        <div class="carnet__datos">
+          <h3>{{ nombreCompleto() }}</h3>
+
+          <ul class="carnet__datos-lista">
+            @for (campo of campos(); track campo.etiqueta + $index) {
+              <li class="carnet__dato-item">
+                <span class="carnet__dato-label">{{ campo.etiqueta }}</span>
+                <strong
+                  class="carnet__dato-valor"
+                  [class.carnet__dato-valor--lista]="campoEsLista(campo)"
+                >
+                  {{ valorCampo(campo) }}
+                </strong>
+              </li>
+            }
+          </ul>
+        </div>
+
+        <div class="carnet__acciones-frente">
+          <app-boton
+            tipo="button"
+            apariencia="texto"
+            class="carnet__flip-button"
+            (accion)="mostrarDorso()"
+            aria-label="Ver dorso del carnet"
+          >
+            <ng-icon name="heroQrCode" aria-hidden="true" />
+            Ver QR
+          </app-boton>
+        </div>
+      </section>
+    </section>
+
+    <section class="carnet__cara carnet__cara--dorso" aria-label="Dorso del carnet">
+      <span class="carnet__fondo-orbita carnet__fondo-orbita--uno" aria-hidden="true"></span>
+      <span class="carnet__fondo-orbita carnet__fondo-orbita--dos" aria-hidden="true"></span>
+      <span class="carnet__fondo-linea carnet__fondo-linea--uno" aria-hidden="true"></span>
+      <span class="carnet__fondo-linea carnet__fondo-linea--dos" aria-hidden="true"></span>
+      <span class="carnet__brillo" aria-hidden="true"></span>
+
+      <header class="carnet__header carnet__header--dorso">
+        <div>
+          <strong>QR</strong>
+          <small>Validacion digital</small>
+        </div>
+      </header>
+
+      <div class="carnet__dorso-body">
+        <div
+          class="carnet__qr carnet__qr--grande"
+          role="img"
+          [attr.aria-label]="'Codigo QR ' + qrContenido()"
+        >
+          <div class="carnet__qr-visual carnet__qr-visual--grande">
+            @if (!cargando() && !qrCargado()) {
+              <span class="carnet__spinner carnet__spinner--qr">
+                <app-load-spinner tipo="imagen" [altoRendimiento]="altoRendimiento()" />
+              </span>
+            }
+            <img
+              [src]="qrSvgSrc()"
+              [alt]="'Codigo QR de ' + nombreCompleto()"
+              [class.carnet__media--cargando]="!qrCargado()"
+              (load)="manejarQrCargado()"
+            />
+          </div>
+        </div>
+        <p class="carnet__dorso-copy">Escaneá este código para validar la credencial.</p>
+      </div>
+
+      <footer class="carnet__footer carnet__footer--dorso">
+        <app-boton
+          tipo="button"
+          apariencia="texto"
+          class="carnet__flip-button"
+          (accion)="mostrarFrente()"
+          aria-label="Volver al frente del carnet"
+        >
+          <ng-icon name="heroQrCode" aria-hidden="true" />
+          Volver
+        </app-boton>
+      </footer>
+    </section>
+  </div>
+
+  @if (cargando()) {
+    <div class="carnet__carga" role="status" aria-live="polite">
+      <app-load-spinner-blue ariaLabel="Cargando credencial" />
+    </div>
+  }
+</article>

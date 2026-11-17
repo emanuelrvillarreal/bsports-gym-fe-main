@@ -1,0 +1,181 @@
+:host {
+  display: block;
+}
+
+.formulario-configuracion-empresa {
+  display: grid;
+  gap: 1.25rem;
+
+  &__card--contacto {
+    --app-card-header-color: var(--brand-primary, var(--app-accent));
+  }
+
+  &__campos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  &__error,
+  &__acciones,
+  &__interruptor,
+  &__plazos {
+    grid-column: 1 / -1;
+  }
+
+  &__error {
+    display: block;
+    min-height: 1.1rem;
+    color: var(--semantic-danger, #ef4444);
+    visibility: hidden;
+
+    &--visible {
+      visibility: visible;
+    }
+  }
+
+  label:not(&__interruptor) {
+    display: grid;
+    align-content: start;
+    gap: 0.35rem;
+    color: var(--app-text-soft);
+  }
+
+  input:not([type='checkbox']) {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.65rem;
+    color: var(--app-text);
+    background: var(--app-surface);
+    border: 1px solid var(--app-surface-border);
+    border-radius: 0.55rem;
+    font: inherit;
+
+    &:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--app-accent) 35%, white);
+      outline-offset: 2px;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.65;
+    }
+  }
+
+  :host-context(.theme-mode-dark) input:not([type='checkbox']),
+  :host-context(.dark-mode-on) input:not([type='checkbox']) {
+    background: #000;
+    border-color: color-mix(in srgb, var(--app-surface-border) 70%, white);
+  }
+
+  &__etiqueta-telefono {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  &__whatsapp {
+    color: var(--semantic-success);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    ng-icon {
+      font-size: 0.95rem;
+    }
+  }
+
+  &__ayuda,
+  &__interruptor small {
+    color: var(--app-text-soft);
+  }
+
+  &__interruptor {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.8rem;
+    color: var(--app-text);
+    background: color-mix(in srgb, var(--app-accent) 8%, var(--app-surface));
+    border: 1px solid color-mix(in srgb, var(--app-accent) 22%, var(--app-surface-border));
+    border-radius: 0.65rem;
+    cursor: pointer;
+
+    input {
+      flex: 0 0 2.7rem;
+      width: 2.7rem;
+      height: 1.45rem;
+      margin: 0;
+      appearance: none;
+      background: var(--app-surface);
+      border: 1px solid var(--app-surface-border);
+      border-radius: 99px;
+      cursor: pointer;
+
+      &::after {
+        display: block;
+        width: 1.05rem;
+        height: 1.05rem;
+        margin: 0.14rem;
+        content: '';
+        background: var(--app-text-soft);
+        border-radius: 50%;
+        transition:
+          transform 0.2s ease,
+          background 0.2s ease;
+      }
+
+      &:checked {
+        background: var(--app-accent);
+        border-color: var(--app-accent);
+
+        &::after {
+          background: #fff;
+          transform: translateX(1.22rem);
+        }
+      }
+
+      &:focus-visible {
+        outline: 3px solid color-mix(in srgb, var(--app-accent) 35%, white);
+        outline-offset: 2px;
+      }
+
+      &:disabled {
+        cursor: not-allowed;
+      }
+    }
+
+    > span {
+      display: grid;
+      gap: 0.2rem;
+    }
+  }
+
+  &__plazos {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  &__acciones {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 42rem) {
+  .formulario-configuracion-empresa {
+    &__campos,
+    &__plazos {
+      grid-template-columns: 1fr;
+    }
+
+    &__acciones app-boton {
+      width: 100%;
+    }
+  }
+}

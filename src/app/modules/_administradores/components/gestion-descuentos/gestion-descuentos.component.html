@@ -1,0 +1,281 @@
+<section class="gestion-descuentos">
+  @if (error()) {
+    <p class="gestion-descuentos__error" role="alert">{{ error() }}</p>
+  }
+
+  <app-card
+    titulo="Catálogo"
+    descripcion="Creá definiciones reutilizables de porcentaje o monto fijo."
+  >
+    <div class="gestion-descuentos__barra">
+      <label
+        ><span>Buscar descuento</span
+        ><input
+          type="search"
+          placeholder="Buscar por título"
+          [value]="busquedaCatalogo()"
+          (input)="actualizarBusquedaCatalogo($event)"
+          (keydown.enter)="buscarCatalogo()"
+      /></label>
+      <app-boton tipo="button" [cargando]="cargandoCatalogo()" (accion)="buscarCatalogo()"
+        >Buscar</app-boton
+      >
+    </div>
+    <app-tabla-responsive
+      [columnas]="columnasCatalogo"
+      [filas]="filasCatalogo()"
+      idFila="descuentoUuid"
+      [acciones]="accionesCatalogo"
+      [cargando]="cargandoCatalogo()"
+      [tbody_rows]="5"
+      [tr_input]="true"
+      [tr_input_conmutador]="false"
+      [tr_input_boton_agregar]="true"
+      tr_input_boton_agregar_modo="emitir"
+      tr_input_boton_agregar_texto="Nuevo descuento"
+      mensajeVacio="No hay descuentos en el catálogo."
+      (accionFila)="manejarCatalogo($event)"
+      (trInputNuevo)="abrirAltaCatalogo()"
+    />
+    <app-paginacion
+      [paginaActual]="paginaCatalogo()"
+      [totalPaginas]="totalPaginasCatalogo()"
+      [deshabilitado]="cargandoCatalogo()"
+      (paginaCambiada)="cambiarPaginaCatalogo($event)"
+    />
+  </app-card>
+
+  <app-card
+    titulo="Asignaciones por socio"
+    descripcion="Consultá descuentos sociales y de actividades, finalizalos o corregí una carga errónea."
+  >
+    <div class="gestion-descuentos__barra">
+      <label
+        ><span>Buscar socio</span
+        ><input
+          type="search"
+          placeholder="Nombre, apellido, DNI o número de socio"
+          [value]="busquedaMembers()"
+          (input)="actualizarBusquedaMembers($event)"
+          (keydown.enter)="buscarMembers()"
+      /></label>
+      <app-boton tipo="button" [cargando]="cargandoMembers()" (accion)="buscarMembers()"
+        >Buscar</app-boton
+      >
+    </div>
+    <app-tabla-responsive
+      [columnas]="columnasMembers"
+      [filas]="filasMembers()"
+      idFila="memberUuid"
+      [acciones]="accionesMembers"
+      [cargando]="cargandoMembers()"
+      [tbody_rows]="6"
+      mensajeVacio="No hay socios para mostrar."
+      (accionFila)="manejarMember($event)"
+    />
+    <app-paginacion
+      [paginaActual]="paginaMembers()"
+      [totalPaginas]="totalPaginasMembers()"
+      [deshabilitado]="cargandoMembers()"
+      (paginaCambiada)="cambiarPaginaMembers($event)"
+    />
+  </app-card>
+
+  <!--
+  <app-card
+    titulo="Asignar a una actividad"
+    descripcion="Elegí una actividad y luego una inscripción vigente para aplicar el descuento."
+  >
+    <div class="gestion-descuentos__barra">
+      <label
+        ><span>Buscar actividad</span
+        ><input
+          type="search"
+          placeholder="Nombre o ubicación"
+          [value]="busquedaActividades()"
+          (input)="actualizarBusquedaActividades($event)"
+          (keydown.enter)="buscarActividades()"
+      /></label>
+      <app-boton tipo="button" [cargando]="cargandoActividades()" (accion)="buscarActividades()"
+        >Buscar</app-boton
+      >
+    </div>
+    <app-tabla-responsive
+      [columnas]="columnasActividades"
+      [filas]="actividades()"
+      idFila="actividadUuid"
+      [acciones]="accionesActividades"
+      [cargando]="cargandoActividades()"
+      [tbody_rows]="5"
+      mensajeVacio="No hay actividades para mostrar."
+      (accionFila)="manejarActividad($event)"
+    />
+    <app-paginacion
+      [paginaActual]="paginaActividades()"
+      [totalPaginas]="totalPaginasActividades()"
+      [deshabilitado]="cargandoActividades()"
+      (paginaCambiada)="cambiarPaginaActividades($event)"
+    />
+  </app-card>
+  -->
+</section>
+
+<app-popup
+  [abierto]="formularioCatalogoAbierto()"
+  [titulo]="descuentoFormulario() ? 'Editar descuento' : 'Nuevo descuento'"
+  [mostrarEncabezado]="false"
+  ancho="mediano"
+  [cancelarDeshabilitado]="guardandoCatalogo()"
+  (cancelar)="cerrarFormularioCatalogo()"
+>
+  <app-titulo-hero
+    icono="descuentos"
+    [titulo]="descuentoFormulario() ? 'Editar descuento' : 'Nuevo descuento'"
+    subtitulo="Definí el nombre y el valor que se aplicará a futuras cuotas."
+  />
+  <app-formulario-descuento
+    [descuento]="descuentoFormulario()"
+    (enviado)="guardarCatalogo($event)"
+  />
+  <app-boton
+    popupAcciones
+    tipo="submit"
+    form="formulario-descuento"
+    [cargando]="guardandoCatalogo()"
+    >Guardar</app-boton
+  >
+</app-popup>
+
+<app-popup
+  [abierto]="memberSeleccionado() !== null"
+  [titulo]="memberSeleccionado()?.nombre ?? 'Asignaciones'"
+  [mostrarEncabezado]="false"
+  ancho="extraGrande"
+  (cancelar)="cerrarDetalleMember()"
+>
+  @if (memberSeleccionado(); as member) {
+    <app-titulo-hero
+      icono="descuentos"
+      [titulo]="member.nombre"
+      subtitulo="Historial de descuentos de cuota social y actividades."
+    />
+    <div class="gestion-descuentos__acciones-detalle">
+      <app-boton tipo="button" (accion)="prepararAsignacionSocial(member)"
+        >Asignar a cuota social</app-boton
+      >
+    </div>
+    <app-tabla-responsive
+      [columnas]="columnasAsignaciones"
+      [filas]="filasAsignacionesSeleccionadas()"
+      idFila="asignacionUuid"
+      [acciones]="accionesAsignaciones"
+      [tbody_rows]="6"
+      mensajeVacio="Este socio no tiene descuentos asignados."
+      (accionFila)="manejarAsignacion($event)"
+    />
+  }
+</app-popup>
+
+<app-popup
+  [abierto]="actividadSeleccionada() !== null"
+  [titulo]="actividadSeleccionada()?.nombre ?? 'Inscriptos'"
+  [mostrarEncabezado]="false"
+  ancho="grande"
+  (cancelar)="cerrarInscripciones()"
+>
+  @if (actividadSeleccionada(); as actividad) {
+    <app-titulo-hero
+      icono="actividades"
+      [titulo]="actividad.nombre"
+      subtitulo="Seleccioná una inscripción para asignarle un descuento recurrente."
+    />
+    <div class="gestion-descuentos__barra">
+      <label
+        ><span>Buscar inscripto</span
+        ><input
+          type="search"
+          [value]="busquedaInscripciones()"
+          (input)="actualizarBusquedaInscripciones($event)"
+          (keydown.enter)="buscarInscripciones()" /></label
+      ><app-boton
+        tipo="button"
+        [cargando]="cargandoInscripciones()"
+        (accion)="buscarInscripciones()"
+        >Buscar</app-boton
+      >
+    </div>
+    <app-tabla-responsive
+      [columnas]="columnasInscripciones"
+      [filas]="inscripciones()"
+      idFila="inscripcionUuid"
+      [acciones]="accionesInscripciones"
+      [cargando]="cargandoInscripciones()"
+      [tbody_rows]="6"
+      mensajeVacio="No hay inscriptos para mostrar."
+      (accionFila)="manejarInscripcion($event)"
+    />
+    <app-paginacion
+      [cantidadBotonesVisibles]="3"
+      [paginaActual]="paginaInscripciones()"
+      [totalPaginas]="totalPaginasInscripciones()"
+      [deshabilitado]="cargandoInscripciones()"
+      (paginaCambiada)="cambiarPaginaInscripciones($event)"
+    />
+  }
+</app-popup>
+
+<app-popup
+  [abierto]="contextoAsignacion() !== null"
+  titulo="Asignar descuento"
+  [mostrarEncabezado]="false"
+  ancho="mediano"
+  [cancelarDeshabilitado]="procesando()"
+  (cancelar)="cerrarAsignacion()"
+>
+  @if (contextoAsignacion(); as contexto) {
+    <app-titulo-hero
+      icono="descuentos"
+      titulo="Asignar descuento"
+      [subtitulo]="contexto.nombreDestino"
+    />
+    <app-formulario-asignacion-descuento
+      [descuentos]="catalogoCompleto()"
+      (enviado)="guardarAsignacion($event)"
+    />
+  }
+  <app-boton
+    popupAcciones
+    tipo="submit"
+    form="formulario-asignacion-descuento"
+    [cargando]="procesando()"
+    >Asignar</app-boton
+  >
+</app-popup>
+
+<app-popup
+  [abierto]="contextoFinalizacion() !== null"
+  titulo="Finalizar descuento"
+  [mostrarEncabezado]="false"
+  ancho="pequeno"
+  [cancelarDeshabilitado]="procesando()"
+  (cancelar)="cerrarFinalizacion()"
+>
+  @if (contextoFinalizacion(); as contexto) {
+    <app-titulo-hero
+      icono="descuentos"
+      titulo="Finalizar descuento"
+      [subtitulo]="contexto.asignacion.titulo + ' · ' + contexto.asignacion.destino"
+    />
+    <app-formulario-finalizacion-descuento
+      [fechaDesde]="contexto.asignacion.fechaDesde"
+      (enviado)="finalizarAsignacion($event)"
+    />
+  }
+  <app-boton
+    popupAcciones
+    tipo="submit"
+    form="formulario-finalizacion-descuento"
+    [cargando]="procesando()"
+    >Finalizar</app-boton
+  >
+</app-popup>

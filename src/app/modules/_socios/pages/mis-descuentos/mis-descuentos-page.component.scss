@@ -1,0 +1,52 @@
+:host { display: block; }
+
+.mis-descuentos {
+  display: grid;
+  gap: 1.25rem;
+
+  &__persona {
+    display: grid;
+    gap: .6rem;
+
+    h3 { margin: 0; font-size: 1.05rem; }
+    ul { display: grid; gap: .6rem; margin: 0; padding: 0; list-style: none; }
+  }
+
+  &__item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem 1rem;
+    padding: .9rem 1rem;
+    border: 1px solid var(--app-surface-border);
+    border-radius: .85rem;
+    background: var(--app-surface);
+
+    div { display: grid; gap: .2rem; }
+    span { color: var(--app-text-soft); font-size: .9rem; }
+  }
+
+  &__valor {
+    padding: .3rem .8rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--semantic-success, #15803d) 14%, transparent);
+    color: var(--semantic-success, #15803d) !important;
+    font-size: 1rem !important;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  &__vacio { margin: 0; color: var(--app-text-soft); }
+  &__error { margin: 0; color: var(--semantic-danger); }
+
+  &__link {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--app-accent);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+}

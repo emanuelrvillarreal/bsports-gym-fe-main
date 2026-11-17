@@ -1,0 +1,42 @@
+<form
+  id="formulario-asignacion-descuento"
+  class="formulario-asignacion-descuento"
+  appValidacionFormulario
+  (submit)="$event.preventDefault(); enviar()"
+  novalidate
+>
+  <small
+    class="formulario-asignacion-descuento__error"
+    [class.formulario-asignacion-descuento__error--visible]="errorVisible()"
+    role="alert"
+    >{{ mensajeError() }}</small
+  >
+
+  <app-select
+    [attr.data-app-invalido]="!descuentoUuid() ? 'true' : null"
+    etiqueta="Descuento *"
+    placeholder="Seleccionar descuento"
+    [opciones]="opcionesDescuentos()"
+    [value]="descuentoUuid()"
+    (valueChange)="cambiarDescuento($event)"
+  />
+
+  <app-input-fecha
+    id="asignacion-descuento-desde"
+    etiqueta="Vigente desde *"
+    modo="fecha"
+    [requerido]="true"
+    [minimo]="fechaMinima()"
+    [valorInicial]="fechaDesde()"
+    (valorCambiado)="fechaDesde.set($event)"
+  />
+
+  <app-input-fecha
+    id="asignacion-descuento-hasta"
+    etiqueta="Vigente hasta (opcional)"
+    modo="fecha"
+    [minimo]="fechaDesde() || fechaMinima()"
+    [valorInicial]="fechaHasta()"
+    (valorCambiado)="fechaHasta.set($event)"
+  />
+</form>

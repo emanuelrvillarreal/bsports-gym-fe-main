@@ -1,0 +1,42 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background: var(--app-bg);
+  color: var(--app-text);
+}
+
+.club-bloqueado {
+  display: grid;
+  gap: 1.5rem;
+  width: min(100% - 2rem, 52rem);
+  margin-inline: auto;
+  padding: clamp(1rem, 4vw, 3rem) 0;
+
+  &__carga {
+    display: grid;
+    place-items: center;
+    min-height: 10rem;
+
+    app-load-spinner-blue {
+      width: min(100%, 12rem);
+    }
+  }
+
+  &__error {
+    color: var(--app-danger);
+  }
+
+  &__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+}
+
+@media (max-width: 36rem) {
+  .club-bloqueado__acciones {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

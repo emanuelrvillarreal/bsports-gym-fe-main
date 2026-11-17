@@ -1,0 +1,81 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+}
+
+.resultado-factura {
+  --resultado-color: var(--app-warning);
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  padding: 1rem;
+  color: var(--app-text);
+  background: radial-gradient(circle at 50% 25%, color-mix(in srgb, var(--resultado-color) 14%, transparent), transparent 35rem), var(--app-bg);
+
+  &--exito {
+    --resultado-color: var(--app-success);
+  }
+
+  &__panel {
+    display: grid;
+    width: min(100%, 34rem);
+    justify-items: center;
+    gap: 1rem;
+    padding: clamp(1.5rem, 5vw, 3rem);
+    text-align: center;
+    background: var(--app-surface);
+    border: 1px solid color-mix(in srgb, var(--resultado-color) 45%, var(--app-surface-border));
+    border-radius: 1.4rem;
+    box-shadow: 0 1.5rem 4rem color-mix(in srgb, var(--app-bg) 70%, transparent);
+  }
+
+  &__eyebrow {
+    margin: 0;
+    color: var(--resultado-color);
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: normal;
+    text-transform: none;
+  }
+
+  h1,
+  &__descripcion,
+  &__estado-club,
+  &__error {
+    margin: 0;
+  }
+
+  h1 {
+    font-size: clamp(1.7rem, 6vw, 2.4rem);
+  }
+
+  &__descripcion,
+  &__estado-club {
+    color: var(--app-text-soft);
+    line-height: 1.55;
+  }
+
+  &__carga {
+    display: flex;
+    min-height: 5rem;
+    align-items: center;
+    gap: 0.8rem;
+    color: var(--app-text-soft);
+
+    app-load-spinner-blue {
+      width: 2.8rem;
+    }
+  }
+
+  &__error {
+    padding: 0.8rem;
+    color: var(--app-danger);
+    background: var(--app-danger-soft);
+    border: 1px solid var(--app-danger-border);
+    border-radius: 0.8rem;
+  }
+
+  app-boton {
+    min-width: min(100%, 16rem);
+  }
+}

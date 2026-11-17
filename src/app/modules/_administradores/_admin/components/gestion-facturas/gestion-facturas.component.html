@@ -1,0 +1,87 @@
+<section class="gestion-facturas">
+  <app-card>
+    <div class="gestion-facturas__cabecera">
+      <div>
+        <h2>Facturas</h2>
+        <p>{{ totalElementos() }} factura{{ totalElementos() === 1 ? '' : 's' }} registrada{{ totalElementos() === 1 ? '' : 's' }}</p>
+      </div>
+      <app-select
+        etiqueta="Estado"
+        [opciones]="opcionesEstado"
+        [value]="estado()"
+        (valueChange)="cambiarEstado($event)"
+      />
+    </div>
+
+    @if (error()) {
+      <div class="gestion-facturas__error" role="alert">
+        <span>{{ error() }}</span>
+        <app-boton apariencia="texto" (accion)="cargar()">Reintentar</app-boton>
+      </div>
+    }
+
+    <div class="gestion-facturas__tabla-scroll">
+      <app-tabla-responsive
+        [columnas]="columnas"
+        [filas]="facturas()"
+        idFila="facturaUuid"
+        [acciones]="acciones"
+        [cargando]="cargando()"
+        [tbody_rows]="7"
+        [tr_input_conmutador]="false"
+        mensajeVacio="No hay facturas para los filtros seleccionados."
+        (accionFila)="manejarAccion($event)"
+      />
+    </div>
+
+    <app-paginacion
+      [paginaActual]="pagina()"
+      [totalPaginas]="totalPaginas()"
+      [deshabilitado]="cargando()"
+      (paginaCambiada)="cambiarPagina($event)"
+    />
+  </app-card>
+</section>
+
+<app-popup
+  [abierto]="!!facturaDetalle()"
+  titulo="Detalle de factura"
+  [mostrarEncabezado]="false"
+  ancho="grande"
+  [mostrarCancelar]="false"
+>
+  @if (facturaDetalle(); as factura) {
+    <app-titulo-hero
+      class="factura-detalle__titulo"
+      icono="heroBanknotes"
+      titulo="Detalle de factura"
+    />
+    <app-factura-resumen [factura]="factura" />
+  }
+  @if (facturaDetalle(); as factura) {
+    @if (factura.estado === 'PENDIENTE' || factura.estado === 'VENCIDA') {
+      <div popupAcciones class="factura-detalle__pagar">
+        <app-boton
+          colorPaleta="primario"
+          ariaLabel="Pagar factura"
+          [cargando]="accionDetalleCargando() === 'pagar'"
+          [deshabilitado]="!!accionDetalleCargando()"
+          (accion)="pagarDesdeDetalle(factura)"
+        >Pagar</app-boton>
+      </div>
+    }
+  }
+  @if (facturaDetalle()) {
+    <div popupAcciones class="factura-detalle__cerrar">
+      <app-boton
+        colorPaleta="primario"
+        ariaLabel="Cerrar detalle de factura"
+        [cargando]="accionDetalleCargando() === 'cerrar'"
+        [deshabilitado]="!!accionDetalleCargando()"
+        (accion)="cerrarDetalle()"
+      >Cerrar</app-boton>
+    </div>
+  }
+</app-popup>
+
+<app-checkout-factura [factura]="facturaPago()" (cerrar)="cerrarCheckout()" />

@@ -1,0 +1,94 @@
+<section class="gestion-crm-empresas" aria-label="Suscripciones CRM por empresa">
+  <app-card
+    titulo="Gimnasios y suscripciones"
+    descripcion="Consultá el plan vigente y administrá la suscripción CRM de cada gimnasio."
+  >
+    <form class="gestion-crm-empresas__busqueda" (submit)="$event.preventDefault(); buscar()">
+      <label for="busqueda-crm">Buscar gimnasio</label>
+      <input
+        id="busqueda-crm"
+        name="busqueda"
+        type="search"
+        [ngModel]="busqueda()"
+        (ngModelChange)="busqueda.set($event)"
+        placeholder="Nombre, razón social o CUIT"
+      />
+      <app-boton tipo="submit" [deshabilitado]="cargando()">Buscar</app-boton>
+    </form>
+
+    @if (errorCatalogos()) {
+      <div class="gestion-crm-empresas__aviso" role="alert">
+        <p>{{ errorCatalogos() }}</p>
+        <app-boton apariencia="texto" [cargando]="cargandoCatalogos()" (accion)="cargarCatalogos()">
+          Reintentar catálogos
+        </app-boton>
+      </div>
+    }
+
+    @if (errorListado()) {
+      <p class="gestion-crm-empresas__error" role="alert">{{ errorListado() }}</p>
+    }
+
+    <div class="gestion-crm-empresas__tabla-scroll" aria-live="polite">
+      <app-tabla-responsive
+        [columnas]="columnas"
+        [filas]="filas()"
+        idFila="uuid"
+        [acciones]="acciones"
+        [tr_input_conmutador]="false"
+        [cargando]="cargando()"
+        [tbody_rows]="8"
+        mensajeVacio="No hay gimnasios para mostrar."
+        (accionFila)="manejarAccionFila($event)"
+      />
+    </div>
+
+    <app-paginacion
+      [paginaActual]="pagina()"
+      [totalPaginas]="totalPaginas()"
+      [deshabilitado]="cargando()"
+      (paginaCambiada)="cambiarPagina($event)"
+    />
+  </app-card>
+
+  <app-popup
+    [abierto]="popupAbierto()"
+    [titulo]="tituloPopup()"
+    [descripcion]="nombreEmpresaSeleccionada()"
+    [mostrarEncabezado]="false"
+    ancho="grande"
+    [cancelarDeshabilitado]="procesando()"
+    (cancelar)="cerrarFormulario()"
+  >
+    <app-titulo-hero
+      class="gestion-crm-empresas__popup-titulo"
+      icono="heroBuildingOffice2"
+      [titulo]="tituloPopup()"
+      [subtitulo]="nombreEmpresaSeleccionada()"
+    />
+    <app-formulario-suscripcion-crm
+      [modo]="modoFormulario()"
+      [planes]="planes()"
+      [codigoPlanActual]="empresaSeleccionada()?.suscripcionCrm?.codigoPlan ?? null"
+      [claveReinicio]="empresaSeleccionada()?.uuid ?? null"
+      [procesando]="procesando()"
+      [mostrarAcciones]="false"
+      (enviado)="guardarSeleccion($event)"
+    />
+
+    @if (errorOperacion()) {
+      <p class="gestion-crm-empresas__error" role="alert">{{ errorOperacion() }}</p>
+    }
+
+    <app-boton
+      popupAcciones
+      tipo="submit"
+      form="formulario-suscripcion-crm"
+      [cargando]="procesando()"
+      [deshabilitado]="procesando()"
+      ariaLabelCarga="Guardando suscripción"
+    >
+      {{ modoFormulario() === 'suscribir' ? 'Suscribir gimnasio' : 'Confirmar cambio de plan' }}
+    </app-boton>
+  </app-popup>
+</section>

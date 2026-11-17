@@ -1,0 +1,31 @@
+:host {
+  display: block;
+}
+
+.credencial-profesor {
+  &__carnet {
+    display: grid;
+    min-width: 0;
+    padding-block: 0.5rem 1.5rem;
+    place-items: center;
+  }
+
+  &__error,
+  &__vacia {
+    display: grid;
+    min-height: 16rem;
+    padding: 2rem;
+    align-content: center;
+    justify-items: center;
+    gap: 1rem;
+    color: var(--app-text-soft);
+    text-align: center;
+    border: 1px solid var(--app-surface-border);
+    border-radius: 0.75rem;
+    background: var(--app-surface);
+
+    p {
+      margin: 0;
+    }
+  }
+}

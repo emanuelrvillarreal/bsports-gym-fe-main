@@ -1,0 +1,98 @@
+<form
+  id="formulario-descuento"
+  class="formulario-descuento fs-form"
+  appValidacionFormulario
+  (submit)="$event.preventDefault(); enviar()"
+  novalidate
+>
+  <small
+    class="formulario-descuento__error"
+    [class.formulario-descuento__error--visible]="errorVisible()"
+    role="alert"
+    >{{ mensajeError() }}</small
+  >
+
+  <!-- 1. Nombre -->
+  <section class="fs-seccion" aria-labelledby="fd-titulo-datos">
+    <header class="fs-seccion__cabecera">
+      <span class="fs-seccion__numero" aria-hidden="true">1</span>
+      <div>
+        <h3 id="fd-titulo-datos">¿Cómo se llama el descuento?</h3>
+        <p>Un nombre claro para reconocerlo al aplicarlo a un socio o a una cuota.</p>
+      </div>
+    </header>
+    <div class="fs-seccion__cuerpo">
+      <label for="descuento-titulo">
+        <span>Título *</span>
+        <input
+          id="descuento-titulo"
+          type="text"
+          maxlength="100"
+          required
+          placeholder="Ej: Beca deportiva, Descuento familiar"
+          [value]="titulo()"
+          (input)="actualizarTitulo($event)"
+        />
+      </label>
+    </div>
+  </section>
+
+  <!-- 2. Cálculo -->
+  <section class="fs-seccion" aria-labelledby="fd-titulo-valor">
+    <header class="fs-seccion__cabecera">
+      <span class="fs-seccion__numero" aria-hidden="true">2</span>
+      <div>
+        <h3 id="fd-titulo-valor">¿Cuánto descuenta?</h3>
+        <p>Podés descontar un porcentaje del importe o un monto fijo en pesos.</p>
+      </div>
+    </header>
+    <div class="fs-seccion__cuerpo fs-grid">
+      <app-select
+        data-campo="tipo-valor"
+        [attr.data-app-invalido]="!tipoValor() ? 'true' : null"
+        etiqueta="Tipo de descuento *"
+        placeholder="Seleccionar tipo"
+        [opciones]="opcionesTipo"
+        [value]="tipoValor()"
+        (valueChange)="actualizarTipo($event)"
+      />
+
+      @if (esPorcentaje()) {
+        <label for="descuento-porcentaje">
+          <span>Porcentaje *</span>
+          <span class="formulario-descuento__entrada-con-prefijo">
+            <input
+              id="descuento-porcentaje"
+              type="number"
+              inputmode="decimal"
+              min="0"
+              max="100"
+              step="0.01"
+              required
+              placeholder="Ej: 20"
+              [value]="porcentaje()"
+              (input)="actualizarPorcentaje($event)"
+            />
+            <span aria-hidden="true">%</span>
+          </span>
+        </label>
+      }
+
+      @if (esMontoFijo()) {
+        <label for="descuento-monto-fijo">
+          <span>Monto fijo *</span>
+          <input
+            id="descuento-monto-fijo"
+            type="text"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            required
+            placeholder="$ 0"
+            [value]="formatearMontoFijo()"
+            (input)="actualizarMontoFijo($event)"
+          />
+        </label>
+      }
+    </div>
+  </section>
+</form>

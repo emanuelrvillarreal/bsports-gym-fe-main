@@ -1,0 +1,143 @@
+:host {
+  --popup-ancho: 42rem;
+  --popup-acciones-position: sticky;
+  display: contents;
+}
+
+.popup {
+  width: min(var(--popup-ancho), calc(100vw - 2rem));
+  max-width: none;
+  max-height: calc(100dvh - 2rem);
+  margin: auto;
+  padding: 0;
+  color: var(--app-text);
+  background: transparent;
+  border: 0;
+  overflow: visible;
+
+  &::backdrop {
+    background: color-mix(in srgb, var(--app-bg) 78%, transparent);
+    backdrop-filter: blur(8px);
+  }
+
+  &--pequeno {
+    --popup-ancho: 30rem;
+  }
+
+  &--grande {
+    --popup-ancho: 52rem;
+  }
+
+  &--extra-grande {
+    --popup-ancho: 66rem;
+  }
+
+  &--alto-completo {
+    height: calc(100dvh - 2rem);
+    box-sizing: border-box;
+
+    .popup__panel {
+      height: 100%;
+      max-height: 100%;
+    }
+  }
+
+  &__panel {
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+    max-height: calc(100dvh - 2rem);
+    color: var(--app-text);
+    background: var(--app-surface);
+    border: 1px solid var(--app-surface-border);
+    border-radius: 1rem;
+    box-shadow: 0 1.5rem 4rem rgb(15 23 42 / 18%);
+    overflow: hidden;
+  }
+
+  &__encabezado {
+    display: grid;
+    gap: 0.35rem;
+    padding: 1.25rem 1.5rem;
+    background: color-mix(in srgb, var(--app-surface-strong) 82%, var(--app-surface));
+    border-bottom: 1px solid var(--app-surface-border);
+
+    h2,
+    p {
+      margin: 0;
+    }
+
+    h2 {
+      font-size: 1.1rem;
+    }
+
+    p {
+      color: var(--app-text-soft);
+      font-size: 0.85rem;
+      line-height: 1.45;
+    }
+  }
+
+  &__contenido {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  &__cuerpo {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 1.5rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  &__acciones {
+    display: flex;
+    position: relative;
+    z-index: 2;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem 1.5rem;
+    margin: 0;
+    background: var(--app-surface);
+    border-top: 1px solid var(--app-surface-border);
+    isolation: isolate;
+  }
+}
+
+@media (max-width: 36rem) {
+  .popup {
+    width: calc(100vw - 1rem);
+    max-height: calc(100dvh - 1rem);
+
+    &--alto-completo {
+      height: calc(100dvh - 1rem);
+    }
+
+    &__panel {
+      max-height: calc(100dvh - 1rem);
+      border-radius: 0.75rem;
+    }
+
+    &__encabezado,
+    &__cuerpo,
+    &__acciones {
+      padding-inline: 1rem;
+    }
+
+    &__acciones {
+      align-items: stretch;
+      flex-direction: column-reverse;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .popup::backdrop {
+    backdrop-filter: none;
+  }
+}

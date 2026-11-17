@@ -1,0 +1,139 @@
+<section class="evaluaciones" aria-label="Evaluaciones físicas">
+  @if (cargandoAcceso()) {
+    <p class="evaluaciones__vacio">Cargando…</p>
+  } @else if (acceso(); as a) {
+    @if (a.esAdmin) {
+      <div class="evaluaciones__config" [class.evaluaciones__config--apagado]="!a.habilitado">
+        <div>
+          <strong>{{ a.habilitado ? 'Módulo activo' : 'El módulo de evaluaciones físicas está apagado' }}</strong>
+          <p>
+            {{ a.habilitado
+              ? 'Los socios ven sus evaluaciones en el portal. Recepción no tiene acceso a estos datos.'
+              : 'Activalo para registrar peso, IMC, composición corporal y medidas de los socios, con su evolución.' }}
+          </p>
+        </div>
+        <div class="evaluaciones__switches">
+          <label class="evaluaciones__check">
+            <input type="checkbox" [checked]="a.habilitado" [disabled]="guardandoConfig()" (change)="cambiarConfig('habilitado', $any($event.target).checked)" />
+            Activar evaluaciones físicas
+          </label>
+          @if (a.habilitado) {
+            <label class="evaluaciones__check">
+              <input type="checkbox" [checked]="!!a.config?.profesoresPuedenRegistrar" [disabled]="guardandoConfig()" (change)="cambiarConfig('profesoresPuedenRegistrar', $any($event.target).checked)" />
+              Los profesores pueden registrar evaluaciones de sus alumnos
+            </label>
+          }
+        </div>
+      </div>
+    } @else if (!a.habilitado || !a.puedeRegistrar) {
+      <p class="evaluaciones__vacio">
+        {{ !a.habilitado ? 'El gimnasio no tiene activadas las evaluaciones físicas.' : 'El gimnasio no habilitó a los profesores para registrar evaluaciones.' }}
+        Consultá con un administrador.
+      </p>
+    }
+
+    @if (a.habilitado && a.puedeRegistrar) {
+      <p class="evaluaciones__aviso" role="note">{{ aviso }}</p>
+      <label class="evaluaciones__campo evaluaciones__buscar">
+        <span>Buscar socio</span>
+        <input type="search" placeholder="Nombre, apellido o DNI" [value]="busqueda()" (input)="buscar($any($event.target).value)" />
+      </label>
+      <app-tabla-responsive
+        [columnas]="columnas"
+        [filas]="filas()"
+        idFila="memberUuid"
+        [acciones]="acciones"
+        [cargando]="cargando()"
+        [mensajeVacio]="busqueda() ? 'No hay socios con esa búsqueda.' : 'No hay socios para evaluar.'"
+        (accionFila)="manejarAccion($event)"
+        (verFila)="abrirHistorial($event.memberUuid)"
+      />
+    }
+  }
+</section>
+
+<app-popup
+  [abierto]="!!historial() || cargandoHistorial()"
+  [titulo]="historial() ? (historial()!.nombre + ' ' + historial()!.apellido) : 'Evaluaciones'"
+  [descripcion]="historial()?.dni ? 'DNI ' + historial()!.dni : ''"
+  ancho="grande"
+  textoCancelar="Cerrar"
+  (cancelar)="cerrarHistorial()"
+>
+  @if (cargandoHistorial()) {
+    <p class="evaluaciones__vacio">Cargando evaluaciones…</p>
+  } @else if (historial(); as h) {
+    <div class="evaluaciones__historial">
+      @if (h.puedeRegistrar) {
+        <div><app-boton (accion)="nuevaEvaluacion()">Nueva evaluación</app-boton></div>
+      }
+      <app-historial-evaluaciones [evaluaciones]="h.evaluaciones" (editar)="corregir($event)" (eliminar)="eliminar($event)" />
+    </div>
+  }
+</app-popup>
+
+<app-popup
+  [abierto]="formularioAbierto()"
+  [titulo]="editandoUuid() ? 'Corregir evaluación' : 'Nueva evaluación'"
+  [descripcion]="historial() ? historial()!.nombre + ' ' + historial()!.apellido : ''"
+  ancho="grande"
+  [cancelarDeshabilitado]="guardando()"
+  (cancelar)="formularioAbierto.set(false)"
+>
+  @let b = borrador();
+  <form class="evaluaciones__formulario" (submit)="$event.preventDefault(); guardar()">
+    <div class="evaluaciones__grilla">
+      <app-input-fecha etiqueta="Fecha *" [valorInicial]="b.fecha" [maximo]="hoy" (valorCambiado)="cambiar('fecha', $event)" />
+      <label class="evaluaciones__campo">
+        <span>Profesional responsable</span>
+        <input maxlength="120" placeholder="Si no sos vos" [value]="b.profesional" (input)="cambiar('profesional', $any($event.target).value)" />
+      </label>
+    </div>
+
+    <fieldset class="evaluaciones__bloque">
+      <legend>Composición corporal</legend>
+      <div class="evaluaciones__grilla">
+        @for (c of campos; track c.clave) {
+          <label class="evaluaciones__campo">
+            <span>{{ c.etiqueta }}</span>
+            <input type="number" inputmode="decimal" step="0.1" [min]="c.min" [max]="c.max" [value]="b.numeros[c.clave]" (input)="cambiarNumero(c.clave, $any($event.target).value)" />
+          </label>
+        }
+        <div class="evaluaciones__imc" aria-live="polite">
+          <span>IMC (automático)</span>
+          <strong>{{ imcCalculado() !== null ? medida(imcCalculado()) : 'Cargá peso y altura' }}</strong>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="evaluaciones__bloque">
+      <legend>Medidas (cm)</legend>
+      <div class="evaluaciones__grilla">
+        @for (c of medidas; track c.clave) {
+          <label class="evaluaciones__campo">
+            <span>{{ c.etiqueta }}</span>
+            <input type="number" inputmode="decimal" step="0.1" [min]="c.min" [max]="c.max" [value]="b.numeros[c.clave]" (input)="cambiarNumero(c.clave, $any($event.target).value)" />
+          </label>
+        }
+      </div>
+    </fieldset>
+
+    <label class="evaluaciones__campo">
+      <span>Observaciones</span>
+      <textarea rows="2" [value]="b.observaciones" (input)="cambiar('observaciones', $any($event.target).value)"></textarea>
+    </label>
+    <label class="evaluaciones__campo">
+      <span>Recomendaciones</span>
+      <textarea rows="2" [value]="b.recomendaciones" (input)="cambiar('recomendaciones', $any($event.target).value)"></textarea>
+    </label>
+    <div class="evaluaciones__grilla">
+      <app-input-fecha etiqueta="Próxima evaluación" [valorInicial]="b.proximaEvaluacion" [minimo]="b.fecha" (valorCambiado)="cambiar('proximaEvaluacion', $event)" />
+    </div>
+
+    <p class="evaluaciones__aviso" role="note">{{ aviso }}</p>
+    @if (error()) { <p class="evaluaciones__error" role="alert">{{ error() }}</p> }
+    <div class="evaluaciones__pie">
+      <app-boton tipo="submit" [cargando]="guardando()">{{ editandoUuid() ? 'Guardar cambios' : 'Registrar evaluación' }}</app-boton>
+    </div>
+  </form>
+</app-popup>

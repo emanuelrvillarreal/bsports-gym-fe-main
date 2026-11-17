@@ -1,0 +1,52 @@
+<div class="configuracion-sistema">
+  <app-popup
+    [abierto]="popupAbierto()"
+    [titulo]="editando() ? 'Editar configuración' : 'Nueva configuración'"
+    descripcion="Las claves globales son visibles fuera del contexto privado."
+    ancho="mediano"
+    [cancelarDeshabilitado]="guardando()"
+    (cancelar)="cerrarFormulario()"
+  >
+    @if (popupAbierto()) {
+      <app-formulario-configuracion-sistema
+        [valorInicial]="valorFormulario()"
+        (enviado)="guardar($event)"
+      />
+    }
+
+    <app-boton
+      popupAcciones
+      tipo="submit"
+      form="formulario-configuracion"
+      [cargando]="guardando()"
+      ariaLabelCarga="Guardando configuración"
+    >
+      Guardar
+    </app-boton>
+  </app-popup>
+
+  <app-card titulo="Configuraciones existentes" icono="heroKey">
+    @if (error()) {
+      <p class="configuracion-sistema__error" role="alert">{{ error() }}</p>
+    }
+    @if (cargando()) {
+      <p role="status">Cargando configuraciones…</p>
+    } @else {
+      <app-tabla-responsive
+        [columnas]="columnas"
+        [filas]="configuraciones()"
+        idFila="uid"
+        [tbody_rows]="8"
+        [acciones]="acciones"
+        [tr_input]="true"
+        [tr_input_conmutador]="false"
+        [tr_input_boton_agregar]="true"
+        tr_input_boton_agregar_modo="emitir"
+        tr_input_boton_agregar_texto="Nueva configuración"
+        mensajeVacio="No hay configuraciones para mostrar."
+        (accionFila)="manejarAccion($event)"
+        (trInputNuevo)="abrirNuevaConfiguracion()"
+      />
+    }
+  </app-card>
+</div>

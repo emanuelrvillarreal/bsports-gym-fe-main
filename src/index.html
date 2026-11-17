@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>B Sports Gym</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="B Sports Gym — panel de gestión del gimnasio.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="icon" type="image/svg+xml" href="assets/Logo BOP Solo.svg">
+  <link rel="apple-touch-icon" href="assets/Logo BOP Solo.svg">
+  <style>
+    #app-cortina-f5 {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      opacity: 1;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(6, 0, 0, 0.94), #000000);
+      animation: app-cortina-f5-fade 1s linear forwards;
+    }
+
+    html[data-ui-high-performance='true'] #app-cortina-f5 {
+      display: none;
+      animation: none;
+    }
+
+    @keyframes app-cortina-f5-fade {
+      0% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0;
+      }
+    }
+  </style>
+  <script>
+    (function () {
+      try {
+        var root = document.documentElement;
+        var tema = sessionStorage.getItem('b-spots.tema');
+        var temaAplicado = tema === 'dark-mode-off' || tema === 'dark-mode-on' ? tema : 'dark-mode-off';
+        root.classList.remove('dark-mode-on', 'dark-mode-off');
+        root.classList.add(temaAplicado);
+
+        var paletaGuardada = localStorage.getItem('b-spots.color-theme')
+          || sessionStorage.getItem('b-sports.paleta-colores');
+        if (paletaGuardada) {
+          var paleta = JSON.parse(paletaGuardada);
+          if (paleta && /^#[\da-fA-F]{6}$/.test(paleta.primario || '')) {
+            root.style.setProperty('--color-primario', paleta.primario);
+            root.style.setProperty('--brand-primary', paleta.primario);
+            root.style.setProperty('--app-accent', paleta.primario);
+            root.style.setProperty('--app-accent-soft', 'color-mix(in srgb, ' + paleta.primario + ' 22%, var(--app-bg))');
+            root.style.setProperty('--app-success', paleta.primario);
+            root.style.setProperty('--app-success-soft', 'color-mix(in srgb, ' + paleta.primario + ' 20%, var(--app-bg))');
+            root.style.setProperty('--app-success-border', 'color-mix(in srgb, ' + paleta.primario + ' 42%, var(--app-surface-border))');
+          }
+
+          if (paleta && /^#[\da-fA-F]{6}$/.test(paleta.secundario || '')) {
+            root.style.setProperty('--color-secundario', paleta.secundario);
+            root.style.setProperty('--brand-secondary', paleta.secundario);
+            root.style.setProperty('--app-warning', paleta.secundario);
+            root.style.setProperty('--app-warning-soft', 'color-mix(in srgb, ' + paleta.secundario + ' 18%, var(--app-bg))');
+            root.style.setProperty('--app-warning-border', 'color-mix(in srgb, ' + paleta.secundario + ' 44%, var(--app-surface-border))');
+          }
+
+          if (paleta && /^#[\da-fA-F]{6}$/.test(paleta.terciario || '')) {
+            root.style.setProperty('--color-terciario', paleta.terciario);
+            root.style.setProperty('--brand-tertiary', paleta.terciario);
+            root.style.setProperty('--app-info', paleta.terciario);
+            root.style.setProperty('--app-info-soft', 'color-mix(in srgb, ' + paleta.terciario + ' 18%, var(--app-bg))');
+            root.style.setProperty('--app-info-border', 'color-mix(in srgb, ' + paleta.terciario + ' 44%, var(--app-surface-border))');
+          }
+        }
+
+        var rendimientoGuardado = localStorage.getItem('b-spots.ui-performance.disabled');
+        var rendimientoAlto = false;
+        if (rendimientoGuardado) {
+          var rendimiento = JSON.parse(rendimientoGuardado);
+          rendimientoAlto = rendimiento && rendimiento.desactivado === false;
+        }
+
+        if (rendimientoAlto) {
+          root.setAttribute('data-ui-high-performance', 'true');
+        } else {
+          root.removeAttribute('data-ui-high-performance');
+        }
+
+      } catch (_) {}
+    })();
+  </script>
+</head>
+<body>
+  <!-- Cortina F5: overlay inicial para recarga dura del documento -->
+  <div id="app-cortina-f5" aria-hidden="true"></div>
+  <app-root></app-root>
+</body>
+</html>

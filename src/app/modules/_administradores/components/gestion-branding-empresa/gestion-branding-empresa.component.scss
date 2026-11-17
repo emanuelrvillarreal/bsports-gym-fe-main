@@ -1,0 +1,39 @@
+:host {
+  display: block;
+}
+
+.gestion-branding-empresa {
+  display: grid;
+  gap: 1.25rem;
+
+  &__encabezado {
+    display: grid;
+    gap: 0.35rem;
+
+    h2,
+    p {
+      margin: 0;
+    }
+
+    p {
+      color: var(--app-text-soft);
+    }
+  }
+
+  &__carga {
+    display: grid;
+    min-height: 8rem;
+    place-items: center;
+  }
+
+  &__error {
+    margin: 0 0 0.75rem;
+    color: var(--app-danger, #dc2626);
+  }
+}
+
+@media (max-width: 48rem) {
+  .gestion-branding-empresa {
+    gap: 1rem;
+  }
+}

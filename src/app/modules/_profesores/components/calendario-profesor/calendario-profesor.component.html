@@ -1,0 +1,20 @@
+<app-card titulo="Calendario" descripcion="Actividades asignadas al profesor.">
+  @if (error()) {
+    <div class="calendario-profesor__error">
+      <p role="alert">{{ error() }}</p>
+      <app-boton tipo="button" (accion)="cargar()">Reintentar</app-boton>
+    </div>
+  }
+
+  <app-calendario
+    [eventos]="eventos()"
+    [mesActivo]="mesActivo()"
+    [semanaActiva]="semanaActiva()"
+    [cargando]="cargando()"
+    [proximaActividad]="proximaActividad()"
+    [resolverEventoClase]="claseEvento"
+    leyendaVacia="No hay actividades para este mes."
+    (mesCambiado)="cambiarMes($event)"
+    (semanaCambiada)="cambiarSemana($event)"
+  />
+</app-card>

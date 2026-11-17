@@ -1,0 +1,149 @@
+:host {
+  display: block;
+}
+
+.dashboard-financiero {
+  display: grid;
+  gap: 1.25rem;
+
+  &__estado,
+  &__vacio {
+    color: var(--app-text-muted);
+  }
+
+  &__estado {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--semantic-danger);
+  }
+
+  &__estado--sin-balance {
+    --estado-primario: var(--color-primario, var(--app-accent));
+    --estado-secundario: var(--color-secundario, var(--app-accent));
+
+    position: relative;
+    isolation: isolate;
+    min-height: clamp(13rem, 24vw, 18rem);
+    padding: clamp(2rem, 5vw, 4rem) 1.5rem;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1rem;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--estado-secundario) 52%, var(--app-surface-border));
+    border-radius: 1.25rem;
+    color: var(--app-text);
+    text-align: center;
+    background:
+      radial-gradient(circle at 18% 0%, color-mix(in srgb, var(--estado-primario) 18%, transparent), transparent 48%),
+      radial-gradient(circle at 86% 100%, color-mix(in srgb, var(--estado-secundario) 18%, transparent), transparent 46%),
+      color-mix(in srgb, var(--app-surface) 92%, var(--estado-primario));
+    box-shadow:
+      0 1rem 2.5rem color-mix(in srgb, var(--estado-primario) 18%, transparent),
+      inset 0 1px color-mix(in srgb, var(--estado-secundario) 28%, transparent);
+
+    &::before {
+      position: absolute;
+      z-index: -1;
+      inset: 0 0 auto;
+      height: 0.35rem;
+      content: '';
+      background: linear-gradient(90deg, var(--estado-primario), var(--estado-secundario));
+    }
+  }
+
+  &__estado-icon {
+    display: grid;
+    place-items: center;
+    width: clamp(3rem, 6vw, 4.25rem);
+    height: clamp(3rem, 6vw, 4.25rem);
+    border: 2px solid color-mix(in srgb, var(--color-secundario, var(--app-accent)) 72%, white);
+    border-radius: 50%;
+    color: var(--color-primario, var(--app-accent));
+    font-size: clamp(1.7rem, 3vw, 2.4rem);
+    font-weight: 900;
+    line-height: 1;
+    background: color-mix(in srgb, var(--color-secundario, var(--app-accent)) 20%, var(--app-surface));
+    box-shadow: 0 0 0 0.45rem color-mix(in srgb, var(--color-primario, var(--app-accent)) 12%, transparent);
+  }
+
+  &__estado-titulo {
+    color: var(--color-primario, var(--app-accent));
+    font-size: clamp(1.5rem, 3vw, 2.4rem);
+    line-height: 1.05;
+    text-transform: none;
+  }
+
+  &__estado--sin-balance p,
+  &__estado-ayuda {
+    margin: 0;
+  }
+
+  &__estado--sin-balance p {
+    color: var(--app-text);
+    font-size: clamp(1rem, 1.7vw, 1.3rem);
+    font-weight: 700;
+  }
+
+  &__estado-ayuda {
+    color: var(--color-secundario, var(--app-accent));
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
+  &__contenido {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(20rem, 1fr);
+    gap: 1rem;
+    align-items: start;
+  }
+
+  &__lateral {
+    display: grid;
+    gap: 1rem;
+  }
+
+  &__grafico {
+    display: block;
+    height: clamp(26rem, 42vw, 34rem);
+    margin-top: 0.5rem;
+  }
+
+  &__alertas,
+  &__movimientos {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__alertas li {
+    padding: 0.875rem;
+    border: 1px solid var(--app-border);
+    border-radius: 0.75rem;
+    background: color-mix(in srgb, var(--app-surface) 90%, var(--app-accent));
+  }
+
+  &__movimientos li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--app-border);
+  }
+
+  &__monto--egreso {
+    color: var(--semantic-danger);
+  }
+}
+
+@media (max-width: 56rem) {
+  .dashboard-financiero__contenido {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-financiero__grafico {
+    height: 24rem;
+  }
+}

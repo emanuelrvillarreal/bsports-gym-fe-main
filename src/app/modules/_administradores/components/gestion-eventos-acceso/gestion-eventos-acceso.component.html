@@ -1,0 +1,147 @@
+<section class="gestion-eventos-acceso">
+  <app-card>
+    <div class="gestion-eventos-acceso__toolbar">
+      <label>
+        <span>Buscar eventos</span>
+        <input
+          type="search"
+          placeholder="Título o descripción"
+          [value]="busqueda()"
+          (input)="actualizarBusqueda($event)"
+          (keydown.enter)="buscar()"
+        />
+      </label>
+      <app-boton tipo="button" [cargando]="cargando()" (accion)="buscar()">Buscar</app-boton>
+    </div>
+
+    @if (errorListado()) {
+      <p class="gestion-eventos-acceso__error" role="alert">{{ errorListado() }}</p>
+    }
+
+    <app-tabla-responsive
+      [columnas]="columnas"
+      [filas]="eventos()"
+      idFila="uuid"
+      [acciones]="acciones"
+      [cargando]="cargando()"
+      [tbody_rows]="7"
+      [tr_input]="true"
+      [tr_input_conmutador]="false"
+      [tr_input_boton_agregar]="true"
+      tr_input_boton_agregar_modo="emitir"
+      tr_input_boton_agregar_texto="Nuevo evento"
+      mensajeVacio="No hay eventos de acceso para mostrar."
+      (accionFila)="manejarAccion($event)"
+      (trInputNuevo)="abrirAlta()"
+    />
+
+    <app-paginacion
+      [paginaActual]="paginaActual()"
+      [totalPaginas]="totalPaginas()"
+      [deshabilitado]="cargando()"
+      (paginaCambiada)="cambiarPagina($event)"
+    />
+  </app-card>
+</section>
+
+<app-popup
+  [abierto]="popupFormularioAbierto()"
+  [titulo]="editando() ? 'Editar evento' : 'Nuevo evento'"
+  [mostrarEncabezado]="false"
+  ancho="grande"
+  [mostrarCancelar]="true"
+  [cancelarDeshabilitado]="guardando()"
+  (cancelar)="cerrarFormulario()"
+>
+  <app-titulo-hero
+    icono="eventos"
+    [titulo]="editando() ? 'Editar evento' : 'Nuevo evento'"
+    subtitulo="Completá los datos comerciales de la entrada."
+  />
+
+  <app-formulario-evento-acceso
+    formId="formulario-evento-acceso-admin"
+    [valorInicial]="eventoSeleccionado()"
+    [reinicioVersion]="formularioVersion()"
+    (enviado)="guardar($event)"
+  />
+
+  <app-boton
+    popupAcciones
+    tipo="submit"
+    form="formulario-evento-acceso-admin"
+    [cargando]="guardando()"
+  >
+    Guardar evento
+  </app-boton>
+</app-popup>
+
+<app-popup
+  [abierto]="popupDetalleAbierto()"
+  titulo="Ver evento"
+  [mostrarEncabezado]="false"
+  ancho="mediano"
+  [mostrarCancelar]="false"
+  (cancelar)="cerrarDetalle()"
+>
+  <app-titulo-hero
+    icono="eventos"
+    titulo="Ver evento"
+    subtitulo="Detalle actualizado del evento de acceso."
+  />
+
+  <app-card class="gestion-eventos-acceso__detalle" titulo="Datos del evento">
+    @if (eventoSeleccionado(); as evento) {
+      <dl class="gestion-eventos-acceso__detalle-lista">
+        <div>
+          <dt>Título</dt>
+          <dd>{{ evento.titulo }}</dd>
+        </div>
+        <div>
+          <dt>Descripción</dt>
+          <dd>{{ evento.descripcion }}</dd>
+        </div>
+        <div>
+          <dt>Socio al día</dt>
+          <dd>{{ formatearMonto(evento.monto) }}</dd>
+        </div>
+        <div>
+          <dt>Socio moroso</dt>
+          <dd>{{ formatearMonto(evento.montoMorosos) }}</dd>
+        </div>
+        <div>
+          <dt>Invitado</dt>
+          <dd>{{ formatearMonto(evento.montoInvitados) }}</dd>
+        </div>
+        <div>
+          <dt>Permite socios morosos</dt>
+          <dd>{{ evento.permiteMorosos ? 'Sí' : 'No' }}</dd>
+        </div>
+        <div>
+          <dt>Permite invitados</dt>
+          <dd>{{ evento.permiteInvitados ? 'Sí' : 'No' }}</dd>
+        </div>
+      </dl>
+    }
+  </app-card>
+  @if (errorPopup()) {
+    <p class="gestion-eventos-acceso__error" role="alert">{{ errorPopup() }}</p>
+  }
+
+  <app-boton popupAcciones (accion)="cerrarDetalle()">
+    Cerrar
+  </app-boton>
+</app-popup>
+
+@if (eventoSeleccionado(); as evento) {
+  <app-operacion-evento-acceso
+    [abierto]="popupOperacionAbierto()"
+    [evento]="evento"
+    (cerrar)="cerrarOperacion()"
+  />
+  <app-historial-evento-acceso
+    [abierto]="popupHistorialAbierto()"
+    [evento]="evento"
+    (cerrar)="cerrarHistorial()"
+  />
+}

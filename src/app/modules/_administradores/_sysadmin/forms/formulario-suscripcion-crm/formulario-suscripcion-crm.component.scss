@@ -1,0 +1,164 @@
+:host {
+  display: block;
+}
+.formulario-suscripcion-crm {
+  display: grid;
+  gap: 1.25rem;
+
+  &__planes {
+    display: grid;
+    gap: 0.75rem;
+
+    // Se conserva el bloque legado solo para no alterar el contrato del
+    // formulario; el encabezado visible es app-titulo-hero.
+    > div {
+      display: none;
+    }
+  }
+
+  &__plan {
+    width: min(100%, 30rem);
+    height: 15rem;
+    min-height: 15rem;
+    margin-inline: auto;
+    padding: 0.25rem;
+    border: 2px solid transparent;
+    border-radius: 0.9rem;
+
+    &--seleccionado {
+      border-color: var(--app-accent);
+      background: var(--app-accent-soft);
+    }
+
+    &--actual {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    // app-cards proyecta su contenido dentro de app-boton. Se restablece la
+    // grilla y la altura del contenido en este formulario para evitar
+    // superposiciones y que el pie de la tarjeta quede recortado.
+    ::ng-deep app-cards .app-boton {
+      height: 100%;
+      align-items: stretch;
+      justify-content: initial;
+      text-align: left;
+    }
+
+    ::ng-deep app-cards .app-boton__contenido {
+      display: grid;
+      width: 100%;
+      height: 100%;
+      align-items: stretch;
+      justify-content: initial;
+      grid-template-rows: auto auto auto auto 1fr auto;
+      text-align: left;
+    }
+  }
+
+  &__plan-vigente {
+    margin: 0;
+    padding: 0.75rem;
+    border: 1px solid color-mix(in srgb, var(--app-accent) 42%, var(--app-surface-border));
+    border-radius: 0.65rem;
+    background: var(--app-accent-soft);
+    color: var(--app-text);
+  }
+
+  &__seleccion {
+    margin: 0;
+    padding: 0.75rem;
+    border: 1px solid var(--app-surface-border);
+    border-radius: 0.65rem;
+    background: var(--app-surface-strong);
+    color: var(--app-text);
+  }
+
+  &__descuento {
+    display: grid;
+    gap: 0.85rem;
+    padding: 1rem;
+    border: 1px solid var(--app-surface-border);
+    border-radius: 0.65rem;
+    background: var(--app-surface-strong);
+  }
+
+  &__checkbox {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    color: var(--app-text);
+    font-weight: 600;
+
+    input {
+      inline-size: 1rem;
+      block-size: 1rem;
+      accent-color: var(--app-accent);
+    }
+  }
+
+  &__descuento-campos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+    gap: 0.85rem;
+    align-items: end;
+
+    h3 {
+      grid-column: 1 / -1;
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    label {
+      display: grid;
+      gap: 0.35rem;
+      color: var(--app-text-soft);
+    }
+
+    input[type='number'] {
+      min-block-size: 2.75rem;
+      padding: 0.65rem;
+      border: 1px solid var(--app-surface-border);
+      border-radius: 0.55rem;
+      background: var(--app-surface);
+      color: var(--app-text);
+
+      &:focus-visible {
+        outline: 3px solid color-mix(in srgb, var(--app-accent) 35%, white);
+        outline-offset: 2px;
+      }
+    }
+  }
+
+  &__entrada-con-prefijo {
+    display: flex;
+    gap: 0.45rem;
+    align-items: center;
+
+    > span {
+      min-inline-size: 0.75rem;
+      color: var(--app-text);
+      font-weight: 700;
+    }
+
+    input {
+      flex: 1;
+      min-inline-size: 0;
+    }
+  }
+
+  &__error {
+    margin: 0;
+    color: var(--semantic-danger) !important;
+  }
+
+  &__acciones {
+    display: flex;
+    justify-content: flex-end;
+
+    app-boton {
+      min-height: 2.75rem;
+    }
+  }
+
+}

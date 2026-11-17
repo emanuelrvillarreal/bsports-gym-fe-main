@@ -1,0 +1,23 @@
+<section class="dashboard-page">
+  @if (mostrarFinanzas) {
+    <app-dashboard-financiero-hero
+      [empresa]="empresa()"
+      [logoUrl]="logoEmpresa()"
+      [periodo]="periodoHero()"
+      [saldoNeto]="saldoNeto()"
+      [detalleSaldoNeto]="detalleSaldoNeto()"
+      [anios]="anios()"
+      [meses]="meses()"
+      [cargando]="componenteFinanciero()?.cargando() ?? true"
+      (periodoCambiado)="cambiarPeriodo($event)"
+      (restablecer)="restablecerPeriodo()"
+    />
+    <app-acciones-rapidas rol="ADMIN" />
+    <app-dashboard-general />
+    <app-dashboard-financiero #dashboardFinanciero />
+  } @else {
+    <app-titulo-hero [titulo]="titulo" [subtitulo]="subtitulo" icono="dashboard" />
+    <app-acciones-rapidas rol="ADM_RECEPCION" />
+    <app-resumen-dashboard [mostrarFinanzas]="false" [prefijoRuta]="prefijoRuta" />
+  }
+</section>

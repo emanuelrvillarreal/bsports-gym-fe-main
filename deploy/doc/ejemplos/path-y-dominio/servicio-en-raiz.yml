@@ -1,0 +1,14 @@
+# Ejemplo: servicio publicado en la raíz del dominio (sin path)
+# Se usa directamente la plantilla -root.conf para nginx.
+
+s4:
+  mi-home:
+    branch: main
+    port: 6038
+    domain: blueopendata.com
+
+    stack: nginx-1.27
+    composer_file: plantillas/nginx-1.27/docker-compose.yml
+    nginx_config: plantillas/nginx-1.27/nginx.host-reverse-proxy-root.conf
+
+# Resultado: https://blueopendata.com/

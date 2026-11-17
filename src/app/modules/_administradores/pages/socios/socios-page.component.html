@@ -1,0 +1,48 @@
+<section class="socios-page">
+  <app-titulo-hero
+    titulo="Gestión de socios"
+    subtitulo="Administra socios titulares, familiares e importaciones del gimnasio."
+    icono="socios"
+  >
+    <app-boton
+      tituloHeroAcciones
+      tipo="button"
+      [deshabilitado]="!pathEmpresa() || cargandoQr()"
+      aria-label="Mostrar QR del enlace de socio"
+      (accion)="abrirQrSocio()"
+    >
+      <ng-icon name="heroQrCode" aria-hidden="true" />
+    </app-boton>
+    <app-boton
+      tituloHeroAcciones
+      tipo="button"
+      [deshabilitado]="!pathEmpresa()"
+      [attr.aria-label]="enlaceCopiado() ? 'Enlace de socio copiado' : 'Copiar enlace de socio'"
+      (accion)="copiarEnlaceSocio()"
+    >
+      {{ enlaceCopiado() ? 'Enlace copiado' : 'Link socio' }}
+    </app-boton>
+  </app-titulo-hero>
+  <app-gestion-socios [filasVisiblesTabla]="filasVisiblesTabla" />
+</section>
+
+<app-popup
+  [abierto]="!!qrSocio()"
+  titulo="QR del enlace de socio"
+  [mostrarEncabezado]="false"
+  ancho="pequeno"
+  textoCancelar="Cerrar"
+  aparienciaCancelar="solido"
+  (cancelar)="cerrarQrSocio()"
+>
+  @if (qrSocio(); as qr) {
+    <app-titulo-hero
+      titulo="QR a login"
+      subtitulo="Escaneá este código para abrir el acceso."
+      icono="socios"
+    />
+    <div class="socios-page__qr">
+      <img [src]="qr" alt="Código QR del enlace de acceso de socios" />
+    </div>
+  }
+</app-popup>

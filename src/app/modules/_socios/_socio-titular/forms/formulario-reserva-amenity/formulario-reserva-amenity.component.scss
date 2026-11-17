@@ -1,0 +1,20 @@
+:host { display: block; }
+
+.formulario-reserva-amenity {
+  display: grid;
+  gap: 1rem;
+
+  &__error { min-height: 1.25rem; color: var(--semantic-danger); visibility: hidden; }
+  &__error--visible { visibility: visible; }
+  &__ayuda { margin: 0; color: var(--app-text-soft); font-size: .875rem; }
+  &__horas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+}
+
+:host-context(.theme-mode-dark) .formulario-reserva-amenity :is(input, textarea) {
+  color: var(--app-text);
+  background: #000;
+}
+
+:host-context(.theme-mode-dark) ::ng-deep app-select .app-select__control .app-boton {
+  background: #000;
+}

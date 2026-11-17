@@ -1,0 +1,15 @@
+:host {
+  display: block;
+}
+
+.balance-comparacion__grafico {
+  display: block;
+  height: 23rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 48rem) {
+  .balance-comparacion__grafico {
+    height: 20rem;
+  }
+}

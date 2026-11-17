@@ -1,0 +1,187 @@
+<app-popup
+  [abierto]="!!evento()"
+  [titulo]="tituloPopup()"
+  [mostrarEncabezado]="false"
+  ancho="extraGrande"
+  textoCancelar="Cerrar"
+  [cancelarDeshabilitado]="guardando() || confirmandoCierre()"
+  (cancelar)="solicitarCierre()"
+>
+  <app-titulo-hero icono="eventos" [titulo]="tituloPopup()" [subtitulo]="descripcionPopup()" />
+
+  <app-wizard-pasos
+    [pasos]="pasos"
+    [pasoActual]="pasoActual()"
+    etiquetaProgreso="Pasos para registrar asistencia"
+  >
+    <div class="wizard-asistencia">
+      @switch (pasoActual()) {
+        @case ('dia') {
+          <section
+            class="wizard-asistencia__paso wizard-asistencia__paso--dia"
+            aria-labelledby="asistencia-titulo-dia"
+          >
+            <header class="wizard-asistencia__encabezado">
+              <span>Fecha de la actividad</span>
+              <h3 id="asistencia-titulo-dia">Seleccioná el día</h3>
+              <p>Los días cancelados se muestran como referencia, pero no permiten operar.</p>
+            </header>
+
+            @if (cargandoDias()) {
+              <p class="wizard-asistencia__estado" role="status" aria-live="polite">
+                Cargando días disponibles…
+              </p>
+            } @else if (errorDias()) {
+              <div
+                class="wizard-asistencia__feedback wizard-asistencia__feedback--error"
+                role="alert"
+              >
+                <p>{{ errorDias() }}</p>
+                <app-boton tipo="button" apariencia="texto" (accion)="reintentarDias()">
+                  Reintentar
+                </app-boton>
+              </div>
+            } @else if (!dias().length) {
+              <p class="wizard-asistencia__feedback" role="status">
+                No se encontraron días de esta actividad dentro del rango del evento.
+              </p>
+            } @else {
+              <div class="wizard-asistencia__selector">
+                <app-select
+                  etiqueta="Día y horario"
+                  placeholder="Seleccionar un día"
+                  [opciones]="opcionesDias()"
+                  [value]="slotUuidSeleccionado()"
+                  [maximoOpcionesVisibles]="5"
+                  (valueChange)="seleccionarDia($event)"
+                />
+                @if (hayDiasCancelados()) {
+                  <small>Las opciones marcadas como canceladas están deshabilitadas.</small>
+                }
+              </div>
+            }
+
+            @if (errorPlanilla()) {
+              <p
+                class="wizard-asistencia__feedback wizard-asistencia__feedback--error"
+                role="alert"
+              >
+                {{ errorPlanilla() }}
+              </p>
+            }
+          </section>
+        }
+
+        @case ('asistencia') {
+          <section class="wizard-asistencia__paso" aria-labelledby="asistencia-titulo-planilla">
+            <header class="wizard-asistencia__encabezado wizard-asistencia__encabezado--en-linea">
+              <div>
+                <span>Planilla</span>
+                <h3 id="asistencia-titulo-planilla">Marcá presentes y ausentes</h3>
+                <p>{{ fechaSeleccionada() }} · {{ horarioSeleccionado() }}</p>
+              </div>
+              <strong>{{ presentes().length }} presentes</strong>
+            </header>
+
+            <app-tabla-responsive
+              [columnas]="columnasAsistencia"
+              [filas]="planillaBorrador()"
+              idFila="memberUuid"
+              [acciones]="accionesAsistencia"
+              [tbody_rows]="5"
+              mensajeVacio="No hay alumnos en la planilla de este día."
+              tituloAcciones="Registrar"
+              (accionFila)="manejarAccionAsistencia($event)"
+            />
+          </section>
+        }
+
+        @case ('confirmacion') {
+          <section class="wizard-asistencia__paso" aria-labelledby="asistencia-titulo-confirmacion">
+            <header class="wizard-asistencia__encabezado wizard-asistencia__encabezado--en-linea">
+              <div>
+                <span>Resumen</span>
+                <h3 id="asistencia-titulo-confirmacion">Confirmá la asistencia</h3>
+              </div>
+              <strong>{{ presentes().length }} presentes</strong>
+            </header>
+
+            <dl class="wizard-asistencia__resumen">
+              <div>
+                <dt>Actividad</dt>
+                <dd>{{ evento()?.actividadNombre || '-' }}</dd>
+              </div>
+              <div>
+                <dt>Día</dt>
+                <dd>{{ fechaSeleccionada() }}</dd>
+              </div>
+              <div>
+                <dt>Horario</dt>
+                <dd>{{ horarioSeleccionado() }}</dd>
+              </div>
+            </dl>
+
+            <div class="wizard-asistencia__presentes">
+              <h4>Lista de presentes</h4>
+              <app-tabla-responsive
+                [columnas]="columnasAsistencia"
+                [filas]="presentes()"
+                idFila="memberUuid"
+                [mostrarAcciones]="false"
+                [tbody_rows]="5"
+                [vacio_reservar_filas]="false"
+                mensajeVacio="No se marcaron alumnos presentes."
+              />
+            </div>
+
+            @if (errorGuardado()) {
+              <p
+                class="wizard-asistencia__feedback wizard-asistencia__feedback--error"
+                role="alert"
+              >
+                {{ errorGuardado() }}
+              </p>
+            }
+          </section>
+        }
+      }
+    </div>
+  </app-wizard-pasos>
+
+  @if (pasoActual() !== 'dia') {
+    <app-boton
+      popupAcciones
+      tipo="button"
+      apariencia="texto"
+      [deshabilitado]="guardando() || cargandoPlanilla()"
+      (accion)="volver()"
+    >
+      Atrás
+    </app-boton>
+  }
+
+  @if (pasoActual() === 'dia') {
+    <app-boton
+      popupAcciones
+      tipo="button"
+      [deshabilitado]="!puedeAvanzarDia()"
+      [cargando]="cargandoPlanilla()"
+      ariaLabelCarga="Cargando planilla"
+      (accion)="avanzar()"
+    >
+      Siguiente
+    </app-boton>
+  } @else if (pasoActual() === 'asistencia') {
+    <app-boton popupAcciones tipo="button" (accion)="avanzar()">Siguiente</app-boton>
+  } @else {
+    <app-boton
+      popupAcciones
+      tipo="button"
+      [cargando]="guardando()"
+      ariaLabelCarga="Guardando asistencia"
+      (accion)="confirmar()"
+    >
+      Confirmar asistencia
+    </app-boton>
+  }
+</app-popup>

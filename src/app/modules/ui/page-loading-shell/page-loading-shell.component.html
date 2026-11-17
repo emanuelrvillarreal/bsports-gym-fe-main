@@ -1,0 +1,12 @@
+@if (cargando()) {
+  <section
+    class="page-loading-shell"
+    role="status"
+    aria-live="polite"
+    [style.min-height]="minHeight()"
+  >
+    <app-load-spinner [altoRendimiento]="altoRendimientoEfectivo()" />
+  </section>
+} @else {
+  <ng-content />
+}

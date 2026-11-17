@@ -1,0 +1,98 @@
+:host {
+  display: block;
+}
+
+.gestion-facturas {
+  color: var(--app-text);
+
+  &__cabecera {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0;
+
+    h2,
+    p {
+      margin: 0;
+    }
+
+    p {
+      margin-top: 0.3rem;
+      color: var(--app-text-soft);
+    }
+
+    app-select {
+      width: min(100%, 18rem);
+    }
+  }
+
+  &__error {
+    display: flex;
+    min-height: 3rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.8rem;
+    padding: 0.7rem 0.9rem;
+    color: var(--app-danger);
+    background: var(--app-danger-soft);
+    border: 1px solid var(--app-danger-border);
+    border-radius: 0.7rem;
+  }
+
+  app-paginacion {
+    display: block;
+    margin-top: 1rem;
+  }
+
+  &__tabla-scroll {
+    margin-top: 0.5rem;
+    // La tabla reusable ya administra el alto limitado y su scroll interno.
+    // Evitamos un segundo scroll para que el estado vacío conserve el mismo alto.
+    overflow: visible;
+    border-radius: 0.75rem;
+  }
+}
+
+.factura-detalle__titulo {
+  display: block;
+  margin-bottom: 1.25rem;
+}
+
+.factura-detalle__pagar {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 1rem;
+
+  app-boton {
+    width: min(100%, 12rem);
+  }
+}
+
+.factura-detalle__cerrar {
+  display: flex;
+  justify-content: center;
+  width: min(100%, 12rem);
+}
+
+:host-context(.theme-mode-dark) .gestion-facturas input,
+:host-context(.dark-mode-on) .gestion-facturas input {
+  color: var(--app-text);
+  background: #000;
+}
+
+@media (max-width: 40rem) {
+  .gestion-facturas {
+    &__cabecera,
+    &__error {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    &__cabecera app-select {
+      width: 100%;
+    }
+  }
+}

@@ -1,0 +1,103 @@
+@use '../../../ui/formulario-secciones/formulario-secciones' as fs;
+
+:host {
+  display: block;
+}
+
+@include fs.estilos;
+
+.formulario-actividad {
+  &__error {
+    display: block;
+    min-height: 1.1rem;
+    color: var(--semantic-danger, #ef4444);
+    font-weight: 600;
+    visibility: hidden;
+
+    &--visible {
+      visibility: visible;
+    }
+  }
+
+  &__etiqueta-vencimiento {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  &__ayuda-vencimiento {
+    color: var(--app-text-soft);
+    font-size: 0.85rem;
+    font-weight: 400;
+  }
+
+  &__nota {
+    color: var(--app-text-soft);
+    font-weight: 400;
+    line-height: 1.4;
+  }
+}
+
+/* ---------- Horarios ---------- */
+.formulario-actividad__horarios-lista {
+  display: grid;
+  gap: 0.7rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.formulario-actividad__horario {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.8rem 0.8rem 1.4rem;
+  border: 1px solid var(--app-surface-border);
+  border-radius: 0.7rem;
+  background: var(--app-surface);
+
+  > * {
+    min-width: 0;
+  }
+}
+
+.fs-horario {
+  &__cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--app-text);
+  }
+
+  &__campos {
+    display: grid;
+    grid-template-columns: minmax(8rem, 1.4fr) repeat(2, minmax(6.5rem, 1fr)) minmax(6rem, 0.9fr);
+    align-items: end;
+    gap: 0.6rem;
+
+    @media (max-width: 42rem) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+}
+
+.formulario-actividad__horario-cupo {
+  position: relative;
+
+  input {
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  // Debajo del campo, sin empujar la fila: así día, horas y cupo quedan alineados.
+  small {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    color: var(--app-text-soft);
+    font-size: 0.85rem;
+    font-weight: 400;
+    white-space: nowrap;
+  }
+}
+
